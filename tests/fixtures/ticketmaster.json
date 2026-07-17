@@ -1,0 +1,29 @@
+{
+  "_embedded": {
+    "events": [
+      {
+        "name": "Rayados vs Tigres",
+        "url": "https://www.ticketmaster.com.mx/rayados",
+        "images": [{ "url": "https://img.tm.com/clasico.jpg" }],
+        "dates": { "start": { "dateTime": "2026-08-22T19:00:00Z" }, "status": { "code": "onsale" } },
+        "classifications": [{ "segment": { "name": "Sports" }, "genre": { "name": "Soccer" } }],
+        "priceRanges": [{ "min": 300, "max": 2500 }],
+        "_embedded": { "venues": [{ "name": "Estadio BBVA", "address": { "line1": "Av. Pablo Livas 2011" } }] }
+      },
+      {
+        "name": "Cirque du Soleil",
+        "url": "https://www.ticketmaster.com.mx/cirque",
+        "images": [],
+        "dates": { "start": { "dateTime": "2026-09-05T20:30:00Z" }, "status": { "code": "cancelled" } },
+        "classifications": [{ "segment": { "name": "Arts & Theatre" }, "genre": { "name": "Circus" } }],
+        "_embedded": { "venues": [{ "name": "Arena Monterrey" }] }
+      },
+      {
+        "name": "Evento raro sin clasificación conocida",
+        "dates": { "start": { "dateTime": "2026-09-06T20:00:00Z" }, "status": { "code": "onsale" } },
+        "classifications": [{ "segment": { "name": "Miscellaneous" } }],
+        "_embedded": { "venues": [{ "name": "Lugar X" }] }
+      }
+    ]
+  }
+}
