@@ -1,65 +1,144 @@
-import Image from "next/image";
+import { prisma } from "@/lib/db";
+import { formatFecha, formatPrecio } from "@/lib/format";
+import Link from "next/link";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const NOMBRE_CATEGORIA: Record<string, string> = {
+  musica: "Música",
+  deportes: "Deportes",
+  cultura: "Cultura",
+};
+const FECHAS = [
+  { valor: "hoy", nombre: "Hoy" },
+  { valor: "finde", nombre: "Este fin" },
+  { valor: "mes", nombre: "Este mes" },
+];
+
+function rangoFechas(fecha?: string): { gte: Date; lt?: Date } {
+  const now = new Date();
+  if (fecha === "hoy") {
+    const end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+    return { gte: now, lt: end };
+  }
+  if (fecha === "finde") {
+    const day = now.getDay();
+    const viernes = new Date(now);
+    viernes.setHours(0, 0, 0, 0);
+    viernes.setDate(viernes.getDate() + ((5 - day + 7) % 7));
+    const lunes = new Date(viernes);
+    lunes.setDate(viernes.getDate() + 3);
+    const enFinde = day === 5 || day === 6 || day === 0;
+    return { gte: enFinde ? now : viernes, lt: lunes };
+  }
+  if (fecha === "mes") {
+    const end = new Date(now);
+    end.setDate(end.getDate() + 30);
+    return { gte: now, lt: end };
+  }
+  return { gte: now };
+}
+
+function urlCon(params: Record<string, string | undefined>): string {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v) p.set(k, v);
+  const qs = p.toString();
+  return qs ? `/?${qs}` : "/";
+}
+
+export default async function Explorar({
+  searchParams,
+}: {
+  searchParams: Promise<{ categoria?: string; fecha?: string; venue?: string }>;
+}) {
+  const { categoria, fecha, venue } = await searchParams;
+  const [events, venues] = await Promise.all([
+    prisma.event.findMany({
+      where: {
+        status: "activo",
+        city: "monterrey",
+        startsAt: rangoFechas(fecha),
+        ...(categoria ? { category: categoria } : {}),
+        ...(venue ? { venueId: venue } : {}),
+      },
+      include: { venue: true },
+      orderBy: { startsAt: "asc" },
+      take: 100,
+    }),
+    prisma.venue.findMany({ where: { city: "monterrey" }, orderBy: { name: "asc" } }),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="mx-auto max-w-3xl p-4">
+      <h1 className="text-2xl font-bold">Eventos en Monterrey</h1>
+      <p className="mb-4 text-sm text-gray-500">Para no volver a decir “no me enteré”.</p>
+
+      <nav className="mb-2 flex flex-wrap gap-2">
+        <Link href={urlCon({ fecha, venue })} className={!categoria ? "font-bold underline" : ""}>
+          Todo
+        </Link>
+        {Object.entries(NOMBRE_CATEGORIA).map(([valor, nombre]) => (
+          <Link
+            key={valor}
+            href={urlCon({ categoria: valor, fecha, venue })}
+            className={categoria === valor ? "font-bold underline" : ""}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {nombre}
+          </Link>
+        ))}
+        <span className="text-gray-300">|</span>
+        {FECHAS.map((f) => (
+          <Link
+            key={f.valor}
+            href={urlCon({ categoria, venue, fecha: fecha === f.valor ? undefined : f.valor })}
+            className={fecha === f.valor ? "font-bold underline" : ""}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {f.nombre}
+          </Link>
+        ))}
+      </nav>
+
+      <nav className="mb-4 flex flex-wrap gap-2 text-sm text-gray-600">
+        {venues.map((v) => (
+          <Link
+            key={v.id}
+            href={urlCon({ categoria, fecha, venue: venue === v.id ? undefined : v.id })}
+            className={venue === v.id ? "font-bold underline" : ""}
+          >
+            {v.name}
+          </Link>
+        ))}
+      </nav>
+
+      {events.length === 0 && <p>No hay eventos con esos filtros.</p>}
+
+      <ul className="space-y-3">
+        {events.map((e) => (
+          <li key={e.id} className="rounded border p-3">
+            <Link href={`/eventos/${e.id}`} className="block">
+              <div className="flex gap-3">
+                {e.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={e.imageUrl} alt="" className="h-16 w-16 rounded object-cover" />
+                )}
+                <div>
+                  <h2 className="font-semibold">{e.title}</h2>
+                  <p className="text-sm text-gray-600">
+                    {formatFecha(e.startsAt)} · {e.venue.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {NOMBRE_CATEGORIA[e.category]}
+                    {formatPrecio(e.priceMin ? Number(e.priceMin) : null, e.priceMax ? Number(e.priceMax) : null)
+                      ? ` · ${formatPrecio(Number(e.priceMin), e.priceMax ? Number(e.priceMax) : null)}`
+                      : ""}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }

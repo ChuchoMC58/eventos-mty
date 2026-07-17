@@ -12,6 +12,9 @@
     "digest": "tsx scripts/digest.ts",
     "reminders": "tsx scripts/reminders.ts"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.3",
     "@prisma/client": "^6.19.3",
