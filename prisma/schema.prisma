@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id     String        @id @default(cuid())
+  slug   String        @unique
+  name   String
+  runs   SourceRun[]
+  events EventSource[]
+}
+
+model SourceRun {
+  id         String   @id @default(cuid())
+  sourceId   String
+  source     Source   @relation(fields: [sourceId], references: [id])
+  ranAt      DateTime @default(now())
+  ok         Boolean
+  eventCount Int
+  error      String?
+}
+
+model Venue {
+  id      String  @id @default(cuid())
+  name    String
+  address String?
+  zone    String?
+  city    String  @default("monterrey")
+  events  Event[]
+
+  @@unique([name, city])
+}
+
+model Event {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  category    String // musica | deportes | cultura
+  tags        String[]
+  priceMin    Decimal?
+  priceMax    Decimal?
+  ticketUrl   String?
+  imageUrl    String?
+  status      String        @default("activo") // activo | cancelado | pospuesto
+  city        String        @default("monterrey")
+  venueId     String
+  venue       Venue         @relation(fields: [venueId], references: [id])
+  sources     EventSource[]
+  savedBy     SavedEvent[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model EventSource {
+  eventId    String
+  sourceId   String
+  lastSeenAt DateTime @default(now())
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  source     Source   @relation(fields: [sourceId], references: [id])
+
+  @@id([eventId, sourceId])
+}
+
+model User {
+  id           String       @id @default(cuid())
+  phone        String       @unique // E.164, ej +5281xxxxxxxx
+  email        String?
+  city         String       @default("monterrey")
+  categories   String[] // categorías de interés
+  tags         String[] // etiquetas finas (equipos, géneros)
+  digestDay    Int? // 0=domingo..6=sábado; null = sin digest
+  reminderPref String       @default("ask") // always | ask | never
+  saved        SavedEvent[]
+  createdAt    DateTime     @default(now())
+}
+
+model SavedEvent {
+  userId         String
+  eventId        String
+  reminder       Boolean   @default(false)
+  reminderSentAt DateTime?
+  savedAt        DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id])
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+}
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  phone     String
+  code      String // hash sha256, nunca el código plano
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
