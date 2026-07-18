@@ -10,16 +10,20 @@ pública + digest semanal y recordatorios por WhatsApp. Monolito Next.js + Postg
 (Prisma). Todo el texto de usuario en español. Ver `docs/` para el spec y el plan
 completos si están presentes.
 
-## Estado: FASE 0–3 COMPLETAS. Falta FASE 4 (despliegue Coolify).
+## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
 - **46 tests pasan** (`npm test`), **build de producción limpio** (`npm run build`).
-- Commits por fase (rama `main` local):
+- Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
   - `fase 2` cartelera web (explorar, detalle, calendario)
   - `fase 3` usuarios, digest y recordatorios por WhatsApp
-  - FASE 4 (Coolify): archivos preparados (`Dockerfile`, `next.config.ts` standalone,
-    `.dockerignore`, `DEPLOY-COOLIFY.md`) — SIN commitear todavía / sin desplegar.
+  - `fase 4` despliegue en Coolify (VPS Hostinger). **App en vivo:**
+    https://m58mjf955rtyr48celfqjg2a.187.127.254.144.sslip.io
+- **Despliegue:** Coolify en el propio VPS. Postgres gestionado por Coolify
+  (separado de la BD dev local). Auto-deploy activo: `git push` a `main` →
+  webhook de GitHub → Coolify reconstruye y redespliega. HTTPS (Let's Encrypt).
+- La cartelera en prod está VACÍA hasta correr ingesta o seed (BD prod ≠ BD local).
 
 ## ⚠️ Continuidad del entorno (sandbox efímero)
 
