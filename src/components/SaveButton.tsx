@@ -45,7 +45,7 @@ export default function SaveButton({
   }
 
   return (
-    <button onClick={toggle} disabled={busy} className="rounded border px-4 py-2">
+    <button onClick={toggle} disabled={busy} className={`rounded-md border px-5 py-2.5 text-sm transition-colors disabled:opacity-60 ${isSaved ? "border-musica/50 font-bold text-musica" : "border-linea text-hueso hover:border-humo"}`}>
       {isSaved ? "★ Guardado" : "☆ Me interesa"}
     </button>
   );

@@ -11,11 +11,11 @@ export default async function Perfil({
   if (!userId) redirect("/entrar?next=/perfil");
   const { nuevo, next } = await searchParams;
   return (
-    <main className="mx-auto max-w-md p-4">
-      <h1 className="mb-1 text-2xl font-bold">
+    <main className="mx-auto max-w-md px-4 py-8">
+      <h1 className="mb-1 font-display text-3xl uppercase tracking-tight">
         {nuevo ? "¡Bienvenido! ¿Qué te gusta?" : "Mi perfil"}
       </h1>
-      <p className="mb-4 text-sm text-gray-500">
+      <p className="mb-5 text-sm text-humo">
         Con esto armamos tu resumen semanal de WhatsApp.
       </p>
       <PerfilForm next={next ?? "/"} />

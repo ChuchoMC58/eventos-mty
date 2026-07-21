@@ -47,39 +47,39 @@ export default function EntrarForm({ next }: { next: string }) {
     <div className="space-y-3">
       {step === "phone" ? (
         <>
-          <label className="block text-sm">
+          <label className="block text-sm text-humo">
             Tu WhatsApp
             <input
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+528187654321"
             />
           </label>
-          <button onClick={pedirCodigo} disabled={busy} className="w-full rounded bg-black p-2 text-white">
+          <button onClick={pedirCodigo} disabled={busy} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
             {busy ? "Enviando…" : "Mandarme el código"}
           </button>
         </>
       ) : (
         <>
-          <label className="block text-sm">
+          <label className="block text-sm text-humo">
             Código de 6 dígitos (llegó a {phone})
             <input
-              className="mt-1 w-full rounded border p-2"
+              className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               inputMode="numeric"
             />
           </label>
-          <button onClick={verificar} disabled={busy} className="w-full rounded bg-black p-2 text-white">
+          <button onClick={verificar} disabled={busy} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
             {busy ? "Verificando…" : "Entrar"}
           </button>
-          <button onClick={() => setStep("phone")} className="w-full text-sm text-gray-500">
+          <button onClick={() => setStep("phone")} className="w-full text-sm text-humo transition-colors hover:text-hueso">
             Cambiar número
           </button>
         </>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
 }

@@ -8,7 +8,7 @@ describe("formatFecha", () => {
 });
 
 describe("formatPrecio", () => {
-  it("rango", () => expect(formatPrecio(300, 2500)).toBe("$300–$2500"));
+  it("rango", () => expect(formatPrecio(300, 2500)).toBe("$300–$2,500"));
   it("solo mínimo", () => expect(formatPrecio(500, null)).toBe("desde $500"));
   it("sin precio", () => expect(formatPrecio(null, null)).toBeNull());
 });

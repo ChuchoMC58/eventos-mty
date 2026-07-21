@@ -73,11 +73,11 @@ export default function PerfilForm({ next }: { next: string }) {
 
       <label className="block">
         <span className="font-semibold">Gustos específicos</span>
-        <span className="block text-sm text-gray-500">
+        <span className="block text-sm text-humo">
           Equipos, géneros, artistas — separados por comas
         </span>
         <input
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           placeholder="rayados, rock, stand-up"
@@ -87,7 +87,7 @@ export default function PerfilForm({ next }: { next: string }) {
       <label className="block">
         <span className="font-semibold">Resumen semanal por WhatsApp</span>
         <select
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
           value={digestDay}
           onChange={(e) => setDigestDay(e.target.value)}
         >
@@ -103,7 +103,7 @@ export default function PerfilForm({ next }: { next: string }) {
       <label className="block">
         <span className="font-semibold">Recordatorios de eventos guardados</span>
         <select
-          className="mt-1 w-full rounded border p-2"
+          className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
           value={reminderPref}
           onChange={(e) => setReminderPref(e.target.value)}
         >
@@ -113,7 +113,7 @@ export default function PerfilForm({ next }: { next: string }) {
         </select>
       </label>
 
-      <button onClick={guardar} disabled={guardando} className="w-full rounded bg-black p-2 text-white">
+      <button onClick={guardar} disabled={guardando} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
         {guardando ? "Guardando…" : "Guardar"}
       </button>
     </div>
