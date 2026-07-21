@@ -23,13 +23,19 @@ completos si están presentes.
 - **Despliegue:** Coolify en el propio VPS. Postgres gestionado por Coolify
   (separado de la BD dev local). Auto-deploy activo: `git push` a `main` →
   webhook de GitHub → Coolify reconstruye y redespliega. HTTPS (Let's Encrypt).
-- La cartelera en prod está VACÍA hasta correr ingesta o seed (BD prod ≠ BD local).
+- Prod tiene **6 eventos demo** (se corrió `prisma db seed` dentro del contenedor).
+  Son de ejemplo; para datos reales falta la ingesta (ver Pendientes). BD prod ≠ BD local.
+- Auto-deploy verificado end-to-end: `git push` a `main` → webhook de GitHub →
+  Coolify reconstruye y cambia el contenedor (~1 min).
 
-## ⚠️ Continuidad del entorno (sandbox efímero)
+## Continuidad del entorno (VPS persistente)
 
-Este proyecto se construyó en un sandbox Linux sin root/Docker. Si abres una sesión
-nueva y el proyecto NO está en `/home/claude/eventos-mty`, hay que restaurarlo desde
-el remoto Git (o el bundle). Y las herramientas del sistema hay que reinstalarlas:
+**Corrección importante:** este NO es un sandbox efímero — es un **VPS real de Hostinger**
+donde además corre **Coolify** (la plataforma de despliegue). El proyecto y sus
+herramientas ya están instalados y persisten entre sesiones. Node se instaló vía nvm
+y Postgres a nivel de usuario (sin root/Docker para el entorno de dev local); el
+despliegue en cambio usa Coolify (provee su propio Postgres y build). Los pasos de abajo
+son de REFERENCIA por si algún día hay que reconstruir el tooling de dev local:
 
 ### Node.js (vía nvm, sin root)
 ```bash
@@ -83,12 +89,18 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 5. **FASE 4 reescrita para Coolify** (el plan original decía Railway). Ver
    `DEPLOY-COOLIFY.md`.
 
-## Pendientes para terminar FASE 4 (requieren acción del usuario)
-- **Acceso al VPS**: IP/host, puerto SSH, usuario; URL del panel Coolify; token API
-  de Coolify (Keys & Tokens → API tokens). Llave pública SSH ya generada en el
-  sandbox: `~/.ssh/eventos_mty_vps.pub` (añadirla a `authorized_keys` del VPS).
-- **Repo en Git remoto**: Coolify despliega desde un repo. Hay que crear el remoto
-  (GitHub/GitLab) y hacer push, o conectar Coolify al repo.
+## FASE 4 — hecho vs. pendiente
+
+**Ya hecho (desplegado y verificado):**
+- ✅ App en vivo en Coolify con HTTPS (Let's Encrypt), Postgres gestionado por Coolify,
+  migraciones al arrancar, 6 eventos demo sembrados.
+- ✅ Repo público en GitHub (`ChuchoMC58/eventos-mty`), auto-deploy on push a `main`
+  vía webhook de GitHub.
+- ✅ Acceso operativo: `gh` CLI autenticado; token de API de Coolify; acceso Docker
+  al stack. (Detalles sensibles —UUIDs, ubicación de secretos— en la memoria privada
+  del agente, NO en este repo público.)
+
+**Pendiente (requiere acción del usuario):**
 - **Claves de terceros** para datos reales:
   - `TICKETMASTER_API_KEY` (gratis en developer.ticketmaster.com)
   - `ANTHROPIC_API_KEY` (console.anthropic.com) — para el fallback LLM de ingesta
@@ -98,6 +110,10 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   `false` antes de eso.
 - **URLs reales de conectores de página** en `src/lib/ingest/registry.ts` (las
   actuales son candidatas; hay que inspeccionar cada venue y ver si trae JSON-LD).
+- **Tareas programadas en Coolify** (Scheduled Tasks) para los jobs cron:
+  `npm run ingest` / `digest` / `reminders`. Aún no configuradas.
+- **Dominio real** (opcional): hoy usa un dominio auto `*.sslip.io`. Para links de
+  WhatsApp conviene un dominio propio apuntando a la IP del VPS.
 
 ## Variables de entorno
 Ver `.env.example`. En local, `.env` ya tiene `SESSION_SECRET` y `ADMIN_KEY`
