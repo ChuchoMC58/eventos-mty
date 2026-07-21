@@ -122,12 +122,19 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   WhatsApp conviene un dominio propio apuntando a la IP del VPS.
 
 **Pendiente (código — siguiente sesión):**
-- **`SaveButton` no se renderiza en ninguna página**: el componente existe pero la
-  página de detalle no lo incluye → nadie puede guardar eventos desde la web.
-- **Zona horaria**: el server corre en UTC y las horas se muestran mal (p. ej.
-  "2:00 am"). Fijar `TZ=America/Monterrey` en el contenedor/Coolify.
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
+
+**Resuelto (2026-07-21):**
+- ✅ **`SaveButton` montado en la página de detalle** (`src/app/eventos/[id]/page.tsx`):
+  lee la sesión, consulta si el evento ya está guardado y el `reminderPref` del
+  usuario. Verificado end-to-end contra la BD del contenedor: guardar/desguardar,
+  401 sin sesión → redirect a `/entrar`, 404 con evento inexistente, cookie con
+  firma inválida tratada como sin sesión.
+- ✅ **Zona horaria**: ya estaba resuelta en prod — el Dockerfile fija
+  `TZ=America/Monterrey` en la etapa runner y la web en vivo muestra horas
+  correctas (5–8 pm). El "2:00 am" se observó solo en el dev server local, que
+  corre en UTC; para verlo bien en local: `TZ=America/Monterrey npm run dev`.
 
 ## Variables de entorno
 Ver `.env.example`. En local, `.env` ya tiene `SESSION_SECRET` y `ADMIN_KEY`

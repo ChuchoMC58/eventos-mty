@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { formatFecha, formatPrecio } from "@/lib/format";
 import { googleCalendarUrl } from "@/lib/calendar";
+import { getSessionUserId } from "@/lib/auth/session";
+import SaveButton from "@/components/SaveButton";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -19,6 +21,18 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const e = await prisma.event.findUnique({ where: { id }, include: { venue: true } });
   if (!e) notFound();
+
+  const userId = await getSessionUserId();
+  let saved = false;
+  let reminderPref: string | null = null;
+  if (userId) {
+    const [savedEvent, user] = await Promise.all([
+      prisma.savedEvent.findUnique({ where: { userId_eventId: { userId, eventId: id } } }),
+      prisma.user.findUnique({ where: { id: userId } }),
+    ]);
+    saved = Boolean(savedEvent);
+    reminderPref = user?.reminderPref ?? null;
+  }
 
   const gcal = googleCalendarUrl({
     title: e.title,
@@ -77,6 +91,7 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
             Boletos
           </a>
         )}
+        <SaveButton eventId={e.id} saved={saved} reminderPref={reminderPref} />
         <a
           href={gcal}
           target="_blank"
