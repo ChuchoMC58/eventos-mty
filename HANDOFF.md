@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-17.
+> Última actualización: 2026-07-21.
 
 ## Qué es
 
@@ -26,7 +26,13 @@ completos si están presentes.
 - Prod tiene **6 eventos demo** (se corrió `prisma db seed` dentro del contenedor).
   Son de ejemplo; para datos reales falta la ingesta (ver Pendientes). BD prod ≠ BD local.
 - Auto-deploy verificado end-to-end: `git push` a `main` → webhook de GitHub →
-  Coolify reconstruye y cambia el contenedor (~1 min).
+  Coolify reconstruye y cambia el contenedor (~2–3 min medidos).
+- **Rediseño UI "Marquesina" en producción (2026-07-21):** cartelera nocturna —
+  tokens Tailwind v4 (tinta/hueso/humo + categorías ámbar/verde/lila), fuente
+  display Archivo Black, home con agenda agrupada por día (Hoy/Mañana), filtros
+  como chips, CTA de WhatsApp en el hero, y todas las páginas/formularios con el
+  mismo lenguaje visual. Se eligió entre 2 prototipos (quedan sin trackear en
+  `design/` local). `formatPrecio` ahora usa separador de miles.
 
 ## Continuidad del entorno (VPS persistente)
 
@@ -114,6 +120,14 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   `npm run ingest` / `digest` / `reminders`. Aún no configuradas.
 - **Dominio real** (opcional): hoy usa un dominio auto `*.sslip.io`. Para links de
   WhatsApp conviene un dominio propio apuntando a la IP del VPS.
+
+**Pendiente (código — siguiente sesión):**
+- **`SaveButton` no se renderiza en ninguna página**: el componente existe pero la
+  página de detalle no lo incluye → nadie puede guardar eventos desde la web.
+- **Zona horaria**: el server corre en UTC y las horas se muestran mal (p. ej.
+  "2:00 am"). Fijar `TZ=America/Monterrey` en el contenedor/Coolify.
+- Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
+  pulir al final).
 
 ## Variables de entorno
 Ver `.env.example`. En local, `.env` ya tiene `SESSION_SECRET` y `ADMIN_KEY`
