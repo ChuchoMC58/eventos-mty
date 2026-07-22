@@ -8,9 +8,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 `main` está protegida: no se puede pushear directo. Para cada feature/fix:
 
 1. Crear una rama nueva desde `main` (p. ej. `feat/save-button`, `fix/tz-horas`).
-2. Commitear ahí y abrir un PR a `main` con `gh pr create`.
+2. Commitear ahí y abrir un PR a `main` con `gh pr create --assignee @me`.
 3. El usuario revisa y mergea. El merge a `main` deploya a producción
    (auto-deploy vía Coolify).
+
+**NUNCA hagas merge a `main`.** Abre el PR, asígnalo al usuario, avísale y
+detente — el merge lo hace SIEMPRE el usuario, aunque técnicamente puedas
+hacerlo tú y aunque te lo hayan pedido antes. Si el usuario quiere que mergees,
+que lo diga explícitamente en ese momento; por default, no.
 
 # Al terminar un fix/feature — dejar la app corriendo en vivo para revisar
 
