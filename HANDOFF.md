@@ -135,6 +135,14 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
 
+**Resuelto (2026-07-22):**
+- ✅ **Recordatorio de 2 h en el `.ics`** (`src/lib/calendar.ts`): `buildIcs` ahora
+  incluye un bloque `VALARM` con `TRIGGER:-PT2H`, así el botón "Apple/Outlook (.ics)"
+  agrega el evento con recordatorio 2 h antes (Apple/Outlook/Google lo respetan al
+  importar). El botón de Google Calendar usa un link `TEMPLATE` que NO admite fijar
+  recordatorio por URL, así que ahí sigue el default de la cuenta del usuario.
+  Verificado en vivo: el `.ics` de un evento real trae el `VALARM`.
+
 **Resuelto (2026-07-21):**
 - ✅ **`SaveButton` montado en la página de detalle** (`src/app/eventos/[id]/page.tsx`):
   lee la sesión, consulta si el evento ya está guardado y el `reminderPref` del
