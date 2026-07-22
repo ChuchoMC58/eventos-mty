@@ -136,6 +136,14 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   pulir al final).
 
 **Resuelto (2026-07-22):**
+- ✅ **Teléfono estandarizado en el login** (`src/components/EntrarForm.tsx` +
+  `src/lib/auth/phone.ts` + rutas `auth/request-code` y `auth/verify`): la lada
+  `+52` es una caja fija no editable y el recuadro solo acepta dígitos (máx 10, sin
+  espacios). El servidor normaliza con `normalizeMxPhone` a formato canónico
+  `+52XXXXXXXXXX` antes de guardar/buscar, así variantes como `8187654321`,
+  `+52 81 8765 4321` y `528187654321` entran como el MISMO usuario (evita
+  duplicados). Verificado: la basura da 400 y las 3 variantes válidas se guardaron
+  como `+528187654321` en la BD. Helper preparado para extender a otros países.
 - ✅ **Recordatorio de 2 h en el `.ics`** (`src/lib/calendar.ts`): `buildIcs` ahora
   incluye un bloque `VALARM` con `TRIGGER:-PT2H`, así el botón "Apple/Outlook (.ics)"
   agrega el evento con recordatorio 2 h antes (Apple/Outlook/Google lo respetan al
