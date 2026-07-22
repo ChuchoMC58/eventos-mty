@@ -23,8 +23,8 @@ completos si están presentes.
 - **Despliegue:** Coolify en el propio VPS. Postgres gestionado por Coolify
   (separado de la BD dev local). Auto-deploy activo: `git push` a `main` →
   webhook de GitHub → Coolify reconstruye y redespliega. HTTPS (Let's Encrypt).
-- Prod tiene **6 eventos demo** (se corrió `prisma db seed` dentro del contenedor).
-  Son de ejemplo; para datos reales falta la ingesta (ver Pendientes). BD prod ≠ BD local.
+- Prod tiene **82 eventos reales** de Ticketmaster (ingesta corrida 2026-07-22);
+  los 6 eventos demo del `prisma db seed` ya fueron borrados. BD prod ≠ BD local.
 - Auto-deploy verificado end-to-end: `git push` a `main` → webhook de GitHub →
   Coolify reconstruye y cambia el contenedor (~2–3 min medidos).
 - **Rediseño UI "Marquesina" en producción (2026-07-21):** cartelera nocturna —
