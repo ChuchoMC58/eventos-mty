@@ -25,15 +25,6 @@ para que el usuario lo revise antes de darlo por cerrado:
 No basta con tests o build verdes: el usuario quiere ver el cambio funcionando
 en la app real.
 
-# Datos y config de PRODUCCIÓN — confirmar antes de escribir/borrar
-
-Operar directo sobre la base de datos de producción o la config de Coolify
-**no pasa por git ni por un PR**, así que es más delicado que un deploy de
-código y hay que tratarlo con más cuidado, no con menos. Antes de escribir o
-borrar datos en la BD de prod (ingestas, `DELETE`, seeds) o cambiar variables
-de entorno/config en Coolify, **confírmalo con el usuario**. Las operaciones de
-solo lectura (consultas, conteos) no requieren confirmación.
-
 # Docs de progreso — actualizar en cada PR
 
 Como todo merge a `main` deploya a producción, cada PR debe incluir la
