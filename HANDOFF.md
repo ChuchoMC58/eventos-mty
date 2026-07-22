@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-21.
+> Última actualización: 2026-07-22.
 
 ## Qué es
 
@@ -23,8 +23,8 @@ completos si están presentes.
 - **Despliegue:** Coolify en el propio VPS. Postgres gestionado por Coolify
   (separado de la BD dev local). Auto-deploy activo: `git push` a `main` →
   webhook de GitHub → Coolify reconstruye y redespliega. HTTPS (Let's Encrypt).
-- Prod tiene **6 eventos demo** (se corrió `prisma db seed` dentro del contenedor).
-  Son de ejemplo; para datos reales falta la ingesta (ver Pendientes). BD prod ≠ BD local.
+- Prod tiene **82 eventos reales** de Ticketmaster (ingesta corrida 2026-07-22);
+  los 6 eventos demo del `prisma db seed` ya fueron borrados. BD prod ≠ BD local.
 - Auto-deploy verificado end-to-end: `git push` a `main` → webhook de GitHub →
   Coolify reconstruye y cambia el contenedor (~2–3 min medidos).
 - **Rediseño UI "Marquesina" en producción (2026-07-21):** cartelera nocturna —
@@ -99,7 +99,11 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 
 **Ya hecho (desplegado y verificado):**
 - ✅ App en vivo en Coolify con HTTPS (Let's Encrypt), Postgres gestionado por Coolify,
-  migraciones al arrancar, 6 eventos demo sembrados.
+  migraciones al arrancar.
+- ✅ **Datos reales de Ticketmaster en prod (2026-07-22):** `TICKETMASTER_API_KEY`
+  configurada como env var en Coolify; ingesta corrida → **82 eventos reales** de
+  Monterrey (Maroon 5, Rod Stewart, ZZ Top…). Los 6 eventos demo (`prisma db seed`)
+  fueron **borrados** de prod.
 - ✅ Repo público en GitHub (`ChuchoMC58/eventos-mty`), auto-deploy on push a `main`
   vía webhook de GitHub.
 - ✅ Acceso operativo: `gh` CLI autenticado; token de API de Coolify; acceso Docker
@@ -107,17 +111,23 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   del agente, NO en este repo público.)
 
 **Pendiente (requiere acción del usuario):**
-- **Claves de terceros** para datos reales:
-  - `TICKETMASTER_API_KEY` (gratis en developer.ticketmaster.com)
+- **Claves de terceros** restantes:
   - `ANTHROPIC_API_KEY` (console.anthropic.com) — para el fallback LLM de ingesta
+    (el conector de Auditorio Citibanamex lo necesita).
   - Twilio: `TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM` (sandbox para dev)
 - **Modo prueba WhatsApp**: `WHATSAPP_TEST_MODE=true` hasta que las plantillas de
   Meta estén aprobadas y el digest se vea correcto una semana. NUNCA ponerlo en
   `false` antes de eso.
-- **URLs reales de conectores de página** en `src/lib/ingest/registry.ts` (las
-  actuales son candidatas; hay que inspeccionar cada venue y ver si trae JSON-LD).
+- **URLs reales de conectores de página** en `src/lib/ingest/registry.ts`: el de
+  Arena Monterrey da **404** en la URL candidata y el de Auditorio Citibanamex cae
+  al fallback LLM (necesita `ANTHROPIC_API_KEY`). Hay que inspeccionar cada venue y
+  ver si trae JSON-LD. (Ticketmaster ya trae datos reales sin depender de estos.)
 - **Tareas programadas en Coolify** (Scheduled Tasks) para los jobs cron:
-  `npm run ingest` / `digest` / `reminders`. Aún no configuradas.
+  `npm run ingest` / `digest` / `reminders`. Aún no configuradas. La ingesta de hoy
+  se corrió a mano una vez; para que se actualice sola falta el cron.
+- **Expansión nacional (futuro):** el conector de Ticketmaster está fijo a
+  `city=Monterrey`. Para abrir otras ciudades habrá que parametrizarlo por ciudad y
+  añadir `ciudad`/región a la navegación.
 - **Dominio real** (opcional): hoy usa un dominio auto `*.sslip.io`. Para links de
   WhatsApp conviene un dominio propio apuntando a la IP del VPS.
 
