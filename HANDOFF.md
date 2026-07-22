@@ -135,6 +135,23 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
 
+**⚠️ Hallazgos en revisión (2026-07-22) — reportados por el usuario probando en vivo, NO resueltos.**
+Hay dos PRs/ramas abiertas con trabajo que en pruebas del usuario aún no funciona bien:
+- **`.ics` no abre directo a guardar en Outlook** (rama `fix/ics-outlook`, sin PR aún).
+  Se le agregó `UID` + `METHOD:PUBLISH` al `.ics` (`src/lib/calendar.ts` + se pasa
+  `id` desde `src/app/eventos/[id]/ics/route.ts`), pero el usuario reporta que **sigue
+  abriendo la app de Outlook sin llevarlo directo a la ventana de guardar el evento**.
+  Falta investigar más (¿Outlook desktop necesita otro `METHOD`/estructura?, probar el
+  archivo descargado real, versión de Outlook). El `.ics` sí sale bien formado (UID +
+  METHOD verificados), así que el problema es de comportamiento de Outlook, no del formato.
+- **Login: el recuadro del teléfono aún acepta letras y no se limita a 10 dígitos**
+  (rama `feat/telefono-estandarizado`, PR #6). El `onChange` de `EntrarForm.tsx` ya hace
+  `.replace(/\D/g, "").slice(0, 10)` y en pruebas por endpoint/HTML se veía bien, pero el
+  usuario reporta que **en el navegador todavía puede escribir letras y no está topado a
+  10**. Primero reproducir con recarga en limpio (pudo ser cliente viejo en caché del dev
+  server); si se confirma, es bug real del input controlado a arreglar. La normalización
+  del servidor (`normalizeMxPhone`) sí quedó verificada (variantes → `+528187654321`).
+
 **Resuelto (2026-07-22):**
 - ✅ **Recordatorio de 2 h en el `.ics`** (`src/lib/calendar.ts`): `buildIcs` ahora
   incluye un bloque `VALARM` con `TRIGGER:-PT2H`, así el botón "Apple/Outlook (.ics)"
