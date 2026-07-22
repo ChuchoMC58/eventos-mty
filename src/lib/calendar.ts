@@ -34,6 +34,12 @@ export function buildIcs(ev: CalendarEvent): string {
     `DTEND:${fmtUtc(finDe(ev))}`,
     `SUMMARY:${esc(ev.title)}`,
     `LOCATION:${esc([ev.venueName, ev.address ?? ""].filter(Boolean).join(", "))}`,
+    // Recordatorio 2 h antes (Apple/Outlook/Google respetan VALARM al importar el .ics).
+    "BEGIN:VALARM",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${esc(ev.title)}`,
+    "TRIGGER:-PT2H",
+    "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
