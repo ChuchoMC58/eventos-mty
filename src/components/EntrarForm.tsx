@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { mxNationalDigits } from "@/lib/auth/phone";
 
 export default function EntrarForm({ next }: { next: string }) {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function EntrarForm({ next }: { next: string }) {
               <input
                 className="w-full rounded-r-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
                 value={nacional}
-                onChange={(e) => setNacional(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                onChange={(e) => setNacional(mxNationalDigits(e.target.value).slice(0, 10))}
                 inputMode="numeric"
                 autoComplete="tel-national"
                 placeholder="8187654321"

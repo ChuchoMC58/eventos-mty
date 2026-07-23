@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-22.
+> Última actualización: 2026-07-23.
 
 ## Qué es
 
@@ -134,6 +134,25 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
+
+**Resuelto (2026-07-23):**
+- ✅ **"El input de teléfono acepta letras" era un falso bug del preview**: el código
+  del input siempre estuvo bien; lo que pasaba es que Next 16 **bloquea los chunks
+  JS del dev server cuando se abre desde un origen distinto a localhost** (la IP o
+  un dominio `*.sslip.io`) → la página cargaba SIN JavaScript y el input quedaba
+  muerto (aceptaba cualquier cosa). Arreglado con `allowedDevOrigins` en
+  `next.config.ts` (solo afecta a `next dev`; prod nunca tuvo este problema).
+  Verificado tecleando en un Chrome real vía el dominio del preview: letras
+  bloqueadas, tope de 10, botón se habilita justo a los 10 dígitos.
+- ✅ **Pegar el número con lada ya no lo corrompe**: pegar `+52 (81) 8765-4321`
+  metía `5281876543` (número equivocado en silencio). Ahora el input usa el mismo
+  helper del servidor (`mxNationalDigits`) y queda `8187654321`. Con test unitario
+  nuevo (`tests/phone.test.ts`, 9 casos).
+- ⚠️ Ojo al verificar previews de dev server: si el input "no reacciona", revisar
+  primero que el origen esté en `allowedDevOrigins` — sin eso React no hidrata y
+  cualquier componente cliente parece roto. También: si Turbopack entra en pánico
+  con "Permission denied" en `.next`, borrar `.next` completo (residuos root de
+  corridas dockerizadas).
 
 **Resuelto (2026-07-22):**
 - ✅ **Teléfono estandarizado en el login** (`src/components/EntrarForm.tsx` +
