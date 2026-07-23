@@ -6,6 +6,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const e = await prisma.event.findUnique({ where: { id }, include: { venue: true } });
   if (!e) return new Response("No encontrado", { status: 404 });
   const ics = buildIcs({
+    id: e.id,
     title: e.title,
     startsAt: e.startsAt,
     endsAt: e.endsAt,

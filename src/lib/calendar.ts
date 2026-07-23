@@ -1,4 +1,5 @@
 export interface CalendarEvent {
+  id?: string; // se usa como UID del .ics; Outlook lo exige para abrir el evento
   title: string;
   startsAt: Date;
   endsAt?: Date | null;
@@ -24,11 +25,16 @@ export function googleCalendarUrl(ev: CalendarEvent): string {
 export function buildIcs(ev: CalendarEvent): string {
   const esc = (s: string) =>
     s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const uid = `${ev.id ?? fmtUtc(ev.startsAt)}@eventos-mty`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//eventos-mty//ES",
+    // METHOD:PUBLISH + UID hacen que Outlook abra el evento para guardarlo
+    // (sin ellos solo abre la app o lo importa en silencio).
+    "METHOD:PUBLISH",
     "BEGIN:VEVENT",
+    `UID:${uid}`,
     `DTSTAMP:${fmtUtc(new Date())}`,
     `DTSTART:${fmtUtc(ev.startsAt)}`,
     `DTEND:${fmtUtc(finDe(ev))}`,
