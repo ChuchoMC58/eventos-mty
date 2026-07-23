@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-22.
+> Última actualización: 2026-07-23.
 
 ## Qué es
 
@@ -135,8 +135,7 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
 
-**⚠️ Hallazgos en revisión (2026-07-22) — reportados por el usuario probando en vivo, NO resueltos.**
-Hay dos PRs/ramas abiertas con trabajo que en pruebas del usuario aún no funciona bien:
+**⚠️ Hallazgos en revisión — pendientes:**
 - **`.ics` no abre directo a guardar en Outlook** (rama `fix/ics-outlook`, sin PR aún).
   Se le agregó `UID` + `METHOD:PUBLISH` al `.ics` (`src/lib/calendar.ts` + se pasa
   `id` desde `src/app/eventos/[id]/ics/route.ts`), pero el usuario reporta que **sigue
@@ -144,13 +143,24 @@ Hay dos PRs/ramas abiertas con trabajo que en pruebas del usuario aún no funcio
   Falta investigar más (¿Outlook desktop necesita otro `METHOD`/estructura?, probar el
   archivo descargado real, versión de Outlook). El `.ics` sí sale bien formado (UID +
   METHOD verificados), así que el problema es de comportamiento de Outlook, no del formato.
-- **Login: el recuadro del teléfono aún acepta letras y no se limita a 10 dígitos**
-  (rama `feat/telefono-estandarizado`, PR #6). El `onChange` de `EntrarForm.tsx` ya hace
-  `.replace(/\D/g, "").slice(0, 10)` y en pruebas por endpoint/HTML se veía bien, pero el
-  usuario reporta que **en el navegador todavía puede escribir letras y no está topado a
-  10**. Primero reproducir con recarga en limpio (pudo ser cliente viejo en caché del dev
-  server); si se confirma, es bug real del input controlado a arreglar. La normalización
-  del servidor (`normalizeMxPhone`) sí quedó verificada (variantes → `+528187654321`).
+
+**Resuelto (2026-07-23):**
+- ✅ **"El input de teléfono acepta letras" era un falso bug del preview** (PR #6,
+  rama `feat/telefono-estandarizado`): el código del input siempre estuvo bien; Next 16
+  **bloquea los chunks JS del dev server cuando se abre desde un origen distinto a
+  localhost** (la IP o un dominio `*.sslip.io`) → la página cargaba SIN JavaScript y el
+  input quedaba muerto (aceptaba cualquier cosa). Arreglado con `allowedDevOrigins` en
+  `next.config.ts` (solo afecta a `next dev`; prod nunca tuvo este problema). Verificado
+  tecleando en un Chrome real vía el dominio del preview: letras bloqueadas, tope de 10,
+  botón habilitado justo a los 10 dígitos.
+- ✅ **Pegar el número con lada ya no lo corrompe** (mismo PR #6): pegar
+  `+52 (81) 8765-4321` metía `5281876543` (número equivocado en silencio). El input ahora
+  usa el mismo helper del servidor (`mxNationalDigits`) y queda `8187654321`. Con test
+  unitario nuevo (`tests/phone.test.ts`, 9 casos).
+- ⚠️ Lección para verificar previews de dev server: si un componente cliente "no
+  reacciona", revisar primero que el origen esté en `allowedDevOrigins` — sin eso React
+  no hidrata. Y si Turbopack da FATAL "Permission denied" en `.next`, borrar `.next`
+  completo (residuos root de corridas dockerizadas).
 
 **Resuelto (2026-07-22):**
 - ✅ **Recordatorio de 2 h en el `.ics`** (`src/lib/calendar.ts`): `buildIcs` ahora
