@@ -136,15 +136,26 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   pulir al final).
 
 **⚠️ Hallazgos en revisión — pendientes:**
-- **`.ics` no abre directo a guardar en Outlook** (rama `fix/ics-outlook`, sin PR aún).
-  Se le agregó `UID` + `METHOD:PUBLISH` al `.ics` (`src/lib/calendar.ts` + se pasa
-  `id` desde `src/app/eventos/[id]/ics/route.ts`), pero el usuario reporta que **sigue
-  abriendo la app de Outlook sin llevarlo directo a la ventana de guardar el evento**.
-  Falta investigar más (¿Outlook desktop necesita otro `METHOD`/estructura?, probar el
-  archivo descargado real, versión de Outlook). El `.ics` sí sale bien formado (UID +
-  METHOD verificados), así que el problema es de comportamiento de Outlook, no del formato.
+- **PR #8 abierto** (`fix/ics-outlook`, asignado al usuario): agrega `UID` (requerido
+  por RFC 5545, faltaba) + `METHOD:PUBLISH` al `.ics`. Al mergearlo, **limpiar el
+  preview**: `docker rm -f preview-ics` + borrar
+  `/data/coolify/proxy/dynamic/preview-ics.yaml` (vía contenedor alpine; dir root-only).
 
 **Resuelto (2026-07-23):**
+- ✅ **CERRADO el caso "`.ics` no abre directo a guardar en Outlook": no es arreglable
+  desde el archivo.** El nuevo Outlook (Windows) ya no abre la ventana del evento al
+  abrir un `.ics` — Microsoft lo confirma como comportamiento esperado; el diálogo de
+  importar solo aparece yendo a mano a la vista de Calendario (o Agregar calendario >
+  Cargar desde archivo). Ningún `METHOD`/estructura lo cambia. Se probó un botón
+  "Outlook" con deeplink web (`outlook.live.com/calendar/deeplink/compose`, sí abre el
+  formulario prellenado) pero **el usuario lo descartó** — no reintroducirlo. De la
+  rama solo queda el fix de formato del PR #8.
+- ✅ **Recordatorio de 2 h en Google: NO se puede vía el link** — el `TEMPLATE` de
+  Google Calendar no admite parámetro de recordatorio (confirmado 2026-07-23); el
+  evento toma las notificaciones default de la cuenta del usuario. Alternativas
+  descartadas: importar el `.ics` (Google sí respeta el `VALARM` pero el flujo es
+  engorroso) y la API con OAuth (excesivo). **Decisión: apoyarse en los recordatorios
+  de WhatsApp propios**, donde controlamos la anticipación.
 - ✅ **"El input de teléfono acepta letras" era un falso bug del preview** (PR #6,
   rama `feat/telefono-estandarizado`): el código del input siempre estuvo bien; Next 16
   **bloquea los chunks JS del dev server cuando se abre desde un origen distinto a
