@@ -1,14 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { mxNationalDigits } from "@/lib/auth/phone";
 
 export default function EntrarForm({ next }: { next: string }) {
   const router = useRouter();
-  const [phone, setPhone] = useState("+52");
+  const [nacional, setNacional] = useState(""); // solo los 10 dígitos; la lada +52 es fija
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const phone = `+52${nacional}`;
 
   async function pedirCodigo() {
     setBusy(true);
@@ -49,14 +51,21 @@ export default function EntrarForm({ next }: { next: string }) {
         <>
           <label className="block text-sm text-humo">
             Tu WhatsApp
-            <input
-              className="mt-1 w-full rounded-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+528187654321"
-            />
+            <div className="mt-1 flex">
+              <span className="flex select-none items-center rounded-l-md border border-r-0 border-linea bg-ink-2 px-3 font-semibold text-hueso">
+                +52
+              </span>
+              <input
+                className="w-full rounded-r-md border border-linea bg-ink-2 p-2.5 outline-none transition-colors focus:border-musica"
+                value={nacional}
+                onChange={(e) => setNacional(mxNationalDigits(e.target.value).slice(0, 10))}
+                inputMode="numeric"
+                autoComplete="tel-national"
+                placeholder="8187654321"
+              />
+            </div>
           </label>
-          <button onClick={pedirCodigo} disabled={busy} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
+          <button onClick={pedirCodigo} disabled={busy || nacional.length !== 10} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
             {busy ? "Enviando…" : "Mandarme el código"}
           </button>
         </>
