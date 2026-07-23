@@ -3,29 +3,28 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
-# Flujo de trabajo — branch + PR, nunca push directo a `main`
+# Flujo de trabajo — todo en `main` local; push SOLO con OK explícito
 
-`main` está protegida: no se puede pushear directo. Para cada feature/fix:
+(Vigente desde 2026-07-23; sustituye al flujo anterior de branch + PR.)
 
-1. Crear una rama nueva desde `main` (p. ej. `feat/save-button`, `fix/tz-horas`).
-2. Commitear ahí y abrir un PR a `main` con `gh pr create --assignee @me`.
-3. El usuario revisa y mergea. El merge a `main` deploya a producción
-   (auto-deploy vía Coolify).
-
-**NUNCA hagas merge a `main`.** Abre el PR, asígnalo al usuario, avísale y
-detente — el merge lo hace SIEMPRE el usuario, aunque técnicamente puedas
-hacerlo tú y aunque te lo hayan pedido antes. Si el usuario quiere que mergees,
-que lo diga explícitamente en ese momento; por default, no.
+1. Se trabaja directo en `main` local, con commits normales — features, fixes y
+   docs (`HANDOFF.md` incluido). Ya NO se crean ramas por feature ni se abren PRs.
+2. **NUNCA hagas `git push` sin el OK explícito del usuario en ese momento** —
+   el push a `main` deploya a producción (webhook de GitHub → Coolify). Un OK
+   anterior no cubre el siguiente push: cada push requiere su propio OK.
+3. Al terminar un cambio: commit local, enseñárselo al usuario funcionando (ver
+   abajo) y esperar su OK para pushear/deployar.
 
 # Al terminar un fix/feature — dejar la app corriendo en vivo para revisar
 
 Cuando termines un fix o feature, **corre la app en vivo** y comparte la URL
 para que el usuario lo revise antes de darlo por cerrado:
 
-- Si ya está en `main`/producción, comparte la URL de prod y confirma que el
+- Si ya está pusheado/en producción, comparte la URL de prod y confirma que el
   cambio se ve ahí.
-- Si sigue en una rama sin mergear, levanta la app (dev server contra la BD del
-  contenedor, ver [flujo de verificación local]) y comparte la URL/puerto.
+- Si sigue como commit local sin pushear (pendiente del OK), levanta la app
+  (dev server contra la BD del contenedor, ver [flujo de verificación local]) y
+  comparte la URL/puerto.
 
 No basta con tests o build verdes: el usuario quiere ver el cambio funcionando
 en la app real.
@@ -45,14 +44,13 @@ Dos trampas ya pisadas (2026-07-23) al levantar el dev server para revisión:
    por root de corridas dockerizadas. Borrar `.next` completo (vía contenedor si
    hace falta) y dejar que recompile.
 
-# Docs de progreso — `HANDOFF.md` vive en `main`, no en PRs de features
+# Docs de progreso — mantener al día y commitear en `main` local
 
-Como todo merge a `main` deploya a producción, los docs de progreso deben
-mantenerse al día para que una sesión nueva no arranque desde cero, pero:
+Para que una sesión nueva no arranque desde cero:
 
-- **Los PRs de features NO tocan `HANDOFF.md`** (evita conflictos entre ramas).
-  Las actualizaciones de estado (fecha de "Última actualización", hecho vs.
-  pendiente) van en una rama/PR de docs aparte (p. ej. `docs/notas-revision`).
+- `HANDOFF.md` — actualizar (fecha de "Última actualización", hecho vs.
+  pendiente) y **commitearlo en `main` local** como cualquier archivo; se
+  pushea junto con lo demás cuando el usuario dé el OK.
 - `README.md` / `DEPLOY-COOLIFY.md` — actualizar solo si el cambio los vuelve
-  obsoletos (eso sí puede ir en el PR del feature que los invalida).
+  obsoletos.
 <!-- END:nextjs-agent-rules -->
