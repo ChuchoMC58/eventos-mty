@@ -1,0 +1,50 @@
+[
+  {
+    "active": true,
+    "title": "LUX TOUR 2026: ROSALÍA",
+    "description": "",
+    "link_to_tickets": "https://www.superboletos.com/landing-evento/rosalia",
+    "square_banner_aws": "http://admin.arenamonterrey.warelan.com/uploads/event/square_banner/1/rosalia.webp",
+    "banner_aws": "http://admin.arenamonterrey.warelan.com/uploads/event/banner/1/rosalia-wide.webp",
+    "event_dates": [
+      {
+        "date": "2026-09-12T21:00:00-06:00",
+        "id": 1300,
+        "link_to_tickets": "https://www.superboletos.com/landing-evento/rosalia-12sep",
+        "location_id": 10
+      },
+      {
+        "date": "2026-09-13T21:00:00-06:00",
+        "id": 1301,
+        "link_to_tickets": null,
+        "location_id": 10
+      }
+    ]
+  },
+  {
+    "active": true,
+    "title": "WWE MEXICO TOUR MONTERREY",
+    "description": "Lucha libre de la WWE en vivo",
+    "link_to_tickets": "https://www.superboletos.com/landing-evento/wwe",
+    "square_banner_aws": null,
+    "banner_aws": "http://admin.arenamonterrey.warelan.com/uploads/event/banner/2/wwe.webp",
+    "event_dates": [
+      {
+        "date": "2026-10-03T20:00:00-06:00",
+        "id": 1310,
+        "link_to_tickets": null,
+        "location_id": 10
+      }
+    ]
+  },
+  {
+    "active": false,
+    "title": "EVENTO CANCELADO QUE NO DEBE SALIR",
+    "event_dates": [{ "date": "2026-11-01T21:00:00-06:00", "id": 1320 }]
+  },
+  {
+    "active": true,
+    "title": "SIN FECHAS TODAVÍA",
+    "event_dates": []
+  }
+]

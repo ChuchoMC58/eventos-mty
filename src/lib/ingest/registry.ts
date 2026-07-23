@@ -1,23 +1,15 @@
 import { Connector } from "./connector";
 import { ticketmasterConnector } from "./sources/ticketmaster";
-import { pageConnector } from "./page-connector";
+import { arenaMonterreyConnector } from "./sources/arena-monterrey";
 
 // Agregar una fuente nueva = agregar una entrada aquí.
-// Las URLs se confirman al implementar (inspeccionar cada página: ¿trae JSON-LD?).
 export const connectors: Connector[] = [
   ticketmasterConnector(),
-  pageConnector({
-    slug: "arena-monterrey",
-    name: "Arena Monterrey",
-    url: "https://www.arenamonterrey.com/eventos",
-    category: "musica",
-    llmFallback: true,
-  }),
-  pageConnector({
-    slug: "auditorio-citibanamex",
-    name: "Auditorio Citibanamex",
-    url: "https://www.auditoriocitibanamex.com/eventos",
-    category: "musica",
-    llmFallback: true,
-  }),
+  // API JSON del sitio de la Arena (su cartelera es SPA sin JSON-LD; el
+  // pageConnector viejo daba 404). Cubre lo que vende Superboletos, que
+  // Ticketmaster casi no trae de este venue.
+  arenaMonterreyConnector(),
+  // Auditorio Citibanamex se quitó (2026-07-23): Ticketmaster ya cubre ese
+  // venue ("Auditorio Banamex") y el pageConnector solo vivía del fallback
+  // LLM que nunca tuvo ANTHROPIC_API_KEY.
 ];
