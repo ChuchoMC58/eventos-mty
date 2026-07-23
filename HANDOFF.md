@@ -111,14 +111,23 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   del agente, NO en este repo público.)
 
 **Pendiente (requiere acción del usuario):**
+- ~~Twilio: `TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM`~~ ✅ **HECHO y VERIFICADO
+  (2026-07-23):** cuenta Twilio creada; **WhatsApp Sandbox** conectado. Las cinco
+  env vars están en Coolify: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`,
+  `TWILIO_WHATSAPP_FROM=+14155238886`, `ADMIN_WHATSAPP=+5219223736016` (número del
+  usuario, ya suscrito con `join though-excellent`) y `WHATSAPP_TEST_MODE=true`.
+  Probado end-to-end: `POST /api/auth/request-code` → HTTP 200 y el OTP llegó al
+  WhatsApp del admin con el prefijo `[PRUEBA → …]`. Es **sandbox** (solo entrega a
+  números que hayan hecho `join`; caduca ~72 h de inactividad) → sirve para dev, NO
+  para usuarios reales. Ver [[whatsapp-mx-521-format]] para el riesgo del `+521`.
 - **Claves de terceros** restantes:
-  - Twilio: `TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM` (sandbox para dev)
   - `ANTHROPIC_API_KEY` ya NO es urgente: era para el fallback LLM del conector
     de Citibanamex, que se eliminó (2026-07-23). Solo se necesitará si un venue
     futuro requiere el fallback LLM.
 - **Modo prueba WhatsApp**: `WHATSAPP_TEST_MODE=true` hasta que las plantillas de
   Meta estén aprobadas y el digest se vea correcto una semana. NUNCA ponerlo en
-  `false` antes de eso.
+  `false` antes de eso. ⚠️ ANTES de apagarlo: verificar el formato `+521` con un
+  número mexicano real (la app guarda `+52` sin el `1`; ver `src/lib/auth/phone.ts`).
 - ~~URLs reales de conectores de página~~ ✅ **RESUELTO y EN PROD (2026-07-23):**
   la cartelera de la Arena es una SPA sin JSON-LD — se descubrió su API real
   (`api.arenamonterrey.com/next_event_dates`) y se escribió un conector dedicado
