@@ -122,9 +122,13 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   Arena Monterrey da **404** en la URL candidata y el de Auditorio Citibanamex cae
   al fallback LLM (necesita `ANTHROPIC_API_KEY`). Hay que inspeccionar cada venue y
   ver si trae JSON-LD. (Ticketmaster ya trae datos reales sin depender de estos.)
-- **Tareas programadas en Coolify** (Scheduled Tasks) para los jobs cron:
-  `npm run ingest` / `digest` / `reminders`. Aún no configuradas. La ingesta de hoy
-  se corrió a mano una vez; para que se actualice sola falta el cron.
+- ~~Tareas programadas en Coolify~~ ✅ **HECHO (2026-07-23):** Scheduled Tasks
+  creadas vía API y verificadas: `ingesta` (06:00 MTY / `0 12 * * *` UTC),
+  `recordatorios` (10:00 / `0 16 * * *`), `digest` (18:00 / `0 0 * * *`).
+  Verificado end-to-end: ingest corre dentro del contenedor (83 eventos TM) y el
+  scheduler de Coolify dispara solo (ejecución de prueba `success`). Los conectores
+  de Arena (404) y Citibanamex (falta `ANTHROPIC_API_KEY`) siguen fallando — la
+  ingesta diaria vive de Ticketmaster mientras tanto.
 - **Expansión nacional (futuro):** el conector de Ticketmaster está fijo a
   `city=Monterrey`. Para abrir otras ciudades habrá que parametrizarlo por ciudad y
   añadir `ciudad`/región a la navegación.
