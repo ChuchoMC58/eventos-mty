@@ -112,16 +112,22 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 
 **Pendiente (requiere acción del usuario):**
 - **Claves de terceros** restantes:
-  - `ANTHROPIC_API_KEY` (console.anthropic.com) — para el fallback LLM de ingesta
-    (el conector de Auditorio Citibanamex lo necesita).
   - Twilio: `TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM` (sandbox para dev)
+  - `ANTHROPIC_API_KEY` ya NO es urgente: era para el fallback LLM del conector
+    de Citibanamex, que se eliminó (2026-07-23). Solo se necesitará si un venue
+    futuro requiere el fallback LLM.
 - **Modo prueba WhatsApp**: `WHATSAPP_TEST_MODE=true` hasta que las plantillas de
   Meta estén aprobadas y el digest se vea correcto una semana. NUNCA ponerlo en
   `false` antes de eso.
-- **URLs reales de conectores de página** en `src/lib/ingest/registry.ts`: el de
-  Arena Monterrey da **404** en la URL candidata y el de Auditorio Citibanamex cae
-  al fallback LLM (necesita `ANTHROPIC_API_KEY`). Hay que inspeccionar cada venue y
-  ver si trae JSON-LD. (Ticketmaster ya trae datos reales sin depender de estos.)
+- ~~URLs reales de conectores de página~~ ✅ **RESUELTO (2026-07-23, commit local
+  pendiente de push):** la cartelera de la Arena es una SPA sin JSON-LD — se
+  descubrió su API real (`api.arenamonterrey.com/next_event_dates`) y se escribió
+  un conector dedicado (`src/lib/ingest/sources/arena-monterrey.ts`): **47 eventos**
+  (vende por Superboletos; TM solo traía 1). El de Citibanamex se **eliminó**: TM ya
+  cubre ese venue ("Auditorio Banamex", 29 eventos). Dedupe verificado (Melanie
+  Martinez = 1 evento, 2 fuentes). Al pushear: correr `npm run ingest` en el
+  contenedor (o esperar el cron de las 06:00) y borrar el Source huérfano
+  `auditorio-citibanamex` de prod.
 - ~~Tareas programadas en Coolify~~ ✅ **HECHO (2026-07-23):** Scheduled Tasks
   creadas vía API y verificadas: `ingesta` (06:00 MTY / `0 12 * * *` UTC),
   `recordatorios` (10:00 / `0 16 * * *`), `digest` (18:00 / `0 0 * * *`).
