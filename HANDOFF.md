@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-23.
+> Última actualización: 2026-07-22.
 
 ## Qué es
 
@@ -135,34 +135,7 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
 
-**Resuelto (2026-07-23):**
-- ✅ **"El input de teléfono acepta letras" era un falso bug del preview**: el código
-  del input siempre estuvo bien; lo que pasaba es que Next 16 **bloquea los chunks
-  JS del dev server cuando se abre desde un origen distinto a localhost** (la IP o
-  un dominio `*.sslip.io`) → la página cargaba SIN JavaScript y el input quedaba
-  muerto (aceptaba cualquier cosa). Arreglado con `allowedDevOrigins` en
-  `next.config.ts` (solo afecta a `next dev`; prod nunca tuvo este problema).
-  Verificado tecleando en un Chrome real vía el dominio del preview: letras
-  bloqueadas, tope de 10, botón se habilita justo a los 10 dígitos.
-- ✅ **Pegar el número con lada ya no lo corrompe**: pegar `+52 (81) 8765-4321`
-  metía `5281876543` (número equivocado en silencio). Ahora el input usa el mismo
-  helper del servidor (`mxNationalDigits`) y queda `8187654321`. Con test unitario
-  nuevo (`tests/phone.test.ts`, 9 casos).
-- ⚠️ Ojo al verificar previews de dev server: si el input "no reacciona", revisar
-  primero que el origen esté en `allowedDevOrigins` — sin eso React no hidrata y
-  cualquier componente cliente parece roto. También: si Turbopack entra en pánico
-  con "Permission denied" en `.next`, borrar `.next` completo (residuos root de
-  corridas dockerizadas).
-
 **Resuelto (2026-07-22):**
-- ✅ **Teléfono estandarizado en el login** (`src/components/EntrarForm.tsx` +
-  `src/lib/auth/phone.ts` + rutas `auth/request-code` y `auth/verify`): la lada
-  `+52` es una caja fija no editable y el recuadro solo acepta dígitos (máx 10, sin
-  espacios). El servidor normaliza con `normalizeMxPhone` a formato canónico
-  `+52XXXXXXXXXX` antes de guardar/buscar, así variantes como `8187654321`,
-  `+52 81 8765 4321` y `528187654321` entran como el MISMO usuario (evita
-  duplicados). Verificado: la basura da 400 y las 3 variantes válidas se guardaron
-  como `+528187654321` en la BD. Helper preparado para extender a otros países.
 - ✅ **Recordatorio de 2 h en el `.ics`** (`src/lib/calendar.ts`): `buildIcs` ahora
   incluye un bloque `VALARM` con `TRIGGER:-PT2H`, así el botón "Apple/Outlook (.ics)"
   agrega el evento con recordatorio 2 h antes (Apple/Outlook/Google lo respetan al
