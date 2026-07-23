@@ -8,9 +8,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 `main` está protegida: no se puede pushear directo. Para cada feature/fix:
 
 1. Crear una rama nueva desde `main` (p. ej. `feat/save-button`, `fix/tz-horas`).
-2. Commitear ahí y abrir un PR a `main` con `gh pr create`.
+2. Commitear ahí y abrir un PR a `main` con `gh pr create --assignee @me`.
 3. El usuario revisa y mergea. El merge a `main` deploya a producción
    (auto-deploy vía Coolify).
+
+**NUNCA hagas merge a `main`.** Abre el PR, asígnalo al usuario, avísale y
+detente — el merge lo hace SIEMPRE el usuario, aunque técnicamente puedas
+hacerlo tú y aunque te lo hayan pedido antes. Si el usuario quiere que mergees,
+que lo diga explícitamente en ese momento; por default, no.
 
 # Al terminar un fix/feature — dejar la app corriendo en vivo para revisar
 
@@ -25,12 +30,29 @@ para que el usuario lo revise antes de darlo por cerrado:
 No basta con tests o build verdes: el usuario quiere ver el cambio funcionando
 en la app real.
 
-# Docs de progreso — actualizar en cada PR
+## ⚠️ Previews con `next dev`: hidratación y orígenes permitidos
 
-Como todo merge a `main` deploya a producción, cada PR debe incluir la
-actualización de los docs de progreso para que una sesión nueva no arranque
-desde cero:
+Dos trampas ya pisadas (2026-07-23) al levantar el dev server para revisión:
 
-- `HANDOFF.md` — estado actual, fecha de "Última actualización", hecho vs. pendiente
-- `README.md` / `DEPLOY-COOLIFY.md` — solo si el cambio los vuelve obsoletos
+1. **Next 16 bloquea los chunks JS del dev server desde orígenes no listados**
+   (`127.0.0.1`, la IP del VPS, dominios `*.sslip.io`) → la página carga SIN
+   JavaScript y los componentes cliente parecen rotos (así nació el falso bug de
+   "el input de teléfono acepta letras"). El origen del preview debe estar en
+   `allowedDevOrigins` de `next.config.ts`. Si un componente cliente "no
+   reacciona" en un preview, verifica esto ANTES de tocar el código. Solo aplica
+   a `next dev`; producción no se ve afectada.
+2. **Si Turbopack da FATAL "Permission denied" en `.next`**: hay residuos owned
+   por root de corridas dockerizadas. Borrar `.next` completo (vía contenedor si
+   hace falta) y dejar que recompile.
+
+# Docs de progreso — `HANDOFF.md` vive en `main`, no en PRs de features
+
+Como todo merge a `main` deploya a producción, los docs de progreso deben
+mantenerse al día para que una sesión nueva no arranque desde cero, pero:
+
+- **Los PRs de features NO tocan `HANDOFF.md`** (evita conflictos entre ramas).
+  Las actualizaciones de estado (fecha de "Última actualización", hecho vs.
+  pendiente) van en una rama/PR de docs aparte (p. ej. `docs/notas-revision`).
+- `README.md` / `DEPLOY-COOLIFY.md` — actualizar solo si el cambio los vuelve
+  obsoletos (eso sí puede ir en el PR del feature que los invalida).
 <!-- END:nextjs-agent-rules -->
