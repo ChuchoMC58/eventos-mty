@@ -22,7 +22,8 @@ export default function EntrarForm({ next }: { next: string }) {
     });
     setBusy(false);
     if (!res.ok) {
-      setError((await res.json()).error ?? "Error al enviar el código");
+      const body = await res.json().catch(() => ({}));
+      setError(body.error ?? "Error al enviar el código");
       return;
     }
     setStep("code");
@@ -38,7 +39,8 @@ export default function EntrarForm({ next }: { next: string }) {
     });
     setBusy(false);
     if (!res.ok) {
-      setError((await res.json()).error ?? "Código incorrecto");
+      const body = await res.json().catch(() => ({}));
+      setError(body.error ?? "Código incorrecto");
       return;
     }
     const { isNew } = await res.json();
