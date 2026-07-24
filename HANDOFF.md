@@ -181,6 +181,18 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   minutos en reflejarse tras el pago). Sigue siendo **Sandbox** para WhatsApp
   (entrega solo a números con `join`); el sender aprobado + plantillas de Meta
   sigue pendiente para mandar a terceros. `WHATSAPP_TEST_MODE=true` intacto.
+- ✅ **Previews vía Cloudflare Tunnel documentados** (commit `eb9dd31`): `cloudflared`
+  ya estaba instalado (`~/.local/bin`) pero sin documentar. Flujo en `AGENTS.md`
+  (§ "Exponer un preview"). El firewall de Hostinger bloquea puertos directos y
+  el ruteo contenedor→host, así que el túnel es la vía simple. Se agregó
+  `*.trycloudflare.com` a `allowedDevOrigins`. **Ojo:** `next dev` (HMR) NO
+  sobrevive al túnel (error "Connection closed" + reload en loop) → para un preview
+  compartible usar **build de producción** (`node .next/standalone/server.js`), no
+  `next dev`.
+- ✅ **Desplegado a prod (push 2026-07-24):** este lote (fix de OTP `b494dbd` +
+  config/docs) se pusheó a `main` con OK del usuario → auto-deploy de Coolify. El
+  único cambio funcional en prod es el fix de OTP; `next.config` (allowedDevOrigins)
+  es solo dev.
 
 **Resuelto (2026-07-23):**
 - ✅ **Nuevo flujo de trabajo (ver `AGENTS.md`):** ya NO se usan ramas ni PRs — todo
