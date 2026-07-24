@@ -44,6 +44,28 @@ Dos trampas ya pisadas (2026-07-23) al levantar el dev server para revisión:
    por root de corridas dockerizadas. Borrar `.next` completo (vía contenedor si
    hace falta) y dejar que recompile.
 
+## Exponer un preview: usar Cloudflare Tunnel (lo más simple)
+
+`cloudflared` ya está instalado en `~/.local/bin/cloudflared`. Es la forma
+recomendada de exponer un `next dev` para revisión — el firewall de Hostinger
+bloquea los puertos directos (3105, etc.) y enrutar por el Traefik de Coolify
+hacia un proceso del host NO funciona (contenedor→host bloqueado). Flujo:
+
+```bash
+# 1) dev server en el host contra la BD de prod (via IP del contenedor de la BD)
+npx next dev -H 127.0.0.1 -p 3105          # con DATABASE_URL apuntando a la IP del contenedor
+# 2) túnel público (URL https aleatoria *.trycloudflare.com):
+setsid ~/.local/bin/cloudflared tunnel --url http://localhost:3105 --no-autoupdate > cf.log 2>&1 < /dev/null & disown
+grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' cf.log   # la URL a compartir
+```
+
+Notas: (a) `*.trycloudflare.com` ya está en `allowedDevOrigins` (sin eso React no
+hidrata sobre el túnel). (b) El host NO resuelve `trycloudflare.com` por DNS, así
+que para auto-verificar la URL hay que curl-earla desde un contenedor con salida a
+internet (`docker run --rm node:22-bookworm-slim node -e "fetch(URL)..."`), no
+desde el host. (c) Lánzalo con `setsid ... & disown` (no como background task del
+harness, que lo reapea).
+
 # Docs de progreso — mantener al día y commitear en `main` local
 
 Para que una sesión nueva no arranque desde cero:

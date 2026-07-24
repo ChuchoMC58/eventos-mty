@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     "*.sslip.io",
     "preview.187-127-254-144.sslip.io",
     "*.187.127.254.144.sslip.io",
+    "*.trycloudflare.com", // previews vía `cloudflared tunnel --url http://localhost:3105`
   ],
 };
 
