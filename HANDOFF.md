@@ -172,9 +172,15 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   `eventos/[id]` (el hallazgo de "no está en ninguna página" era pre-rediseño y
   quedó obsoleto). Verificado end-to-end: botón "☆ Me interesa" renderiza, `/api/saved`
   da 401 sin sesión, y con login real (OTP) se guarda un evento con recordatorio y
-  aparece en `/mis-eventos`. El login se probó completo (verificar→sesión→guardar);
-  el único paso simulado fue el código OTP, porque la cuenta Twilio trial topa a 5
-  WhatsApp/día — al hacer Upgrade se prueba el envío real. Ver [[whatsapp-mx-521-format]].
+  aparece en `/mis-eventos`. **Login probado 100% real (2026-07-24):** tras el
+  Upgrade de Twilio a cuenta **Full** (tope de 5/día levantado), el OTP viajó de
+  verdad por WhatsApp, el usuario lo leyó y se completó verificar→sesión→guardar→
+  recordatorio→Mis eventos sin nada simulado. Ver [[whatsapp-mx-521-format]].
+- ✅ **Cuenta Twilio Upgraded a Full (2026-07-24):** ya no es Trial → sin el tope
+  diario de 5 mensajes (error `63038`). Saldo pagado agregado ($20; puede tardar
+  minutos en reflejarse tras el pago). Sigue siendo **Sandbox** para WhatsApp
+  (entrega solo a números con `join`); el sender aprobado + plantillas de Meta
+  sigue pendiente para mandar a terceros. `WHATSAPP_TEST_MODE=true` intacto.
 
 **Resuelto (2026-07-23):**
 - ✅ **Nuevo flujo de trabajo (ver `AGENTS.md`):** ya NO se usan ramas ni PRs — todo
