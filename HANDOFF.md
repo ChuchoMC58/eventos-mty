@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-23.
+> Última actualización: 2026-07-24.
 
 ## Qué es
 
@@ -154,6 +154,27 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
+
+**Resuelto (2026-07-24):**
+- ✅ **OTP no falla en silencio si el WhatsApp rebota** (commit `b494dbd`, `main`
+  local sin push): `request-code` no capturaba la excepción de `sendWhatsApp` → un
+  fallo de envío (proveedor caído, tope de mensajes, número inalcanzable) devolvía
+  un 500 sin JSON y `EntrarForm` reventaba al hacer `res.json()` → el botón se
+  rehabilitaba sin mostrar error. Ahora la ruta responde **503 con mensaje claro en
+  español** y el form parsea el JSON a prueba de fallos en ambos pasos. Verificado
+  contra el fallo real de Twilio (429 `63038`): antes HTTP 500 crudo, ahora 503 +
+  mensaje; el path de número inválido sigue en 400.
+- ✅ **Horas verificadas correctas en prod (cierre del "2:00 am"):** el contenedor
+  corre con `TZ=America/Monterrey` y la web renderiza p.ej. Ricardo Montaner como
+  "mar 28 jul · 9:00 pm" (guardado 03:00 UTC). El "2 am" era solo del dev server
+  (UTC). No hay nada que arreglar; para ver bien en local: `TZ=America/Monterrey npm run dev`.
+- ✅ **SaveButton confirmado operativo en prod:** ya estaba montado en
+  `eventos/[id]` (el hallazgo de "no está en ninguna página" era pre-rediseño y
+  quedó obsoleto). Verificado end-to-end: botón "☆ Me interesa" renderiza, `/api/saved`
+  da 401 sin sesión, y con login real (OTP) se guarda un evento con recordatorio y
+  aparece en `/mis-eventos`. El login se probó completo (verificar→sesión→guardar);
+  el único paso simulado fue el código OTP, porque la cuenta Twilio trial topa a 5
+  WhatsApp/día — al hacer Upgrade se prueba el envío real. Ver [[whatsapp-mx-521-format]].
 
 **Resuelto (2026-07-23):**
 - ✅ **Nuevo flujo de trabajo (ver `AGENTS.md`):** ya NO se usan ramas ni PRs — todo
