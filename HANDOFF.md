@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-24.
+> Última actualización: 2026-07-25.
 
 ## Qué es
 
@@ -142,9 +142,14 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
   creadas vía API y verificadas: `ingesta` (06:00 MTY / `0 12 * * *` UTC),
   `recordatorios` (10:00 / `0 16 * * *`), `digest` (18:00 / `0 0 * * *`).
   Verificado end-to-end: ingest corre dentro del contenedor (83 eventos TM) y el
-  scheduler de Coolify dispara solo (ejecución de prueba `success`). Los conectores
-  de Arena (404) y Citibanamex (falta `ANTHROPIC_API_KEY`) siguen fallando — la
-  ingesta diaria vive de Ticketmaster mientras tanto.
+  scheduler de Coolify dispara solo (ejecución de prueba `success`).
+  **Conector de Arena SANO (verificado 2026-07-25):** el "404" era una caída
+  transitoria de la API de Arena (`api.arenamonterrey.com`) el 22 y 23-jul temprano,
+  NO un bug del código. Se recuperó solo el 23-jul 16:06 UTC y desde entonces ingiere
+  **47 eventos** consistentemente, incluida la corrida del cron del 24-jul 12:00 UTC
+  (ver tabla `SourceRun` en prod). El endpoint responde 200 y el parseo sigue cuadrando.
+  El de Citibanamex se eliminó (TM cubre ese venue). La ingesta diaria vive de
+  Ticketmaster + Arena.
 - **Expansión nacional (futuro):** el conector de Ticketmaster está fijo a
   `city=Monterrey`. Para abrir otras ciudades habrá que parametrizarlo por ciudad y
   añadir `ciudad`/región a la navegación.

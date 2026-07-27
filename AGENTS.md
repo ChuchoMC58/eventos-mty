@@ -14,6 +14,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
    anterior no cubre el siguiente push: cada push requiere su propio OK.
 3. Al terminar un cambio: commit local, enseñárselo al usuario funcionando (ver
    abajo) y esperar su OK para pushear/deployar.
+4. **Squash antes de pushear:** se trabaja con commits normales mientras se itera,
+   pero **justo antes de cada push se aplanan los commits pendientes en uno solo**
+   con un mensaje que resuma el lote, para que `main` quede con historia limpia.
+   Como el ruleset de `main` bloquea force-push (`non_fast_forward`) y `git rebase
+   -i` no está disponible en este entorno, el squash se hace localmente antes de
+   subir: `git reset --soft origin/main && git commit -m "..."` y luego `git push`.
+   (NO intentar squashear commits ya pusheados: requeriría force-push, prohibido.)
 
 # Al terminar un fix/feature — dejar la app corriendo en vivo para revisar
 
