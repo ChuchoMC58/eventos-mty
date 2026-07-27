@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/db";
 import { formatFecha, formatPrecio } from "@/lib/format";
-import { googleCalendarUrl } from "@/lib/calendar";
+import { googleCalendarUrl, androidCalendarIntentUrl } from "@/lib/calendar";
 import { getSessionUserId } from "@/lib/auth/session";
 import SaveButton from "@/components/SaveButton";
+import GoogleCalendarButton from "@/components/GoogleCalendarButton";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -34,14 +35,16 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
     reminderPref = user?.reminderPref ?? null;
   }
 
-  const gcal = googleCalendarUrl({
+  const calEvent = {
     title: e.title,
     startsAt: e.startsAt,
     endsAt: e.endsAt,
     venueName: e.venue.name,
     address: e.venue.address,
     description: e.description,
-  });
+  };
+  const gcal = googleCalendarUrl(calEvent);
+  const gcalIntent = androidCalendarIntentUrl(calEvent);
   const precio = formatPrecio(e.priceMin ? Number(e.priceMin) : null, e.priceMax ? Number(e.priceMax) : null);
 
   return (
@@ -92,19 +95,12 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
           </a>
         )}
         <SaveButton eventId={e.id} saved={saved} reminderPref={reminderPref} />
-        <a
-          href={gcal}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-md border border-linea px-5 py-2.5 text-sm text-hueso transition-colors hover:border-humo"
-        >
-          Google Calendar
-        </a>
+        <GoogleCalendarButton webUrl={gcal} androidIntentUrl={gcalIntent} />
         <a
           href={`/eventos/${e.id}/ics`}
           className="rounded-md border border-linea px-5 py-2.5 text-sm text-hueso transition-colors hover:border-humo"
         >
-          Apple/Outlook (.ics)
+          Apple Calendar
         </a>
       </div>
     </main>

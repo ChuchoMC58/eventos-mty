@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:borra-bd": "vitest run --config vitest.bd.config.ts",
+    "test:todo": "npm test && npm run test:borra-bd",
     "ingest": "tsx scripts/ingest.ts",
     "digest": "tsx scripts/digest.ts",
     "reminders": "tsx scripts/reminders.ts"

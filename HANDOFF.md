@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-25.
+> Última actualización: 2026-07-27 (segunda tanda: calendario Android, diálogo Sí/No, tests separados).
 
 ## Qué es
 
@@ -12,7 +12,8 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **46 tests pasan** (`npm test`), **build de producción limpio** (`npm run build`).
+- **61 tests pasan** (`npm run test:todo` = 45 puros + 16 de integración),
+  **lint limpio** (`npm run lint`) y **build de producción limpio** (`npm run build`).
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
@@ -71,13 +72,35 @@ cd ~/eventos-mty
 npm install                 # si node_modules no está
 npx prisma migrate deploy   # aplicar migraciones a la BD
 npx prisma db seed          # 6 eventos de ejemplo
-npm test                    # 46 tests (usa la BD local; la vacía con resetDb)
+npm test                    # 45 tests puros, SIN BD — seguro con el dev server arriba
+npm run test:borra-bd       # 16 tests de integración; RESETEA la BD eventos_mty_test
+npm run test:todo           # los dos (correr antes de pushear)
 npm run dev                 # http://localhost:3000
 npm run build               # build de producción
 npm run ingest|digest|reminders   # jobs CLI
 ```
-Nota: correr `npm test` VACÍA la BD (los tests de integración usan `resetDb`).
-Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
+
+### Tests: dos comandos, dos bases (desde 2026-07-27)
+Antes había un solo `npm test` que **borraba la BD de desarrollo** en cada corrida
+(los tests de integración llaman `resetDb()`, que necesita la base vacía para poder
+afirmar conteos). Ese día se perdieron así los eventos locales. Ahora:
+
+- **`npm test`** → solo los archivos `tests/*.test.ts` que NO tocan Postgres (45).
+  No borra nada; se puede correr con un preview o el dev server arriba.
+- **`npm run test:borra-bd`** → solo `tests/*.db.test.ts` (16), con
+  `vitest.bd.config.ts`. Su setup (`tests/setup-bd.ts`) reescribe `DATABASE_URL`
+  agregándole el sufijo `_test` **antes** de que Prisma se instancie, así que
+  siempre acaba en `eventos_mty_test` aunque el `.env` apunte a `eventos_mty`.
+- **Candado en `resetDb()`** (`tests/helpers/db.ts`): si `DATABASE_URL` no termina
+  en `_test`, tira error en vez de borrar. Cubre el caso de un test nuevo que use
+  `resetDb()` pero no se llame `*.db.test.ts` — ese entraría en `npm test` y le
+  caería encima a la BD de desarrollo. La convención de nombres es una promesa;
+  el candado es la verificación.
+- La BD de tests es desechable: `dropdb eventos_mty_test` y se recrea con
+  `createdb -h 127.0.0.1 -U postgres eventos_mty_test` +
+  `DATABASE_URL="…/eventos_mty_test" npx prisma migrate deploy`.
+
+Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
 
 ## Desviaciones del plan original (todas justificadas)
 1. **Prisma fijado a v6** (no v7). Prisma 7 cambió el generador (`prisma-client`,
@@ -126,8 +149,24 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
     futuro requiere el fallback LLM.
 - **Modo prueba WhatsApp**: `WHATSAPP_TEST_MODE=true` hasta que las plantillas de
   Meta estén aprobadas y el digest se vea correcto una semana. NUNCA ponerlo en
-  `false` antes de eso. ⚠️ ANTES de apagarlo: verificar el formato `+521` con un
-  número mexicano real (la app guarda `+52` sin el `1`; ver `src/lib/auth/phone.ts`).
+  `false` antes de eso. ⚠️ ANTES de apagarlo: arreglar el formato `+521` (ver abajo).
+- **⚠️ FORMATO `+521` CONFIRMADO COMO BUG (2026-07-25):** la app guarda los teléfonos
+  como `+52` + 10 dígitos, SIN el `1` que WhatsApp-MX usa. Se probó en sandbox
+  mandando a ambos formatos al número del usuario: a `+529223736016` (sin `1`) →
+  **falló, err 63015** (WhatsApp lo trata como número distinto no unido); a
+  `+5219223736016` (con `1`) → err 63016 (sólo ventana, número reconocido). ⇒ el
+  formato sin `1` NO entrega. **Decisión del usuario: NO arreglar aún; hacerlo al
+  integrar el sender de producción de Meta.** Fix propuesto: helper en `sendWhatsApp`
+  que inserte el `1` para móviles MX al enviar, sin tocar el almacenamiento canónico
+  `+52` (que sirve al dedup). Ver [[whatsapp-mx-521-format]] y `src/lib/auth/phone.ts`.
+- **⚠️ Ventana de 24 h del Sandbox (entendido 2026-07-27):** el Sandbox de WhatsApp
+  sólo entrega mensajes de texto libre (OTP, recordatorios) **dentro de las 24 h**
+  posteriores a que el usuario le escriba al número del sandbox (+1 415 523 8886).
+  Fuera de esa ventana rebotan con err 63016. Por eso "no llega el código" a ratos:
+  la ventana se cerró → el usuario debe mandar cualquier mensaje (ej. `hola`) al
+  sandbox para reabrirla. Esto NO es viable en producción: un usuario real nunca
+  tiene ventana abierta → **en prod el OTP DEBE ir como plantilla de autenticación
+  aprobada de Meta**, no como texto libre. Es el mismo pendiente grande de Meta.
 - ~~URLs reales de conectores de página~~ ✅ **RESUELTO y EN PROD (2026-07-23):**
   la cartelera de la Arena es una SPA sin JSON-LD — se descubrió su API real
   (`api.arenamonterrey.com/next_event_dates`) y se escribió un conector dedicado
@@ -159,6 +198,90 @@ Volver a correr `npx prisma db seed` para tener datos en la web tras los tests.
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
+- **BUG: `reminderSentAt` se marca aunque el WhatsApp rebote** (`src/lib/reminders/run.ts`):
+  `client.messages.create()` de Twilio devuelve `queued` sin lanzar excepción, y el
+  rebote real (p.ej. 63016 fuera de ventana) ocurre después, async. Como el código
+  hace `reminderSentAt = now()` justo tras el `create`, un recordatorio que rebotó
+  queda marcado como enviado y **nunca se reintenta** → el usuario lo pierde en
+  silencio. Aplica también en prod ante cualquier rebote transitorio. Atacar junto
+  con la integración de Meta (idealmente: sólo marcar como enviado tras confirmar
+  entrega, o reintentar si el status final no es delivered).
+
+**Resuelto (2026-07-27, segunda tanda):**
+- ✅ **"Google Calendar" abre la APP en Android — vía `VIEW` + `package`, no
+  `ACTION_INSERT`.** El enfoque anterior (`intent://` con
+  `action=android.intent.action.INSERT`) **nunca podía funcionar**: Chrome solo
+  lanza actividades que declaran `android.intent.category.BROWSABLE`
+  (https://developer.chrome.com/docs/android/intents) y la pantalla de "nuevo
+  evento" de Google Calendar no la declara → el intent no resolvía y SIEMPRE caía
+  al `browser_fallback_url`, o sea al navegador. Ese era el bug reportado.
+  Lo que sí funciona (elegido por el usuario probando 8 variantes en su Android
+  real, con una página de laboratorio temporal ya borrada): envolver el MISMO link
+  web de Google en un intent `VIEW` con `package=com.google.android.calendar`, así
+  el deep link de `calendar.google.com` lo abre la app en vez de Chrome. Se le
+  agregó `S.browser_fallback_url` (el lab no lo traía) para el Android sin la app
+  instalada. **Pendiente:** confirmar el botón real en device; en el lab la
+  variante ya se validó. iOS/desktop no cambian (siguen con el link web); en
+  iPhone la ruta de un toque es el `.ics`, verificado con Apple Calendar
+  mostrando título, sede, fecha y la alerta de 2 h.
+  **Descartado y documentado en el código:** en iOS no hay equivalente — el scheme
+  `comgooglecalendar://` no está documentado ni acepta parámetros de evento.
+- ✅ **Diálogo propio "¿Te recordamos por WhatsApp?" con botones Sí / No**
+  (`SaveButton`): antes usaba `window.confirm`, que rotula "OK/Cancel" en el idioma
+  del navegador y no se puede cambiar. Igual que antes, **ambos botones guardan el
+  evento** (la pregunta es solo por el recordatorio) y el subtítulo lo aclara; Esc
+  y clic afuera equivalen a "No", para no perder el clic en "Me interesa".
+- ✅ **Sesión huérfana = sin sesión** (`getSessionUserId`): la cookie está firmada
+  con HMAC, pero la firma puede ser válida y el usuario ya no existir en la BD
+  (cuenta borrada, BD reseteada). Antes la app se veía "con sesión" y cada escritura
+  tronaba con `Foreign key constraint violated: SavedEvent_userId_fkey`. Ahora se
+  verifica que el usuario exista (consulta por PK) y si no, se trata como no-sesión
+  → redirige a `/entrar`.
+- ✅ **`SaveButton` ya no miente al fallar:** solo marca "★ Guardado" si el servidor
+  respondió OK; si no, deja el botón como estaba y muestra el error en rojo. Antes
+  cualquier 500 se veía como guardado exitoso y el evento desaparecía al recargar.
+- ✅ **Tests separados en dos comandos y dos bases** — ver "Comandos de trabajo".
+- ✅ **Lint limpio:** `GoogleCalendarButton` hacía `setState` dentro de `useEffect`
+  (error `react-hooks/set-state-in-effect` que venía del commit `c2d32cc`); ahora
+  detecta Android con `useSyncExternalStore`, sin mismatch de hidratación.
+
+**Resuelto (2026-07-27):**
+- ✅ **Botón de calendario "Apple/Outlook (.ics)" → "Apple Calendar"** (commit
+  `7ce9aa3`, `main` local sin push): el nuevo Outlook (Windows) NO abre el `.ics`
+  directo a guardar (Microsoft lo confirma como esperado; hay que importar a mano),
+  así que "Outlook" prometía un clic que no pasa. Se dejó sólo "Apple Calendar" —el
+  caso que sí funciona limpio (iPhone/Mac abren Calendar de un toque)—. **Nota:** en
+  desktop Windows el `.ics` seguirá abriendo Outlook porque es la app por defecto del
+  SO para `.ics`, no algo que controle el botón. Verificado en iPhone real (BrowserStack):
+  el `.ics` abre Apple Calendar con el evento y la alerta de 2 h (`VALARM`) presente.
+- ✅ **Hora del `.ics` NO es bug (aclarado):** el `.ics` guarda la hora en UTC
+  (`DTSTART:...Z`). En el iPhone de BrowserStack se veía "03:00" porque ese emulador
+  está en zona UTC; en un teléfono real en Monterrey se ve 9:00 PM correcto (el
+  contenedor de prod ya corre `TZ=America/Monterrey`). Los calendarios SIEMPRE muestran
+  en la zona del dispositivo — no se puede "forzar" que siempre diga 9 PM. Mejora
+  opcional de baja prioridad: usar `TZID=America/Monterrey` (no cambia lo que se ve
+  en un device en otra zona, sólo hace la intención explícita y ayuda con DST).
+- ❌ **[SUPERADO — ver "segunda tanda" arriba] Botón "Google Calendar" vía
+  `intent://` con `ACTION_INSERT`** (commit `c2d32cc`): este enfoque resultó
+  imposible en Chrome (requisito de `BROWSABLE`) y fue reemplazado por el intent
+  `VIEW` + `package`. Se conserva la nota por el contexto que sigue siendo válido:
+  nuevo `androidCalendarIntentUrl` en `src/lib/calendar.ts` + componente
+  cliente `src/components/GoogleCalendarButton.tsx` que detecta Android (por
+  userAgent, tras montar, sin mismatch de hidratación) y cambia el href al `intent://`
+  (`ACTION_INSERT` de evento, con `browser_fallback_url` al link web). En iPhone/desktop
+  sigue el link web `TEMPLATE` de siempre. **Contexto:** el link web de Google
+  (`calendar.google.com/render?action=TEMPLATE`) abre el navegador aunque tengas la
+  app instalada —es diseño de Google, no bug—; el `intent://` es la vía para abrir la
+  app nativa en Android. **Gotcha ya corregido:** el `intent://` debe navegar en la
+  MISMA pestaña (Chrome bloquea el launch de apps desde `target="_blank"` → caía al
+  fallback web). **Salvedad:** `intent://` depende del navegador (Chrome/Samsung sí,
+  Opera flojo, Firefox parcial); el fallback web es el piso confiable que siempre
+  funciona. Última prueba del usuario quedó en: tras el fix de la pestaña, revalidar
+  en Chrome/Opera si ya abre la app.
+- ⚠️ **Previews: `next dev` NO sobrevive al túnel — usar build de producción.** Se
+  levantó el preview con `node .next/standalone/server.js` (output `standalone`) en
+  el puerto 3105 contra la BD de prod (IP `172.16.1.7`) + `cloudflared`. Recordar
+  copiar `.next/static` y `public` dentro de `.next/standalone/` tras cada build.
 
 **Resuelto (2026-07-24):**
 - ✅ **OTP no falla en silencio si el WhatsApp rebota** (commit `b494dbd`, `main`

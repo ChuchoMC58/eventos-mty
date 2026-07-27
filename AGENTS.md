@@ -3,6 +3,22 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
+# Tests: `npm test` NO toca la BD; los que borran van aparte
+
+(Vigente desde 2026-07-27.)
+
+- **`npm test`** → 45 tests puros, sin Postgres. Seguro de correr en cualquier
+  momento, incluso con un preview o el dev server arriba.
+- **`npm run test:borra-bd`** → los 5 archivos `*.db.test.ts`. **RESETEAN la BD**,
+  pero contra `eventos_mty_test` (el setup `tests/setup-bd.ts` le pega el sufijo
+  `_test` a `DATABASE_URL`), nunca contra la de desarrollo.
+- **`npm run test:todo`** → los dos; correr antes de pushear.
+- `resetDb()` aborta si `DATABASE_URL` no termina en `_test`. Un test nuevo que
+  toque la BD **debe** llamarse `*.db.test.ts`.
+
+Contexto: antes un solo `npm test` reseteaba la BD de desarrollo y así se
+perdieron los datos locales el 2026-07-27. Detalles en `HANDOFF.md`.
+
 # Flujo de trabajo — todo en `main` local; push SOLO con OK explícito
 
 (Vigente desde 2026-07-23; sustituye al flujo anterior de branch + PR.)

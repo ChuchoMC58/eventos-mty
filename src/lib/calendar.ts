@@ -22,6 +22,32 @@ export function googleCalendarUrl(ev: CalendarEvent): string {
   return `https://calendar.google.com/calendar/render?${p.toString()}`;
 }
 
+// URL `intent://` de Android: hace que el MISMO link web de Google Calendar lo
+// abra la APP nativa (`package=com.google.android.calendar`) en vez del navegador,
+// con el evento prellenado y listo para guardar.
+//
+// Por qué así y no con `ACTION_INSERT` (el camino "obvio", ya descartado en device):
+// Chrome solo lanza actividades que declaran `android.intent.category.BROWSABLE`
+// (https://developer.chrome.com/docs/android/intents), y la pantalla de "nuevo
+// evento" de Google Calendar no la declara — el intent nunca resolvía y SIEMPRE
+// caía al fallback web. El deep link `VIEW` sí resuelve porque la app maneja las
+// URLs de `calendar.google.com`.
+//
+// `browser_fallback_url` cubre el Android sin la app instalada (o el navegador que
+// no soporte `intent://`): en vez de una página de error, el formulario web.
+// Solo tiene sentido en Android; en iOS/desktop se usa `googleCalendarUrl`.
+export function androidCalendarIntentUrl(ev: CalendarEvent): string {
+  const web = googleCalendarUrl(ev);
+  const extras = [
+    "scheme=https",
+    "package=com.google.android.calendar",
+    "action=android.intent.action.VIEW",
+    `S.browser_fallback_url=${encodeURIComponent(web)}`,
+    "end",
+  ];
+  return `intent://${web.replace(/^https:\/\//, "")}#Intent;${extras.join(";")}`;
+}
+
 export function buildIcs(ev: CalendarEvent): string {
   const esc = (s: string) =>
     s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");

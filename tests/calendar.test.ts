@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { googleCalendarUrl, buildIcs } from "@/lib/calendar";
+import { googleCalendarUrl, androidCalendarIntentUrl, buildIcs } from "@/lib/calendar";
 
 const ev = {
   title: "Rayados vs Tigres",
@@ -15,6 +15,20 @@ describe("googleCalendarUrl", () => {
     expect(url).toContain("action=TEMPLATE");
     expect(url).toContain(encodeURIComponent("Rayados vs Tigres").replace(/%20/g, "+"));
     expect(url).toContain("20260822T190000Z%2F20260822T210000Z"); // fin = inicio + 2h por defecto
+  });
+});
+
+describe("androidCalendarIntentUrl", () => {
+  it("manda el link web de Google a la app nativa, con fallback al navegador", () => {
+    const url = androidCalendarIntentUrl(ev);
+    // El intent envuelve el MISMO link web (sin el "https://", que va en scheme=).
+    expect(url).toMatch(/^intent:\/\/calendar\.google\.com\/calendar\/render\?/);
+    expect(url).not.toContain("intent://https://");
+    expect(url).toContain("#Intent;scheme=https;package=com.google.android.calendar");
+    expect(url).toContain("action=android.intent.action.VIEW");
+    expect(url.endsWith(";end")).toBe(true);
+    // Sin la app instalada, Chrome abre el formulario web en vez de dar error.
+    expect(url).toContain(`S.browser_fallback_url=${encodeURIComponent(googleCalendarUrl(ev))}`);
   });
 });
 
