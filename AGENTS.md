@@ -7,7 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 (Vigente desde 2026-07-27.)
 
-- **`npm test`** → 45 tests puros, sin Postgres. Seguro de correr en cualquier
+- **`npm test`** → 49 tests puros, sin Postgres. Seguro de correr en cualquier
   momento, incluso con un preview o el dev server arriba.
 - **`npm run test:borra-bd`** → los 5 archivos `*.db.test.ts`. **RESETEAN la BD**,
   pero contra `eventos_mty_test` (el setup `tests/setup-bd.ts` le pega el sufijo

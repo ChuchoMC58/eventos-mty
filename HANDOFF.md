@@ -1,7 +1,7 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-27 (segunda tanda: calendario Android, diálogo Sí/No, tests separados).
+> Última actualización: 2026-07-28 (dominio `sslip.io` RETIRADO — `vibramx.fun` es el único; descubierto que el webhook del Sandbox de Twilio nunca apuntó a la app).
 
 ## Qué es
 
@@ -12,7 +12,7 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **61 tests pasan** (`npm run test:todo` = 45 puros + 16 de integración),
+- **70 tests pasan** (`npm run test:todo` = 49 puros + 21 de integración),
   **lint limpio** (`npm run lint`) y **build de producción limpio** (`npm run build`).
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
@@ -20,7 +20,7 @@ completos si están presentes.
   - `fase 2` cartelera web (explorar, detalle, calendario)
   - `fase 3` usuarios, digest y recordatorios por WhatsApp
   - `fase 4` despliegue en Coolify (VPS Hostinger). **App en vivo:**
-    https://m58mjf955rtyr48celfqjg2a.187.127.254.144.sslip.io
+    https://vibramx.fun (+ `www.`). El `*.sslip.io` se retiró el 2026-07-28.
 - **Despliegue:** Coolify en el propio VPS. Postgres gestionado por Coolify
   (separado de la BD dev local). Auto-deploy activo: `git push` a `main` →
   webhook de GitHub → Coolify reconstruye y redespliega. HTTPS (Let's Encrypt).
@@ -72,8 +72,8 @@ cd ~/eventos-mty
 npm install                 # si node_modules no está
 npx prisma migrate deploy   # aplicar migraciones a la BD
 npx prisma db seed          # 6 eventos de ejemplo
-npm test                    # 45 tests puros, SIN BD — seguro con el dev server arriba
-npm run test:borra-bd       # 16 tests de integración; RESETEA la BD eventos_mty_test
+npm test                    # 49 tests puros, SIN BD — seguro con el dev server arriba
+npm run test:borra-bd       # 21 tests de integración; RESETEA la BD eventos_mty_test
 npm run test:todo           # los dos (correr antes de pushear)
 npm run dev                 # http://localhost:3000
 npm run build               # build de producción
@@ -85,9 +85,9 @@ Antes había un solo `npm test` que **borraba la BD de desarrollo** en cada corr
 (los tests de integración llaman `resetDb()`, que necesita la base vacía para poder
 afirmar conteos). Ese día se perdieron así los eventos locales. Ahora:
 
-- **`npm test`** → solo los archivos `tests/*.test.ts` que NO tocan Postgres (45).
+- **`npm test`** → solo los archivos `tests/*.test.ts` que NO tocan Postgres (49).
   No borra nada; se puede correr con un preview o el dev server arriba.
-- **`npm run test:borra-bd`** → solo `tests/*.db.test.ts` (16), con
+- **`npm run test:borra-bd`** → solo `tests/*.db.test.ts` (21), con
   `vitest.bd.config.ts`. Su setup (`tests/setup-bd.ts`) reescribe `DATABASE_URL`
   agregándole el sufijo `_test` **antes** de que Prisma se instancie, así que
   siempre acaba en `eventos_mty_test` aunque el `.env` apunte a `eventos_mty`.
@@ -192,20 +192,165 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
 - **Expansión nacional (futuro):** el conector de Ticketmaster está fijo a
   `city=Monterrey`. Para abrir otras ciudades habrá que parametrizarlo por ciudad y
   añadir `ciudad`/región a la navegación.
-- **Dominio real** (opcional): hoy usa un dominio auto `*.sslip.io`. Para links de
-  WhatsApp conviene un dominio propio apuntando a la IP del VPS.
+- **Dominio real: COMPRADO `vibramx.fun`** (2026-07-28, en Hostinger; expira
+  2027-07-28). DNS ya propagado y verificado en Google/Cloudflare/Quad9:
+  `vibramx.fun` y `www.vibramx.fun` → `187.127.254.144` (IP pública del VPS,
+  confirmada con `api.ipify.org`, no deducida del `sslip.io`). Registros en hPanel:
+  `A @ → 187.127.254.144` (TTL 60) y `CNAME www → vibramx.fun`; se borró el A de
+  parking (`2.57.91.91`). El nombre se eligió **sin "MTY" a propósito**, por la
+  expansión nacional de arriba. Display name previsto para Meta: `Vibra MX`.
+  **YA EN PRODUCCIÓN (2026-07-28):** se agregaron `https://vibramx.fun` y
+  `https://www.vibramx.fun` a los dominios de la app en Coolify (vía API, campo
+  `domains`, conservando el `sslip.io`), se cambió la env var `BASE_URL` a
+  `https://vibramx.fun` (env uuid `nm9y0c9o32ttfo7k8lioosio`) y se redesplegó
+  (deployment `p10qnjlijjlczn82b7vho6gk`, `finished`). Verificado desde fuera:
+  los tres dominios responden 200 con TLS válido y `http://vibramx.fun` redirige
+  302 a HTTPS. El certificado de Let's Encrypt salió solo.
+- ~~QUITAR EL DOMINIO `*.sslip.io`~~ ✅ **HECHO (2026-07-28).** `vibramx.fun` y
+  `www.vibramx.fun` son ahora los únicos dominios de la app. Se hizo con
+  `PATCH /api/v1/applications/{uuid}` (campo `domains`) + redeploy
+  (`zy1w2z295rcvrspghgaxbjkj`, `finished`). Verificado: los dos dominios nuevos dan
+  200, `http://vibramx.fun` redirige 302 a HTTPS, el HTML ya no contiene la cadena
+  `sslip.io`, y el dominio viejo responde **503** (Traefik ya no tiene ruta).
+  **Las tres condiciones previas resultaron ser dos falsas alarmas y una real:**
+  1. ✅ El certificado de Let's Encrypt de `vibramx.fun` funciona (era la real).
+  2. ⚠️ "El webhook de Twilio apunta al `sslip.io`" era **falso** — nunca apuntó a
+     la app en absoluto (ver el bug de "baja" abajo). No había nada que romper.
+  3. ⚠️ "Esperar a que `BASE_URL` salga en un digest" era **vacío** — en prod hay un
+     solo usuario (el número del admin) y su `digestDay` es `NULL`, así que no se
+     está enviando ningún digest a nadie.
+- **Nota menor:** el juego de env vars con `is_preview: true` todavía tiene el
+  `BASE_URL` viejo (`…sslip.io`, env uuid `tkhlszrej87jpwdh6c1yyrg5`). No afecta a
+  producción (sólo aplicaría a deploys de preview, que no se usan), pero conviene
+  limpiarlo para que nadie lo lea como el valor bueno.
 
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
-- **BUG: `reminderSentAt` se marca aunque el WhatsApp rebote** (`src/lib/reminders/run.ts`):
-  `client.messages.create()` de Twilio devuelve `queued` sin lanzar excepción, y el
-  rebote real (p.ej. 63016 fuera de ventana) ocurre después, async. Como el código
-  hace `reminderSentAt = now()` justo tras el `create`, un recordatorio que rebotó
-  queda marcado como enviado y **nunca se reintenta** → el usuario lo pierde en
-  silencio. Aplica también en prod ante cualquier rebote transitorio. Atacar junto
-  con la integración de Meta (idealmente: sólo marcar como enviado tras confirmar
-  entrega, o reintentar si el status final no es delivered).
+- (El bug de `reminderSentAt` ya se arregló — ver "Resuelto (2026-07-27, tercera tanda)".)
+- **⚠️ PENDIENTE (1 de 2): apuntar el webhook del Sandbox a la app.** El código de
+  "baja" ya está arreglado (ver "Resuelto (2026-07-28)"), pero **el Sandbox de Twilio
+  sigue apuntando a la función demo de Twilio**, así que el handler todavía no se
+  ejecuta en producción. Falta poner `callback_url` =
+  `https://vibramx.fun/api/whatsapp/webhook` (método POST) en el sender
+  `XEfa539e8303cb08c337a9bfbdab02ab0b`. Dos vías: `POST` a
+  `https://messaging.twilio.com/v2/Channels/Senders/{sid}` (no probado — Twilio
+  puede bloquear la escritura sobre el sender compartido del Sandbox), o a mano en
+  la consola: Messaging → Try it out → Send a WhatsApp message → *Sandbox settings*
+  → "WHEN A MESSAGE COMES IN".
+  **Orden a propósito:** primero el fix del código, después el webhook. Apuntarlo
+  antes habría cambiado "te contesta el demo de Twilio" por "nuestra app te confirma
+  una baja que no ocurrió", que es peor.
+  **Efecto secundario al cambiarlo:** *todos* los entrantes del sandbox llegarán a
+  la app, y el handler responde `<Response/>` vacío a lo que no sea "baja" → mandar
+  `hola` para reabrir la ventana de 24 h dejará de tener respuesta visible (la
+  ventana sí se reabre; eso lo maneja Meta, no el webhook).
+  - Pendiente de decidir: si "baja" debe apagar también los recordatorios de
+    eventos guardados (`SavedEvent.reminder`), no sólo el digest. Hoy sólo pone
+    `digestDay = null`, así que quien escriba "baja" esperando "ya no me manden
+    nada" seguirá recibiendo recordatorios. Para el opt-out que Meta exige en
+    plantillas MARKETING probablemente no alcanza.
+  - El match es exacto (`body === "baja"`, ya en minúsculas y sin espacios): no
+    entra `darme de baja` ni `baja.`.
+  - **Cómo se descubrió (2026-07-28):**
+    `GET https://messaging.twilio.com/v2/Channels/Senders?Channel=whatsapp` (auth
+    básica con el Account SID + Auth Token) → el `webhook.callback_url` del sender
+    `whatsapp:+14155238886` era `https://timberwolf-mastiff-9776.twil.io/demo-reply`,
+    la función demo por defecto de Twilio. Ese mismo GET sirve para verificar que el
+    cambio quedó.
+  - La palabra clave no se anuncia en ningún lado de la app. En `/perfil` la opción
+    dice `No enviarme el resumen (baja)` (`src/components/PerfilForm.tsx:99`) — ese
+    "(baja)" no explica nada y confunde. Cambiarla a `No enviarme el resumen` + un
+    texto de ayuda que enseñe la palabra clave.
+- **Reintento real de recordatorios — DESPUÉS de las plantillas (decidido 2026-07-28).**
+  Hoy el cron corre 1 vez al día y la consulta filtra eventos de *mañana*, así que un
+  rebote no se reintenta nunca (a la siguiente pasada el evento ya es hoy y sale de la
+  ventana). El plan es **cron cada hora + ventana "próximas 12–36 h"**, pero **no antes
+  de tener plantillas de Meta**: contra un 63015/63016 el reintento sólo repite el mismo
+  rechazo estructural, gastando mensajes para el mismo silencio. Al hacerlo, dos cosas
+  que no son obvias:
+  - **La copia se rompe:** el mensaje dice "Mañana es X" y con ventana de 12–36 h un
+    evento puede caer **hoy en la noche**. Calcular el texto contra la fecha real.
+  - **Hace falta tope de reintentos** (columna `reminderAttempts`, cortar a los 3–4).
+    Sin tope, un número que rechaza siempre se reintentaría ~36 veces por evento: quema
+    dinero y **baja la calificación de calidad del sender**, que es justo lo que Meta usa
+    para limitar o pausar las plantillas. Se dejó fuera del fix de 2026-07-27 a propósito,
+    porque sin reintento real no servía de nada.
+
+**Resuelto (2026-07-28):**
+- ✅ **"baja" por WhatsApp: arreglada la normalización del `+521` y las confirmaciones
+  falsas** (`src/lib/auth/phone.ts`, `src/app/api/whatsapp/webhook/route.ts`).
+  `mxNationalDigits` ahora quita el prefijo `521` de 13 dígitos — es la **raíz**, y
+  como es el helper compartido, el mismo número entra igual por el login que por
+  WhatsApp. El webhook normaliza el `From` y **solo** confirma si `updateMany` tocó
+  una fila; si no empata (o el `From` no es un móvil MX) responde diciéndolo y lo
+  loguea, en vez de mentir. Tests: 5 nuevos en `tests/phone.test.ts` y
+  `tests/whatsapp-webhook.db.test.ts` con los 5 caminos del handler. **Se verificó
+  que los 2 tests clave fallan si se quita la normalización** (no son tests que
+  pasarían de todos modos), y end-to-end por HTTP contra el build de producción
+  (`digestDay` 1 → NULL mandando el `From` con `+521`). **80 tests** (54 puros + 26
+  de BD), lint y build limpios.
+  ⚠️ **Esto NO surte efecto en prod hasta apuntar el webhook del Sandbox** — ver el
+  pendiente de arriba.
+- ✅ **`*.sslip.io` retirado; `vibramx.fun` es el único dominio** — ver el detalle en
+  la sección de pendientes de FASE 4 (arriba). Cambio sólo de infraestructura
+  (Coolify), sin tocar código.
+- ✅ **Cookie de sesión con `secure` en producción** (`src/lib/auth/session.ts`). La
+  cookie `session` ya era `httpOnly` + `sameSite: lax` + firmada con HMAC, pero le
+  faltaba `secure`, así que nada impedía que viajara en claro si algo llegaba por
+  `http://`. Se activa **solo con `NODE_ENV === "production"`**: en dev los previews
+  por IP del VPS / `sslip.io` son http y con `secure` el browser descartaría la
+  cookie (no se podría ni entrar). Verificado en un build de producción: el
+  `Set-Cookie` de `/api/auth/verify` responde `Secure; HttpOnly; SameSite=lax`.
+  Nota: sigue sin haber revocación — la cookie es un HMAC del `userId`, no un token
+  en BD, así que "cerrar sesión" solo la borra del browser y la única invalidación
+  global es rotar `SESSION_SECRET`.
+- ✅ **Quitado el "(baja)" del selector de resumen** (`src/components/PerfilForm.tsx`):
+  la opción ahora dice solo "No enviarme el resumen". El "baja" era jerga del webhook
+  de WhatsApp (`body === "baja"`), no algo que el usuario tenga que ver en el perfil.
+
+**Resuelto (2026-07-27, tercera tanda):**
+- ✅ **`reminderSentAt` ya no se marca cuando el WhatsApp rebota**
+  (`src/lib/reminders/run.ts` + `src/lib/whatsapp.ts`). El bug: `messages.create()`
+  de Twilio devuelve `queued` **sin lanzar excepción** y el rebote real (63016 fuera
+  de la ventana de 24 h, 63015 número no unido) llega segundos después de forma
+  asíncrona; como el código marcaba `reminderSentAt = now()` justo tras el `create`,
+  un recordatorio rebotado quedaba como enviado y **nunca se reintentaba**.
+  Ahora: `sendWhatsApp` **devuelve** el mensaje (`sid`/`status`/`errorCode`),
+  `MessageSender` gana un `fetch(sid)` opcional, y `confirmarEntrega()` releé el
+  estado con esperas crecientes (2/3/5/8/12 s, ~30 s tope) hasta un estado terminal.
+  - `failed`/`undelivered`/`canceled` → **no** se marca `reminderSentAt`; se guardan
+    `reminderStatus`/`reminderError` y sigue elegible para el próximo run.
+  - `delivered`/`read` → se marca, con `reminderSid`/`reminderStatus`.
+  - Sigue provisional a los ~30 s (`queued`/`sending`/`sent`) → se marca igual
+    (`indecisos`), porque duplicar un recordatorio es peor que perderlo. **`sent` NO
+    cuenta como entregado**: sólo dice que Twilio se lo pasó a Meta y todavía puede
+    caer en `undelivered`.
+  - Migración `20260727203745_recordatorio_estado_entrega`: `SavedEvent` gana
+    `reminderSid`, `reminderStatus`, `reminderError` (aditiva, no toca datos).
+- ✅ **Un destinatario que truena ya no tumba el lote** (recordatorios *y* digest):
+  antes una excepción en cualquier envío abortaba el `for` y los usuarios restantes
+  se quedaban sin nada. Ahora es `try/catch` por destinatario, con el error guardado
+  en `reminderError` y logueado.
+- ✅ **Los jobs ya no se tragan los fallos:** `runReminders` devuelve
+  `{ enviados, fallidos, indecisos }` (antes un `number`) y `runDigest` suma
+  `failed`. `scripts/reminders.ts` y `scripts/digest.ts` lo imprimen y **salen con
+  código 1 si hubo fallos**, para que la Scheduled Task de Coolify marque la corrida
+  como fallida en vez de reportar éxito.
+- ✅ **Verificado end-to-end contra Twilio real (2026-07-27)**, corriendo
+  `npm run reminders` contra la BD desechable `eventos_mty_test`:
+  - Camino feliz: mensaje entregado al WhatsApp del admin → `reminderStatus=delivered`,
+    `reminderSid=SMfa7c21…`, `reminderSentAt` marcado, exit 0.
+  - Camino del bug: mismo número **sin el `1`** (`+529223736016`, el formato que la
+    app guarda hoy) → Twilio aceptó el `create` y rebotó async con **63015**. El job
+    imprimió `0 enviados, 1 fallidos`, dejó `reminderSentAt` en **null**, guardó
+    `reminderStatus=failed` / `reminderError=63015…` y **salió con código 1**. Antes
+    ese mismo caso reportaba "1 enviado" y se perdía en silencio.
+- **Nota:** esto detecta y no miente, pero **no arregla la causa** de los rebotes —
+  la ventana de 24 h del Sandbox sigue ahí. Con el cron diario a las 10:00 y la
+  ventana de consulta fija en "mañana", un rebote hoy no se reintenta mañana (el
+  evento ya sería hoy). El reintento real llega con las plantillas de Meta.
+- **70 tests** (49 puros + 21 de BD), lint y build limpios.
 
 **Resuelto (2026-07-27, segunda tanda):**
 - ✅ **"Google Calendar" abre la APP en Android — vía `VIEW` + `package`, no

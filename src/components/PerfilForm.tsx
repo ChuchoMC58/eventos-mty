@@ -96,7 +96,7 @@ export default function PerfilForm({ next }: { next: string }) {
               Cada {d.toLowerCase()}
             </option>
           ))}
-          <option value="sin">No enviarme el resumen (baja)</option>
+          <option value="sin">No enviarme el resumen</option>
         </select>
       </label>
 

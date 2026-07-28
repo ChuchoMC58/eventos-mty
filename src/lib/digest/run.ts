@@ -6,7 +6,7 @@ import { sendWhatsApp, MessageSender } from "@/lib/whatsapp";
 export async function runDigest(
   now: Date = new Date(),
   sender?: MessageSender,
-): Promise<{ sent: number; skipped: number }> {
+): Promise<{ sent: number; skipped: number; failed: number }> {
   const users = await prisma.user.findMany({ where: { digestDay: now.getDay() } });
   const horizon = new Date(now);
   horizon.setDate(horizon.getDate() + 10);
@@ -18,6 +18,7 @@ export async function runDigest(
 
   let sent = 0;
   let skipped = 0;
+  let failed = 0;
   for (const user of users) {
     const matched = events.filter((e) => eventMatchesInterests(e, user));
     const msg = buildDigestMessage(
@@ -28,8 +29,14 @@ export async function runDigest(
       skipped++; // silencio > relleno
       continue;
     }
-    await sendWhatsApp(user.phone, msg, sender);
-    sent++;
+    try {
+      await sendWhatsApp(user.phone, msg, sender);
+      sent++;
+    } catch (e) {
+      // Un destinatario que truena no debe tumbar el digest de los demás.
+      failed++;
+      console.error(`Digest falló (${user.phone}): ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
-  return { sent, skipped };
+  return { sent, skipped, failed };
 }

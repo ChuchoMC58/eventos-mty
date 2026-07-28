@@ -4,10 +4,11 @@ import { resetDb } from "./helpers/db";
 import { runDigest } from "@/lib/digest/run";
 import { MessageSender } from "@/lib/whatsapp";
 
-function recorder() {
+function recorder(fallaSi?: (to: string) => boolean) {
   const sent: Array<{ to: string; body: string }> = [];
   const sender: MessageSender = {
     create: async (o) => {
+      if (fallaSi?.(o.to)) throw new Error("Twilio: 21211 número inválido");
       sent.push(o);
       return {};
     },
@@ -50,9 +51,23 @@ describe("runDigest", () => {
     });
     const { sent, sender } = recorder();
     const r = await runDigest(now, sender);
-    expect(r).toEqual({ sent: 1, skipped: 1 });
+    expect(r).toEqual({ sent: 1, skipped: 1, failed: 0 });
     expect(sent).toHaveLength(1);
     expect(sent[0].to).toBe("whatsapp:+5281000001");
     expect(sent[0].body).toContain("Concierto dentro del rango");
+  });
+
+  it("un destinatario que truena no tumba el digest del resto", async () => {
+    await prisma.user.create({
+      data: { phone: "+5281000001", categories: ["musica"], tags: [], digestDay: 4 },
+    });
+    await prisma.user.create({
+      data: { phone: "+5281000002", categories: ["musica"], tags: [], digestDay: 4 },
+    });
+    const { sent, sender } = recorder((to) => to.includes("0001"));
+
+    expect(await runDigest(now, sender)).toEqual({ sent: 1, skipped: 0, failed: 1 });
+    expect(sent).toHaveLength(1);
+    expect(sent[0].to).toBe("whatsapp:+5281000002");
   });
 });

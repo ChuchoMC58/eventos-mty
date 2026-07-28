@@ -85,7 +85,13 @@ model SavedEvent {
   userId         String
   eventId        String
   reminder       Boolean   @default(false)
+  // reminderSentAt = el proveedor NO rechazó el mensaje. Se pone solo tras
+  // confirmar el estado final (ver src/lib/reminders/run.ts); un rebote lo deja
+  // en null para que el recordatorio siga siendo elegible.
   reminderSentAt DateTime?
+  reminderSid    String?
+  reminderStatus String?
+  reminderError  String?
   savedAt        DateTime  @default(now())
   user           User      @relation(fields: [userId], references: [id])
   event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)

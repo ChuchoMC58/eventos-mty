@@ -8,6 +8,10 @@ const sign = (v: string) =>
 export async function createSession(userId: string): Promise<void> {
   (await cookies()).set("session", `${userId}.${sign(userId)}`, {
     httpOnly: true,
+    // En producción (siempre HTTPS) la cookie no debe viajar nunca en claro. En
+    // dev queda apagada porque los previews por IP del VPS / sslip.io son http:
+    // con `secure` el browser descartaría la cookie y no se podría ni entrar.
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
