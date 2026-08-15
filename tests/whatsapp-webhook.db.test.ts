@@ -30,8 +30,8 @@ describe("webhook de WhatsApp — 'baja'", () => {
     const { xml } = await mandar("baja", ENTRANTE);
 
     const user = await prisma.user.findUnique({ where: { phone: GUARDADO } });
-    expect(user!.digestDay).toBeNull();
-    expect(xml).toContain("ya no recibirás el resumen semanal");
+    expect(user!.optOutAt).not.toBeNull();
+    expect(xml).toContain("ni resumen semanal ni recordatorios");
   });
 
   it("NO confirma si no empató con ningún usuario", async () => {
@@ -39,7 +39,7 @@ describe("webhook de WhatsApp — 'baja'", () => {
     // tranquilo creyendo que se había dado de baja.
     const { xml } = await mandar("baja", ENTRANTE);
 
-    expect(xml).not.toContain("ya no recibirás el resumen semanal");
+    expect(xml).not.toContain("ni resumen semanal ni recordatorios");
     expect(xml).toContain("No encontramos una cuenta");
   });
 
@@ -48,8 +48,8 @@ describe("webhook de WhatsApp — 'baja'", () => {
     const { xml } = await mandar("baja", `whatsapp:${GUARDADO}`);
 
     const user = await prisma.user.findUnique({ where: { phone: GUARDADO } });
-    expect(user!.digestDay).toBeNull();
-    expect(xml).toContain("ya no recibirás el resumen semanal");
+    expect(user!.optOutAt).not.toBeNull();
+    expect(xml).toContain("ni resumen semanal ni recordatorios");
   });
 
   it("ignora cualquier otro mensaje sin tocar al usuario", async () => {
@@ -57,8 +57,21 @@ describe("webhook de WhatsApp — 'baja'", () => {
     const { xml } = await mandar("hola", ENTRANTE);
 
     const user = await prisma.user.findUnique({ where: { phone: GUARDADO } });
+    expect(user!.optOutAt).toBeNull();
     expect(user!.digestDay).toBe(1);
     expect(xml).not.toContain("<Message>");
+  });
+
+  // La plantilla del digest pide "Responde BAJA" y la gente contesta como
+  // habla. El detalle de qué frases entran vive en `tests/baja.test.ts`; aquí
+  // sólo se comprueba que el webhook use ese criterio y no una igualdad exacta.
+  it("da de baja con una variante, no sólo con la palabra exacta", async () => {
+    await crearUsuario(1);
+    const { xml } = await mandar("BAJA por favor", ENTRANTE);
+
+    const user = await prisma.user.findUnique({ where: { phone: GUARDADO } });
+    expect(user!.optOutAt).not.toBeNull();
+    expect(xml).toContain("ni resumen semanal ni recordatorios");
   });
 
   it("responde 200 a un From basura, sin reventar", async () => {
@@ -66,5 +79,30 @@ describe("webhook de WhatsApp — 'baja'", () => {
 
     expect(status).toBe(200);
     expect(xml).toContain("No pudimos identificar tu número");
+  });
+
+  // La preferencia del resumen se conserva: darse de baja no debe borrar el día
+  // elegido, para que reactivar desde el perfil lo devuelva como estaba.
+  it("no pisa el digestDay al dar de baja", async () => {
+    await crearUsuario(3);
+    await mandar("baja", ENTRANTE);
+
+    const user = await prisma.user.findUnique({ where: { phone: GUARDADO } });
+    expect(user!.digestDay).toBe(3);
+  });
+
+  // Repetir "baja" es lo más natural del mundo si el usuario no confía; no debe
+  // mandarlo a buscar una cuenta que sí existe.
+  it("confirma de nuevo si ya estaba dado de baja, sin mover la fecha", async () => {
+    await crearUsuario(1);
+    await mandar("baja", ENTRANTE);
+    const primera = (await prisma.user.findUnique({ where: { phone: GUARDADO } }))!.optOutAt;
+
+    const { xml } = await mandar("baja", ENTRANTE);
+
+    expect(xml).toContain("Ya estabas dado de baja");
+    expect(xml).not.toContain("No encontramos una cuenta");
+    const segunda = (await prisma.user.findUnique({ where: { phone: GUARDADO } }))!.optOutAt;
+    expect(segunda).toEqual(primera);
   });
 });

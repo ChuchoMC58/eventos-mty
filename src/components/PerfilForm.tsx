@@ -15,6 +15,7 @@ export default function PerfilForm({ next }: { next: string }) {
   const [tags, setTags] = useState("");
   const [digestDay, setDigestDay] = useState<string>("4"); // jueves por defecto
   const [reminderPref, setReminderPref] = useState("ask");
+  const [optOut, setOptOut] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
@@ -26,10 +27,24 @@ export default function PerfilForm({ next }: { next: string }) {
         setTags(u.tags.join(", "));
         setDigestDay(u.digestDay === null ? "sin" : String(u.digestDay));
         setReminderPref(u.reminderPref);
+        setOptOut(u.optOut);
       }
       setCargando(false);
     });
   }, []);
+
+  // Reactivar se guarda solo, sin esperar al botón: quien viene a deshacer una
+  // baja quiere ver el efecto ya, no descubrir que faltaba guardar.
+  async function reactivar() {
+    setGuardando(true);
+    await fetch("/api/me", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optOut: false }),
+    });
+    setOptOut(false);
+    setGuardando(false);
+  }
 
   async function guardar() {
     setGuardando(true);
@@ -51,6 +66,23 @@ export default function PerfilForm({ next }: { next: string }) {
 
   return (
     <div className="space-y-4">
+      {optOut && (
+        <div className="rounded-md border border-linea bg-ink-2 p-3">
+          <p className="font-semibold">Estás dado de baja de WhatsApp</p>
+          <p className="mt-1 text-sm text-humo">
+            No te mandamos ni el resumen semanal ni los recordatorios. Tus gustos siguen
+            guardados, así que puedes seguir usando la app.
+          </p>
+          <button
+            onClick={reactivar}
+            disabled={guardando}
+            className="mt-2 rounded-md border border-linea px-3 py-1.5 text-sm font-semibold transition-colors hover:border-musica disabled:opacity-60"
+          >
+            {guardando ? "Reactivando…" : "Volver a recibir mensajes"}
+          </button>
+        </div>
+      )}
+
       <fieldset>
         <legend className="mb-1 font-semibold">Categorías que te interesan</legend>
         {CATEGORIAS.map((c) => (
@@ -112,6 +144,17 @@ export default function PerfilForm({ next }: { next: string }) {
           <option value="never">Nunca recordarme</option>
         </select>
       </label>
+
+      {/* La baja existía desde antes pero no se anunciaba en ningún lado: un
+          opt-out que nadie sabe que existe no cuenta como opt-out, y Meta lo
+          exige para las plantillas de marketing. */}
+      {!optOut && (
+        <p className="text-sm text-humo">
+          ¿Ya no quieres nada por WhatsApp? Responde{" "}
+          <strong className="text-hueso">BAJA</strong> a cualquiera de nuestros mensajes y
+          dejamos de escribirte — resumen y recordatorios.
+        </p>
+      )}
 
       <button onClick={guardar} disabled={guardando} className="w-full rounded-md bg-musica p-2.5 font-extrabold text-ink transition-[filter] hover:brightness-110 disabled:opacity-60">
         {guardando ? "Guardando…" : "Guardar"}

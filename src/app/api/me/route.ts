@@ -14,6 +14,7 @@ export async function GET() {
     tags: u.tags,
     digestDay: u.digestDay,
     reminderPref: u.reminderPref,
+    optOut: u.optOutAt !== null,
   });
 }
 
@@ -22,6 +23,8 @@ const PatchSchema = z.object({
   tags: z.array(z.string().trim().min(1)).max(30).optional(),
   digestDay: z.number().int().min(0).max(6).nullable().optional(),
   reminderPref: z.enum(["always", "ask", "never"]).optional(),
+  /** Baja total de WhatsApp. Se expone como booleano; adentro es una fecha. */
+  optOut: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request) {
@@ -29,6 +32,12 @@ export async function PATCH(req: Request) {
   if (!userId) return Response.json({ error: "No autenticado" }, { status: 401 });
   const parsed = PatchSchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return Response.json({ error: "Datos inválidos" }, { status: 400 });
-  await prisma.user.update({ where: { id: userId }, data: parsed.data });
+  // `optOut` es booleano hacia afuera y fecha adentro; sin esta traducción
+  // Prisma recibiría un boolean en un campo DateTime.
+  const { optOut, ...resto } = parsed.data;
+  await prisma.user.update({
+    where: { id: userId },
+    data: { ...resto, ...(optOut === undefined ? {} : { optOutAt: optOut ? new Date() : null }) },
+  });
   return Response.json({ ok: true });
 }

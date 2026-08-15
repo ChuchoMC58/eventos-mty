@@ -2,11 +2,17 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "@/lib/db";
 import { resetDb } from "./helpers/db";
 import { runReminders } from "@/lib/reminders/run";
+
+/** Variables del envío. Falla claro si el mensaje salió por texto libre en vez de plantilla. */
+function varsDe(m: { contentVariables?: string }): Record<string, string> {
+  if (!m.contentVariables) throw new Error("el envío fue texto libre, no plantilla");
+  return JSON.parse(m.contentVariables);
+}
 import { MessageInfo, MessageSender } from "@/lib/whatsapp";
 
 /** Sender de prueba: `create` registra el envío y `fetch` devuelve el estado final dado. */
 function recorder(final?: MessageInfo, fallaSi?: (to: string) => boolean) {
-  const sent: Array<{ to: string; body: string }> = [];
+  const sent: Array<{ to: string; contentSid?: string; contentVariables?: string; body?: string }> = [];
   const sender: MessageSender = {
     create: async (o) => {
       if (fallaSi?.(o.to)) throw new Error("Twilio: 21211 número inválido");
@@ -49,7 +55,7 @@ describe("runReminders", () => {
         sources: { create: { sourceId: source.id } },
       },
     });
-    const user = await prisma.user.create({ data: { phone: overrides.phone ?? "+5281000001" } });
+    const user = await prisma.user.create({ data: { phone: overrides.phone ?? "+528100000001" } });
     await prisma.savedEvent.create({
       data: { userId: user.id, eventId: event.id, reminder: overrides.reminder ?? true },
     });
@@ -58,6 +64,7 @@ describe("runReminders", () => {
   beforeEach(async () => {
     process.env.WHATSAPP_TEST_MODE = "false";
     process.env.TWILIO_WHATSAPP_FROM = "+14155238886";
+    process.env.TWILIO_CONTENT_SID_RECORDATORIO = "HXrec";
     await resetDb();
   });
 
@@ -65,8 +72,13 @@ describe("runReminders", () => {
     await setup();
     const { sent, sender } = recorder();
     expect((await runReminders(now, sender, YA)).enviados).toBe(1);
-    expect(sent[0].body).toContain("Mañana");
-    expect(sent[0].body).toContain("Concierto");
+    // Por la API sólo viajan las variables (el cuerpo lo aprobó Meta), así que
+    // es ahí donde se afirma. La {{2}} es la que carga el "hoy/mañana": si
+    // alguien vuelve a fijar esa palabra en la plantilla, este test se cae.
+    const vs = varsDe(sent[0]);
+    expect(vs["1"]).toContain("Concierto");
+    expect(vs["2"]).toBe("mañana a las 9:00 pm");
+    expect(vs["3"]).toBeTruthy(); // sede, no la fecha: el orden cambió
     expect((await runReminders(now, sender, YA)).enviados).toBe(0); // ya enviado
   });
 
@@ -128,17 +140,28 @@ describe("runReminders", () => {
     expect((await prisma.savedEvent.findFirstOrThrow()).reminderSentAt).not.toBeNull();
   });
 
+  // El hueco que tenía la baja: apagaba el resumen pero los recordatorios
+  // seguían llegando, aunque el evento guardado tuviera el recordatorio activo.
+  it("no manda recordatorio a quien se dio de baja", async () => {
+    await setup();
+    await prisma.user.updateMany({ data: { optOutAt: new Date() } });
+    const { sent, sender } = recorder({ status: "delivered" });
+
+    expect(await runReminders(now, sender, YA)).toEqual({ enviados: 0, fallidos: 0, indecisos: 0 });
+    expect(sent).toHaveLength(0);
+  });
+
   it("un destinatario que truena no tumba el resto del lote", async () => {
-    await setup({ phone: "+5281000001" });
-    await setup({ phone: "+5281000002" });
+    await setup({ phone: "+528100000001" });
+    await setup({ phone: "+528100000002" });
     const { sent, sender } = recorder({ status: "delivered" }, (to) => to.includes("0001"));
 
     expect(await runReminders(now, sender, YA)).toEqual({ enviados: 1, fallidos: 1, indecisos: 0 });
     expect(sent).toHaveLength(1);
-    expect(sent[0].to).toBe("whatsapp:+5281000002");
+    expect(sent[0].to).toBe("whatsapp:+5218100000002");
 
     const malo = await prisma.savedEvent.findFirstOrThrow({
-      where: { user: { phone: "+5281000001" } },
+      where: { user: { phone: "+528100000001" } },
     });
     expect(malo.reminderSentAt).toBeNull();
     expect(malo.reminderError).toContain("21211");

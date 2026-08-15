@@ -7,14 +7,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 (Vigente desde 2026-07-27.)
 
-- **`npm test`** → 49 tests puros, sin Postgres. Seguro de correr en cualquier
+- **`npm test`** → 59 tests puros, sin Postgres. Seguro de correr en cualquier
   momento, incluso con un preview o el dev server arriba.
-- **`npm run test:borra-bd`** → los 5 archivos `*.db.test.ts`. **RESETEAN la BD**,
+- **`npm run test:borra-bd`** → los 6 archivos `*.db.test.ts`. **RESETEAN la BD**,
   pero contra `eventos_mty_test` (el setup `tests/setup-bd.ts` le pega el sufijo
   `_test` a `DATABASE_URL`), nunca contra la de desarrollo.
 - **`npm run test:todo`** → los dos; correr antes de pushear.
 - `resetDb()` aborta si `DATABASE_URL` no termina en `_test`. Un test nuevo que
   toque la BD **debe** llamarse `*.db.test.ts`.
+- ⚠️ **La BD de tests NO se migra sola.** Después de cada `prisma migrate dev`, los
+  tests de BD truenan con "column does not exist" hasta que le apliques las
+  migraciones también a `eventos_mty_test`:
+  `DATABASE_URL="...eventos_mty_test" npx prisma migrate deploy`
 
 Contexto: antes un solo `npm test` reseteaba la BD de desarrollo y así se
 perdieron los datos locales el 2026-07-27. Detalles en `HANDOFF.md`.

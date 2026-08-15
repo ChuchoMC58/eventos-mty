@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/db";
-import { sendWhatsApp, confirmarEntrega, twilioSender, MessageSender } from "@/lib/whatsapp";
-import { formatFecha } from "@/lib/format";
+import {
+  sendPlantilla,
+  plantillaRecordatorio,
+  confirmarEntrega,
+  twilioSender,
+  MessageSender,
+} from "@/lib/whatsapp";
+import { formatCuando } from "@/lib/format";
 
 export interface ResultadoRecordatorios {
   enviados: number;
@@ -25,6 +31,9 @@ export async function runReminders(
       reminder: true,
       reminderSentAt: null,
       event: { status: "activo", startsAt: { gte: start, lt: end } },
+      // La baja por WhatsApp apaga TODO, no solo el resumen: un evento guardado
+      // con recordatorio activo no la sobreescribe.
+      user: { optOutAt: null },
     },
     include: { event: { include: { venue: true } }, user: true },
   });
@@ -37,11 +46,18 @@ export async function runReminders(
   for (const s of saved) {
     cliente ??= twilioSender();
     const where = { userId_eventId: { userId: s.userId, eventId: s.eventId } };
-    const boletos = s.event.ticketUrl ? ` Boletos: ${s.event.ticketUrl}` : "";
+    // El enlace a boletos ya no va en el texto: las plantillas no admiten
+    // segmentos condicionales, así que el botón apunta SIEMPRE a la página del
+    // evento, que es la que enlaza los boletos cuando los hay.
     try {
-      const msg = await sendWhatsApp(
+      const msg = await sendPlantilla(
         s.user.phone,
-        `Recordatorio 📅 Mañana es "${s.event.title}" en ${s.event.venue.name} (${formatFecha(s.event.startsAt)}).${boletos}`,
+        plantillaRecordatorio(
+          s.event.title,
+          formatCuando(s.event.startsAt, now),
+          s.event.venue.name,
+          s.eventId,
+        ),
         cliente,
       );
       // Un `create()` sin excepción NO significa entregado. Solo se marca como

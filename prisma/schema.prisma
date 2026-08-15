@@ -77,6 +77,11 @@ model User {
   tags         String[] // etiquetas finas (equipos, géneros)
   digestDay    Int? // 0=domingo..6=sábado; null = sin digest
   reminderPref String       @default("ask") // always | ask | never
+  // Opt-out total de WhatsApp: apaga digest Y recordatorios. Separado de
+  // `digestDay` a propósito — apagar el digest es una preferencia, darse de baja
+  // es un derecho, y Meta lo exige para plantillas de marketing. Se guarda la
+  // fecha, no un booleano, para poder demostrar cuándo se respetó.
+  optOutAt     DateTime?
   saved        SavedEvent[]
   createdAt    DateTime     @default(now())
 }

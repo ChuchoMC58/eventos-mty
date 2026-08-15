@@ -24,3 +24,19 @@ export function mxNationalDigits(input: string): string {
   if (digits.length === 13 && digits.startsWith("521")) return digits.slice(3);
   return digits.length === 12 && digits.startsWith("52") ? digits.slice(2) : digits;
 }
+
+// El mismo "1" del comentario de arriba, pero de SALIDA. La BD guarda el formato
+// canónico +52XXXXXXXXXX; WhatsApp NO entrega a ese formato para móviles
+// mexicanos y rechaza el mensaje. Hay que reponer el 1 al mandar.
+//
+// Esto estuvo dormido mientras el modo prueba redirigía todo a ADMIN_WHATSAPP,
+// que ya trae el 1: se despierta justo al apagar el modo prueba, que es cuando
+// más caro sale descubrirlo. Idempotente — `mxNationalDigits` quita el 1 si ya
+// venía, así que aplicarlo dos veces no lo duplica.
+//
+// Un número que no es móvil MX de 10 dígitos se devuelve intacto: no nos toca
+// adivinar el formato de otros países.
+export function mxWhatsAppNumber(phone: string): string {
+  const national = mxNationalDigits(phone);
+  return /^\d{10}$/.test(national) ? `+521${national}` : phone;
+}

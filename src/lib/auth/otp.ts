@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "crypto";
 import { prisma } from "@/lib/db";
-import { sendWhatsApp, MessageSender } from "@/lib/whatsapp";
+import { sendPlantilla, plantillaOtp, MessageSender } from "@/lib/whatsapp";
 
 const hashCode = (code: string) =>
   createHash("sha256").update(code + process.env.SESSION_SECRET).digest("hex");
@@ -10,7 +10,10 @@ export async function requestCode(phone: string, sender?: MessageSender): Promis
   await prisma.otpCode.create({
     data: { phone, code: hashCode(code), expiresAt: new Date(Date.now() + 10 * 60_000) },
   });
-  await sendWhatsApp(phone, `Tu código de acceso a Eventos MTY es ${code}. Expira en 10 minutos.`, sender);
+  // El texto lo fija Meta (plantilla de categoría AUTHENTICATION) y no es
+  // editable: llega con botón de "copiar código" y la nota de seguridad. Los
+  // 10 minutos de `expiresAt` son los mismos que declara la plantilla.
+  await sendPlantilla(phone, plantillaOtp(code), sender);
 }
 
 export async function verifyCode(phone: string, code: string): Promise<boolean> {

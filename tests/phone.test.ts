@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mxNationalDigits, normalizeMxPhone } from "@/lib/auth/phone";
+import { mxNationalDigits, mxWhatsAppNumber, normalizeMxPhone } from "@/lib/auth/phone";
 
 describe("normalizeMxPhone", () => {
   it("10 dígitos pelones", () => expect(normalizeMxPhone("8187654321")).toBe("+528187654321"));
@@ -27,4 +27,17 @@ describe("mxNationalDigits (sanitizador del input de login)", () => {
   it("no recorta números sin lada", () => expect(mxNationalDigits("8187654321")).toBe("8187654321"));
   it("quita el 1 de móvil del formato de WhatsApp", () =>
     expect(mxNationalDigits("+5219223736016")).toBe("9223736016"));
+});
+
+describe("mxWhatsAppNumber (destinatario de salida)", () => {
+  it("repone el 1 sobre el canónico de la BD", () =>
+    expect(mxWhatsAppNumber("+529223736016")).toBe("+5219223736016"));
+  it("es idempotente: no duplica el 1", () =>
+    expect(mxWhatsAppNumber("+5219223736016")).toBe("+5219223736016"));
+  it("va y vuelve del canónico sin perder nada", () =>
+    expect(normalizeMxPhone(mxWhatsAppNumber("+528187654321"))).toBe("+528187654321"));
+  // Lo que NO es un móvil MX de 10 dígitos se devuelve intacto: adivinar el
+  // formato de otros países haría más daño que bien.
+  it("deja en paz un número que no es MX", () =>
+    expect(mxWhatsAppNumber("+14155238886")).toBe("+14155238886"));
 });

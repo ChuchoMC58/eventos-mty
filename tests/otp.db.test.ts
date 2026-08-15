@@ -10,7 +10,7 @@ function captureCode() {
   let code = "";
   const sender: MessageSender = {
     create: async (o) => {
-      code = o.body.match(/\d{6}/)![0];
+      code = JSON.parse(o.contentVariables ?? "{}")["1"] ?? "";
       return {};
     },
   };
@@ -22,8 +22,9 @@ describe("OTP", () => {
     process.env.SESSION_SECRET = "test-secret";
     process.env.ADMIN_WHATSAPP = "+520000000000";
     process.env.TWILIO_WHATSAPP_FROM = "+14155238886";
-    // Sin envoltura de modo prueba, para que captureCode lea el código limpio
-    // (en modo prueba el prefijo "[PRUEBA → +52...]" mete dígitos del teléfono).
+    process.env.TWILIO_CONTENT_SID_OTP = "HXotp";
+    // El código viaja en las variables de la plantilla, así que el modo prueba
+    // ya no lo estorbaría; se apaga igual para que el destinatario sea el real.
     process.env.WHATSAPP_TEST_MODE = "false";
     await resetDb();
   });

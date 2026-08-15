@@ -1,7 +1,14 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-07-28 (dominio `sslip.io` RETIRADO — `vibramx.fun` es el único; descubierto que el webhook del Sandbox de Twilio nunca apuntó a la app).
+> Última actualización: 2026-08-03 (**primer envío por plantilla real de todo el
+> proyecto**: recordatorio y digest salieron con `contentSid` desde el sender de
+> producción y llegaron bien —ver "Sesión 2026-08-03"—. De paso se desmintió que el
+> digest ya se hubiera probado así: lo del 2-ago fue texto libre desde el sandbox, y ahí
+> quedó **cómo distinguirlos en el log de Twilio**. Además, **la baja ya acepta las
+> variantes que la gente escribe** (`Baja.`, `darme de baja`, `BAJA por favor`) —commit
+> `a6177b0`, sin pushear—, que hacía falta porque la plantilla del digest dice "Responde
+> BAJA". Sigue el ⛔ del OTP. Antes, 2026-08-02: **flujo completo probado end-to-end en local** —login, digest, recordatorio, baja y reactivación, todo verde contra la BD **dev**; ver "Sesión 2026-08-01/02", que incluye la regla de qué recursos se usan en local y **estado efímero que hay que revertir**: el webhook del sandbox quedó apuntando a un túnel—. Antes, 2026-07-31: **plantillas de recordatorio y digest APROBADAS por Meta** —el recordatorio quedó UTILITY—; **el login ya se puede probar en local** con el fallback de texto libre en modo prueba; webhook del sender repuntado a `vibramx.fun` tras descubrir que llevaba 2.5 días apuntando a un dev server; plantillas de respaldo borradas; **el sitio ya se llama `Vibra MX`**, no "Eventos MTY"; **intento de verificación del negocio PAUSADO** por el régimen fiscal del RFC. **Nada está pusheado** y sigue el ⛔ por el OTP — ver "Sesión 2026-07-29" abajo, y `META-WHATSAPP.md` para el trámite).
 
 ## Qué es
 
@@ -12,8 +19,8 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **70 tests pasan** (`npm run test:todo` = 49 puros + 21 de integración),
-  **lint limpio** (`npm run lint`) y **build de producción limpio** (`npm run build`).
+- **100 tests pasan** (`npm run test:todo` = 68 puros + 32 de integración),
+  **lint limpio** (`npm run lint`) y `tsc --noEmit` limpio.
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
@@ -34,6 +41,499 @@ completos si están presentes.
   como chips, CTA de WhatsApp en el hero, y todas las páginas/formularios con el
   mismo lenguaje visual. Se eligió entre 2 prototipos (quedan sin trackear en
   `design/` local). `formatPrecio` ahora usa separador de miles.
+
+## Sesión 2026-08-03 — las plantillas SÍ se probaron (antes no), y la baja tolerante
+
+### ✅ Recordatorio y digest enviados por plantilla real, con el sender de producción
+
+Primer envío del proyecto con `contentSid`. Los dos llegaron y se marcaron `read`:
+
+| plantilla | SID del mensaje | ContentSid |
+|---|---|---|
+| recordatorio | `MMedb3db41bdf9829e70d51397a7b6358f` | `HXdfa8086a05d711d7feaf5d52ce6d9e4b` |
+| digest | `MM85a1dc6e238af46a1bc78aa0e9d8e337` | `HX626b23de0d02f571a3a841967d6667b9` |
+
+Se corrieron los jobs de verdad (`scripts/reminders.ts`, `scripts/digest.ts`) contra la
+BD dev, no un script suelto que llamara a `plantilla*()` a mano — el riesgo del orden de
+parámetros vive en el **call site**, así que reescribirlo en la prueba lo habría tapado.
+Env del envío: sender `+17347670241`, los dos ContentSid, `ADMIN_WHATSAPP=+5219223736016`
+(⚠️ el del `.env` es un número falso, `+528100000000`, hay que sobreescribirlo),
+`WHATSAPP_TEST_MODE=true` y `TZ=America/Monterrey`.
+
+Verificado que los `{{n}}` cayeron en su lugar: título, `formatCuando`, sede y el id en
+la URL del botón. La sede que llegó ("Escenario GNP Seguros") se contrastó contra la BD
+porque coincidía con la del otro evento guardado — no era un cruce de variables.
+
+### 🔴 Lo que se creía probado y no lo estaba
+
+Se dio por hecho que **el digest ya se había probado como plantilla** el 2-ago. Era
+falso: esa noche salió por **texto libre** desde el **sandbox**. Se confundieron porque
+`textoPrueba` es una transcripción a mano del cuerpo aprobado, así que en el teléfono se
+ve idéntico — misma redacción, mismos datos.
+
+**Cómo distinguirlos sin discutir capturas** (los tres son del log de Twilio, no del
+teléfono):
+
+1. **El prefijo del SID:** `MM…` = mensaje de contenido (plantilla), `SM…` = texto libre.
+2. **El sender:** las plantillas viven en la WABA del `+17347670241`. Lo que salga del
+   sandbox `+14155238886` no puede ser plantilla — ahí no existen.
+3. **La liga:** el digest del 2-ago traía `http://localhost:3000` y un
+   `*.trycloudflare.com`. El cuerpo aprobado está congelado en Meta desde el 31-jul y
+   sólo tiene dos huecos (cuenta y ciudad): una URL efímera no cabe ahí. La puso
+   `baseUrl()` al armar `textoPrueba`.
+
+Lo que aquella prueba sí validó fue el copy, los datos y `formatCuando`. Lo que no tocó
+en absoluto fue Meta.
+
+### Dos cosas que salieron de leer los cuerpos aprobados
+
+- **El botón del recordatorio apunta a `https://vibramx.fun/eventos/{{4}}`**, fijo a
+  producción. Con un id de la BD dev ese botón da 404. Implicación permanente:
+  **probar recordatorios en local nunca podrá validar la liga** — el id tiene que
+  existir en prod.
+- **El digest dice "Responde BAJA para dejar de recibir este resumen".** Es el opt-out
+  que Meta exige, y hasta hoy el webhook no lo aguantaba bien (ver abajo).
+
+### ✅ La baja ahora acepta lo que la gente escribe — commit `a6177b0`, SIN PUSHEAR
+
+El webhook comparaba `body === "baja"` exacto (sobre el texto ya en minúsculas y sin
+espacios). Con la plantilla pidiendo "Responde **BAJA**", eso funcionaba de milagro: por
+el `.toLowerCase()`, no por diseño. Todo lo demás —`Baja.`, `darme de baja`,
+`BAJA por favor`— caía en el `<Response/>` vacío, y **un opt-out que no responde es justo
+lo que Meta no acepta** en plantillas de marketing.
+
+`esBaja()` (`src/lib/whatsapp.ts`) normaliza —sin acentos, sin puntuación ni emoji,
+minúsculas, espacios colapsados—, recorta saludos y cortesías alrededor, y compara
+contra una lista de frases.
+
+⚠️ **La comparación es del mensaje COMPLETO, no por substring, y es a propósito:**
+`"no quiero darme de baja"` contiene `"darme de baja"` entero y significa lo contrario.
+Un `includes()` daría de baja a quien dijo que no. Hay un test dedicado a ese caso
+(`tests/baja.test.ts`), junto con `bajaron los boletos?` y `la banda tocó bajísimo`.
+
+Entra: `baja` en cualquier caja, `Baja.`, `¡BAJA!`, `bája`, `baja 👍`, `darme de baja`,
+`dame de baja`, `me doy de baja`, `quiero darme de baja`, `BAJA por favor`,
+`hola baja porfa`, `cancelar`, `cancelar suscripción`, `stop`, `unsubscribe`.
+
+Probado contra la ruta real con el dev server (no sólo el matcher): `BAJA por favor` →
+graba `optOutAt` y confirma; `no quiero darme de baja` y `a qué hora es el evento` →
+`<Response/>` vacío y `optOutAt` intacto. **106 tests** (73 puros + 33 de BD), lint y
+`tsc` limpios.
+
+**Sigue pendiente de esto:** el round-trip real desde el WhatsApp del usuario. Pide
+apuntar el webhook del sender de producción a un túnel, que es la maniobra que la vez
+pasada quedó 2.5 días sin revertir — se dejó a decisión del usuario.
+
+### Estado efímero de ESTA sesión — ya revertido
+
+Nada quedó sucio: el evento `cmrwgcwt2000xqw3ekga3n3cj` volvió a su fecha
+(`2026-08-06 03:00`), el `digestDay` del usuario a 6, y se limpió el `reminderSentAt`
+para que el recordatorio siga siendo elegible.
+
+**Se mató un `next-server` del 2-ago** (PID 1704714, día y medio corriendo) que era el
+residuo de la sesión pasada — el que recibía los webhooks por el túnel. Salió a la luz
+solo: **Next 16 no deja levantar un segundo dev server en el mismo directorio**, así que
+si `next dev` se queja de "Another next dev server is already running", hay un residuo.
+El proceso del puerto 3000 **no** es de este proyecto (es un bridge del agente).
+
+## Sesión 2026-08-01/02 — prueba end-to-end del flujo completo en local
+
+Se probó el ciclo entero (login OTP → perfil → digest → recordatorio → baja →
+reactivación) contra **recursos de desarrollo**, no de producción. Todo pasó.
+
+### ⚠️ REGLA: en local se prueba contra la BD DEV, nunca contra la de prod
+
+La primera vuelta de esta sesión se hizo por error contra la BD de **producción**
+(apuntando `DATABASE_URL` a la IP del contenedor `t8h92n0ojfm4dpzsizghl93q`). De ahí
+salieron dos horas de conclusiones equivocadas —ver "Lo que costó" abajo—. La
+configuración correcta:
+
+| recurso | en local se usa | NO se usa |
+|---|---|---|
+| Base de datos | `eventos_mty` del Postgres del **host** (`127.0.0.1:5432`), ya migrada | la del contenedor de Coolify |
+| Código | el checkout local vía `next dev` / `tsx` | la imagen desplegada |
+| Jobs (digest, recordatorios) | disparados **a mano** con `tsx scripts/*.ts` | los scheduled tasks de Coolify |
+| `BASE_URL` | la URL del túnel | `https://vibramx.fun` |
+
+**El `.env` del repo ya está bien configurado para esto** (`DATABASE_URL` apunta al
+Postgres del host). No hay que tocarlo: basta con NO sobrescribir `DATABASE_URL` al
+levantar el dev server. Lo único que hay que inyectar aparte son las credenciales de
+Twilio, que no están en el `.env`.
+
+Dos trampas al correr los jobs en local:
+
+1. **`TZ=America/Monterrey` es obligatorio.** El host está en **UTC** y el contenedor
+   de prod en `America/Monterrey`. `runDigest` compara `digestDay` contra
+   `now.getDay()`, así que sin la TZ el host calcula **domingo** donde prod calcula
+   **sábado**, y el digest no empata con nadie.
+2. **`BASE_URL` local es `http://localhost:3000`**, así que la liga del WhatsApp no
+   abre nada desde el teléfono. Para probar hay que apuntarla al túnel. (En prod la
+   variable sí está bien: `https://vibramx.fun`.)
+
+**Twilio sí es compartido** — no existe una cuenta de dev aparte. Lo que protege es
+`WHATSAPP_TEST_MODE=true`, que manda **todo** a `ADMIN_WHATSAPP` sin importar el
+destinatario real. No apagarlo mientras se prueba en local.
+
+### Lo que se probó (todo ✅, con el código local)
+
+- **Login OTP completo:** `request-code` → `verify` → sesión → `/api/me`, `/perfil`,
+  `/mis-eventos`. Guardar y quitar evento (`POST`/`DELETE /api/saved`).
+- **Digest:** llega con el formato nuevo (gancho con contador + liga, sin lista
+  inline y sin el prefijo `[PRUEBA →]`), `status=read` en Twilio.
+- **Recordatorio:** llega con título, `formatCuando` ("mañana a las 8:00 pm") y venue.
+  Marcó `reminderSentAt` **sólo tras** `confirmarEntrega` (`reminderStatus=read`),
+  que es el comportamiento diseñado — un `create()` sin excepción no basta.
+- **Baja por WhatsApp:** `optOutAt` se pone y **`digestDay` se conserva** (6). La
+  segunda baja responde "Ya estabas dado de baja" en vez de mandar a buscar una
+  cuenta inexistente. Un mensaje que no es "baja" devuelve `<Response/>` vacío.
+- **El digest respeta la baja:** `0 enviados` en los tres contadores, y ni siquiera
+  imprime las líneas de `[PRUEBA]` — sale por el `return` temprano de
+  `users.length === 0`, porque `optOutAt: null` va en el `where`.
+- **Reactivación desde `/perfil`:** `optOutAt` vuelve a `NULL` **sin tener que
+  recapturar el día**. Ésa es justo la mejora de `4d97873` sobre la versión vieja.
+
+### Lo que costó probar contra prod por error
+
+- **Login roto con 500.** A la BD de prod le faltaba `User.optOutAt`: la migración
+  `20260729010916_opt_out_whatsapp` nunca se aplicó porque vive en los commits sin
+  pushear. **Ya se aplicó** con `prisma migrate deploy` (columna nullable, aditiva;
+  prod corría código que ni la menciona, así que no le afectó).
+- **Un digest que parecía validar el formato nuevo y era el viejo.** Llegó con
+  `[PRUEBA → +52…]` y la lista de eventos dentro del mensaje: las dos cosas que
+  `424641e` quitó. Ver abajo por qué.
+
+### Por qué los crons SIEMPRE corren código viejo
+
+Los scheduled tasks de Coolify hacen `docker exec` **dentro del contenedor de
+producción**, y ese contenedor es la imagen del último push (`5d6dd59`, 2026-07-28).
+El preview local no los ejecuta: son procesos distintos que sólo comparten la BD si
+uno la apunta a la de prod. Lo mismo con el webhook de WhatsApp — Twilio entrega en
+la URL registrada del sender, que apunta a `vibramx.fun`, no al túnel.
+
+Consecuencia práctica: **el digest, los recordatorios y la baja no se pueden probar
+"desde el preview" sin más**. O se disparan a mano en local, o se reapunta el webhook.
+
+### Los tres crons corren 6 h antes de lo que parece
+
+Coolify evalúa las expresiones cron en **UTC** (`instance_settings.instance_timezone`
+= `UTC`, y su contenedor también). El comando corre dentro del contenedor de la app,
+que tiene `TZ=America/Monterrey`, así que `now.getDay()` sí da el día local correcto —
+pero la hora del cron no es la que aparenta:
+
+| task | cron (UTC) | hora real en Monterrey |
+|---|---|---|
+| `ingesta` | `0 12 * * *` | 06:00 |
+| `recordatorios` | `0 16 * * *` | 10:00 |
+| `digest` | `0 0 * * *` | **18:00**, no medianoche |
+
+Funciona bien, pero por acomodo de dos zonas horarias, no porque el cron diga lo que
+hace. Si alguien "corrige" el digest a `0 6 * * *` pensando en medianoche, lo rompe.
+
+### ⚠️ Estado efímero de esta sesión — REVERTIR
+
+1. **Webhook del sandbox apuntado al túnel.** El sender `XEfa539e8303cb08c337a9bfbdab02ab0b`
+   (`whatsapp:+14155238886`) quedó en una URL `*.trycloudflare.com`. **Mientras siga
+   así, la baja de `vibramx.fun` no funciona**, y cuando el túnel muera Twilio no
+   recibirá respuesta. Regresarlo:
+   ```
+   POST https://messaging.twilio.com/v2/Channels/Senders/XEfa539e8303cb08c337a9bfbdab02ab0b
+   {"webhook":{"callback_url":"https://vibramx.fun/api/whatsapp/webhook","callback_method":"POST"}}
+   ```
+   (Ojo: el sandbox y el número de producción son **senders distintos**. El de prod es
+   `XE4508db748ef8a40888bb3982835a01af` / `whatsapp:+17347670241`.)
+2. **Cron del digest en Coolify** quedó en `25 4 * * *` para las pruebas; el original
+   es `0 0 * * *`. Se cambia en `scheduled_tasks` de la BD de Coolify.
+3. **Datos de prueba en la BD local:** un evento movido al día siguiente y un
+   `SavedEvent` con recordatorio, creados a mano para disparar el recordatorio.
+
+Lo que **NO** hay que revertir: la migración `optOutAt` aplicada a la BD de prod.
+
+> **Verificado el 2026-08-03: los puntos 1 y 2 SIGUEN SIN REVERTIR.** El webhook del
+> sandbox apunta a `https://dirt-beach-compact-charges.trycloudflare.com/api/whatsapp/webhook`
+> (túnel muerto) y el cron del digest sigue en `25 4 * * *` — o sea, corriendo a las
+> **22:25 de Monterrey** en vez de las 18:00. El sandbox aparece `OFFLINE`, así que su
+> webhook ya no hace daño; el cron sí está vivo. El punto 3 sí se limpió.
+
+### Sigue pendiente
+
+`TWILIO_CONTENT_SID_OTP` / `_RECORDATORIO` / `_DIGEST` no están cargadas en Coolify,
+así que **todo mensaje sigue saliendo como texto libre**, que sólo se entrega dentro
+de la ventana de 24 h. Nada de lo probado hoy valida las plantillas aprobadas de Meta.
+Y la membresía del sandbox expira a las ~72 h: si empieza a rebotar con **63015**, hay
+que remandar `join though-excellent` al +1 415 523 8886.
+
+> **Al 2026-08-03:** las plantillas de recordatorio y digest **ya se probaron** con
+> `contentSid` y el sender de producción (ver la sesión de arriba). Lo de las env vars
+> de Coolify sigue vigente: prod no las tiene y por eso sigue mandando texto libre.
+
+## Sesión 2026-07-29 — salida del Sandbox y plantillas
+
+**⛔ LO PRIMERO: hay 15 commits locales SIN PUSHEAR, y NO se deben pushear todavía.**
+El código ya exige plantillas para todo mensaje que inicia el negocio, incluido el
+OTP — y la plantilla de OTP **no existe**. Si esto se deploya, `plantillaOtp()` lanza
+`Falta TWILIO_CONTENT_SID_OTP` y **el login se cae en producción**. La lista de lo
+que tiene que pasar antes está en `META-WHATSAPP.md` § "NO DEPLOYAR".
+
+**No confíes en esta lista: cuéntalos.** `git log origin/main..HEAD --oneline`. Esta
+nota ya estuvo mal dos veces (decía 4 cuando eran 10, y 6 cuando eran 12) porque se
+fue actualizando a mano sumando los commits nuevos, sin contrastar contra `origin/main`.
+El último push a `main` fue `5d6dd59`; todo lo posterior está sin subir.
+
+Los que traen cambios de código (el resto son docs): `424641e` (plantillas + `+521`),
+`4d97873` (baja total), `32a5013` (recordatorio UTILITY + `formatCuando`),
+`bc32cb2` (digest con cuenta pluralizada y ciudad dinámica).
+
+### Lo que se logró
+
+- ✅ **Sender de producción registrado y `ONLINE`:** `whatsapp:+17347670241`, display
+  name `Vibra MX`, límite `250 Customers/24hr`. **Se salió del Sandbox.**
+- ✅ **El código migró a plantillas:** `sendWhatsApp` → `sendPlantilla` con
+  `contentSid` + `contentVariables`.
+- ✅ **`+521` de salida arreglado** (`mxWhatsAppNumber` en `src/lib/auth/phone.ts`).
+- ✅ **Baja total:** `User.optOutAt` apaga digest **y** recordatorios, y la app lo
+  anuncia. **Probado con el WhatsApp real del usuario** contra un túnel: "baja" →
+  `optOutAt` grabado y `digestDay` intacto; repetir "baja" no movió la fecha y
+  respondió "Ya estabas dado de baja" en vez de mandarlo a buscar una cuenta.
+  (Funciona sin plantillas porque el usuario escribe primero: la respuesta cae
+  dentro de la ventana de 24 h, donde el texto libre sí se permite.)
+- ✅ **Plantillas de recordatorio y digest APROBADAS por Meta (2026-07-31).** Tardaron
+  ~1.5 días desde el envío del 29, sin aviso intermedio (el estado sólo salta de
+  `pending` a `approved`). El recordatorio **quedó UTILITY**: Meta respetó la categoría
+  y no la recategorizó, así que los recordatorios salen a la tarifa más barata.
+  **SIDs buenos:** recordatorio `HXdfa8086a05d711d7feaf5d52ce6d9e4b`,
+  digest `HX626b23de0d02f571a3a841967d6667b9`. Los dos respaldos ya se **borraron**
+  (2026-07-31): tenían los bugs de copy viejos.
+- 🔴 **Plantilla de OTP BLOQUEADA** hasta que se verifique el negocio. **Esto es lo
+  único que sigue deteniendo el deploy** — las otras dos ya no.
+- ✅ **Recordatorio rehecho como UTILITY con la fecha en variable**
+  (`HXdfa8086a05d711d7feaf5d52ce6d9e4b`). Ver `META-WHATSAPP.md` para el
+  cuerpo y el porqué de la categoría. Lo que toca al código: nuevo `formatCuando`
+  (`src/lib/format.ts`) que devuelve "hoy a las 9:00 pm" / "mañana a las 9:00 pm" /
+  "el jue 30 jul a las 9:00 pm", **comparando días de calendario, no horas**. Así el
+  "Mañana es …" deja de estar congelado en el cuerpo aprobado y la plantilla sobrevive
+  al cambio de ventana a 12–36 h sin volver a pasar por revisión de Meta.
+  ⚠️ **`plantillaRecordatorio` cambió el ORDEN de sus parámetros** (ahora título,
+  cuándo, sede, id) para seguir a las variables de la plantilla nueva. Los cuatro son
+  `string`: cruzarlos compila y sólo se ve en el WhatsApp del usuario.
+
+- ✅ **Digest rehecho** (`HX626b23de0d02f571a3a841967d6667b9`): el cuerpo
+  viejo traía tres datos congelados que en realidad varían — `eventos` en plural fijo
+  (decía **"hay 1 eventos"** con una sola coincidencia), `Monterrey` fijo (contra la
+  expansión nacional) y "Esta semana" cuando el horizonte son 10 días. Ahora `{{1}}` es
+  la cuenta **con su sustantivo** y `{{2}}` la ciudad desde `User.city` vía
+  `nombreCiudad`. `runDigest` dejó de filtrar por `city: "monterrey"`: consulta las
+  ciudades que tienen usuarios ese día y cada quien cuenta la suya.
+  ⚠️ **`plantillaDigest` ahora recibe `(cuantos, ciudad)`.**
+
+**La regla que dejaron las dos plantillas:** un cuerpo aprobado por Meta **no se
+edita** — corregirlo cuesta plantilla nueva y otra revisión. Todo lo que dependa de los
+datos (fecha relativa, plural, ciudad, sede) tiene que viajar en una variable, aunque
+hoy parezca constante. Y ojo con la concordancia: un verbo que se refiera a la cuenta
+("que **van** con tus gustos") se rompe igual que el plural del sustantivo.
+
+**Aclaración importante (2026-07-29):** la verificación del negocio **sólo bloquea las
+plantillas AUTHENTICATION** (el OTP). Las de MARKETING y UTILITY —recordatorio y
+digest— pasan por el review normal de Meta y no dependen de ella. Antes esto estaba
+mezclado en las notas como si un solo bloqueo detuviera todo.
+
+### 🔴 El bloqueo real: verificación del negocio
+
+Meta **no deja crear plantillas de categoría AUTHENTICATION** sin el negocio
+verificado (error `2388185`). O sea: **sin verificación no hay login por WhatsApp
+para usuarios reales.** Se arranca desde "Verifica tu negocio" en el WhatsApp
+Manager. Se descartó mover el OTP a SMS (decisión del usuario, 2026-07-29): se
+espera la verificación.
+
+⚠️ **Este documento decía "tarda 1–2 semanas". Era falso.** Al enviar la solicitud
+(2026-08-01) Meta prometió respuesta en **2 días**. El dato de las semanas venía de
+`fab2f0d` (2026-07-29), sin fuente conocida, y se repitió en tres lugares como si
+fuera un hecho — llegó a usarse para justificar decisiones ("no vale la pena
+reintentar, son otras dos semanas"). Si un plazo no viene de Meta ni de algo
+comprobado, anótalo como suposición.
+
+#### Intento de verificación 2026-07-31 — PAUSADO antes de subir documentos
+
+Se recorrió el wizard completo (Centro de seguridad → Verificación del negocio)
+sin enviarlo. El usuario decidió reintentar después. Estado y decisiones:
+
+| Pantalla | Respuesta correcta para este caso |
+|---|---|
+| Tipo de negocio | **Sociedad unipersonal** (persona física; no hay acta constitutiva) |
+| ¿Registrado oficialmente? | **Aún no registrado** — ver el hallazgo y la nota de abajo |
+| Nombre del negocio | el nombre legal del usuario, como en la CSF |
+| Nombre alternativo | **`Vibra MX`** — es lo que liga el nombre legal (una persona) con el display name del sender; sin esto Meta no tiene cómo conectarlos |
+| Método de confirmación | **Verificación del dominio** (`vibramx.fun`, DNS en Hostinger) o correo `@vibramx.fun` |
+| Tipo de documento | **"Constancia de Situación Fiscal SAT"** — Meta la lista explícitamente como Recomendado para México |
+
+**🔴 El hallazgo que frena esto (2026-07-31):** el RFC del usuario está en régimen
+**"Sin obligaciones fiscales"** y sin Nombre Comercial. Fiscalmente **no existe un
+negocio**: hay una persona dada de alta y nada más. La CSF sí prueba nombre legal y
+domicilio (que es lo que la pantalla pide literalmente), pero un revisor que lea el
+régimen ve un RFC sin actividad empresarial respaldando un negocio. **No se sabe si
+Meta lo rechaza** — no se llegó a enviar.
+
+**✅ `vibramx.fun` VERIFICADO en Meta (2026-08-01).** Era el método de confirmación
+elegido, y el que destrabó el wizard. Dos cosas que no son obvias:
+
+1. El dominio **no estaba dado de alta** en el portfolio, así que "Verificar" mandaba
+   a Configuración → Dominios con la lista vacía. Hay que agregarlo primero con
+   **"Crear un dominio"** (el nombre engaña: no compra nada, solo lo registra en el
+   portfolio) escribiendo `vibramx.fun` pelón — sin `https://`, sin `www`, sin `/`.
+2. Método usado: **registro TXT en el DNS**, no metaetiqueta ni archivo HTML — los
+   otros dos obligan a deployar a producción solo para verificar un dominio.
+
+Registro que quedó en la zona de Hostinger (hPanel → Domains → `vibramx.fun` →
+DNS/Nameservers → Manage DNS records). **No lo borres:** si desaparece, Meta puede
+revocar la verificación del dominio.
+
+```
+TXT  @  facebook-domain-verification=ztgcxanbgcj0vi2fjhstdzxoxmyn55  TTL 14400
+```
+
+⚠️ El panel de VPS muestra los nameservers como `ns1/ns2.dns-parking.com`, pero los
+autoritativos reales son `atlas` e `hyperion.dns-parking.com`. Es la misma zona y
+funciona — pero si algún día un registro "no aparece", empezar por ahí.
+
+**Por qué "Aún no registrado" y no "Registrado" (corregido 2026-08-01):** primero se
+recomendó "Registrado" suponiendo que la otra ruta solo permitía verificar con
+identificación personal, sin subir documentos. **Es falso: las dos rutas llegan a la
+misma pantalla de subir documentos y aceptan la CSF.** Siendo así, lo único que
+cambia es qué se le afirma a Meta. Con "Registrado" se afirma que el negocio está
+inscrito ante el gobierno y luego se sube una constancia que dice "Sin obligaciones
+fiscales" — el revisor ve una contradicción. Con "Aún no registrado" (*"o una persona
+lo representa"*) no hay nada que contradecir y el mismo documento respalda lo que sí
+prueba: identidad, nombre legal y domicilio fiscal.
+
+No se sabe si Meta trata las dos rutas como niveles distintos de verificación para
+desbloquear AUTHENTICATION. Entre una ruta consistente y una con una contradicción
+adentro, se eligió la consistente.
+
+Dos caminos cuando se retome:
+
+- **A — intentarlo tal cual.** Bajar una CSF nueva del portal del SAT (la que se
+  revisó era de 2024 y Meta pide documentos no caducados), capturar en Meta el
+  **domicilio fiscal de la CSF** —que NO está en Monterrey, sino en otro estado— y
+  subirla en PDF original del SAT, sin foto ni recorte. Costo de fallar: solo tiempo.
+- **B — darse de alta con actividad empresarial** (RESICO o Actividades
+  Empresariales) en el portal del SAT con la e.firma, y luego verificar. La CSF
+  pasaría a mostrar un régimen real. Es el camino sólido pero mete un trámite.
+
+Se recomendó **A** por el tiempo ya perdido en este bloqueo, con la expectativa
+correcta: la CSF no es el documento fuerte que se asumía.
+
+⚠️ **La dirección que se capture en Meta debe ser la de la CSF, no la de operación.**
+Meta no verifica dónde vives; solo que documento y datos capturados digan lo mismo.
+Ojo: el domicilio fiscal está en otro estado y la marca es de eventos **en
+Monterrey**. No se cruzan en esta verificación, pero no coinciden.
+
+Los datos personales (RFC, CURP, domicilio fiscal) **no van en este repo, que es
+público** — están en la memoria privada del agente.
+
+### ✅ El login SÍ se puede probar en local (2026-07-31)
+
+La migración a plantillas había dejado el login **imposible de probar**, no sólo
+imposible en producción: `plantillaOtp()` tronaba sin `TWILIO_CONTENT_SID_OTP` y no
+quedaba ninguna vía de texto libre. Eso era autoinfligido, no una regla de Meta — el
+texto libre **sí** se entrega dentro de la ventana de 24 h que abre el usuario al
+escribirle al número. La restricción de Meta muerde con usuarios reales, que nunca
+tienen esa ventana abierta.
+
+Ahora `Plantilla` guarda el **nombre de la env var** (`envSid`) y el ContentSid se
+resuelve **al enviar**, no al construir — antes `contentSid()` lanzaba en el
+constructor, así que `sendPlantilla` nunca llegaba a decidir nada. Cada plantilla trae
+además `textoPrueba`, el mismo mensaje en texto plano.
+
+| Sin ContentSid en el entorno | Qué hace `sendPlantilla` |
+|---|---|
+| `WHATSAPP_TEST_MODE=true` | manda `textoPrueba` en texto plano + `console.warn` |
+| `WHATSAPP_TEST_MODE=false` | **lanza**, y no envía nada |
+
+**La segunda fila es el punto, no un detalle.** Un fallback silencioso en producción
+convertiría "el login no funciona" en "funciona en pruebas y falla con usuarios
+reales", que es mucho más caro de diagnosticar. Hay un test por rama y **se verificó
+que el de producción falla si se le quita la condición `!testMode`** — no es un test
+que pasaría de todos modos.
+
+**Cómo probar en un teléfono real** (sin deployar nada):
+
+```bash
+TWILIO_WHATSAPP_FROM=+17347670241                              # sender de PRODUCCIÓN
+TWILIO_CONTENT_SID_RECORDATORIO=HXdfa8086a05d711d7feaf5d52ce6d9e4b
+TWILIO_CONTENT_SID_DIGEST=HX626b23de0d02f571a3a841967d6667b9
+# TWILIO_CONTENT_SID_OTP  ← dejarla SIN definir: eso activa el texto libre
+WHATSAPP_TEST_MODE=true                                        # todo va a ADMIN_WHATSAPP
+```
+
+- Recordatorio y digest van por **plantilla aprobada de verdad** → llegan aunque no
+  haya ventana abierta. Ésa sí es la prueba real.
+- El OTP sale como **texto libre** → hay que escribirle al `+1 734 767 0241` **primero**
+  para abrir la ventana de 24 h; si no, rebota con `63016`.
+- Tiene que ser el sender de producción: las plantillas viven en esa WABA, no en el
+  Sandbox (que además ya aparece `OFFLINE`).
+
+⚠️ **Lo que esta prueba NO demuestra:** que el login sirva para un usuario real. Ése
+sigue roto hasta la verificación del negocio; el texto libre sólo funciona para quien
+puede abrir la ventana a mano.
+
+### ✅ El sitio ya se llama Vibra MX (2026-07-31) — commit `f24820e`, SIN PUSHEAR
+
+El sitio se presentaba como **"Eventos MTY"** en el `<title>`, el logo del header y
+el footer (`src/app/layout.tsx`), pero el dominio declarado ante Meta es
+`vibramx.fun` y el display name del sender es **`Vibra MX`**. Como el respaldo del
+display name ante Meta **ES el dominio** (ver `META-WHATSAPP.md`), un revisor que
+abriera `vibramx.fun` buscando "Vibra MX" no encontraba la marca por ningún lado —
+exactamente el rechazo de display name que ya estaba anticipado, con su castigo de
+250 mensajes iniciados por el negocio cada 24 h.
+
+Cambiadas las tres apariciones. Verificado desde fuera por el túnel: `<title>` dice
+`Vibra MX — qué hacer en Monterrey` y el HTML ya no contiene "Eventos MTY".
+
+⚠️ El repo, el directorio y el título de este documento siguen llamándose
+`eventos-mty` / "Eventos MTY". Es solo cosmético e interno —Meta no lo ve— pero si
+alguien renombra, que sea consciente de que el nombre de cara al público es
+**Vibra MX** y el interno no.
+
+### ⚠️ Estado efímero que hay que limpiar
+
+1. ~~El webhook del sender apunta a un túnel muerto.~~ ✅ **RESUELTO (2026-07-31), y no
+   era lo que decía esta nota.** El túnel **no estaba muerto**: `cloudflared` llevaba
+   2.5 días vivo, así que **todo WhatsApp entrante al número de producción estuvo
+   llegando a un `next-server` de desarrollo de este VPS** (puerto 3105), no a
+   `vibramx.fun` — incluidos los "baja", que es justo el opt-out que Meta exige. Daño
+   real ~nulo porque aún no hay usuarios. Ya se repuntó el `callback_url` del sender
+   `XE4508db748ef8a40888bb3982835a01af` a `https://vibramx.fun/api/whatsapp/webhook`
+   (POST, HTTP 202, verificado leyendo de vuelta) y se mataron los dos túneles con sus
+   servidores. **Lección: "el túnel murió solo" es una suposición, no un hecho — se
+   comprueba con `ps -eo pid,lstart,cmd | grep cloudflared`.**
+2. **El `voice_url` del `+1 734 767 0241` apunta a un túnel que ahora sí está muerto.**
+   Era el twimlet de la llamada de verificación de Meta
+   (`scratchpad/twiml/server.js`, puerto 3108), apagado el 2026-07-31. Ya no graba
+   nada; una llamada entrante simplemente falla. Conviene vaciarlo.
+3. **Usuarios de prueba en la BD de desarrollo:** `+528100000091`, `+528100000092` y
+   el número real del usuario (`+529223736016`). Solo en dev, no en prod.
+4. **Plantillas de respaldo borradas (2026-07-31):** `HX97332f…` y `HX93686b…` ya no
+   existen (`DELETE /v1/Content/{sid}` → 204). Tenían los bugs de copy viejos; se
+   quitaron para que nadie las conecte por error.
+
+### Variables de entorno que faltan en Coolify
+
+```
+TWILIO_WHATSAPP_FROM=+17347670241        # hoy sigue en el Sandbox (+14155238886)
+TWILIO_CONTENT_SID_RECORDATORIO=HXdfa8086a05d711d7feaf5d52ce6d9e4b   # UTILITY, aprobada
+TWILIO_CONTENT_SID_DIGEST=HX626b23de0d02f571a3a841967d6667b9         # v2, aprobada
+TWILIO_CONTENT_SID_OTP=...               # NO EXISTE: bloqueada por la verificación
+```
+
+⚠️ **Los SIDs que decía esta lista hasta el 2026-07-31 (`HX97332f…`, `HX93686b…`) eran
+de las plantillas de respaldo, que ya se borraron.** Configurarlos ahora daría un 404
+de Twilio en cada envío. Los buenos son los de arriba.
+
+**En producción `TWILIO_CONTENT_SID_OTP` tiene que faltar Y `WHATSAPP_TEST_MODE` ser
+`false`** → `sendPlantilla` lanza y el login se cae. Ése es el motivo del ⛔ de arriba,
+y es intencional: es preferible a un login que aparenta funcionar. El fallback de texto
+libre **sólo** aplica en modo prueba.
+
+`WHATSAPP_TEST_MODE=false` **hasta el final**, y solo cuando todo lo anterior esté.
 
 ## Continuidad del entorno (VPS persistente)
 
@@ -79,6 +579,13 @@ npm run dev                 # http://localhost:3000
 npm run build               # build de producción
 npm run ingest|digest|reminders   # jobs CLI
 ```
+
+⚠️ **Los jobs `digest` y `reminders` en local necesitan `TZ=America/Monterrey`.** El
+host está en UTC y el contenedor de prod no; `runDigest` compara `digestDay` contra
+`now.getDay()`, así que sin la TZ el día sale distinto y no empata con nadie:
+`TZ=America/Monterrey npx tsx scripts/digest.ts`. También necesitan las credenciales
+de Twilio, que **no** están en el `.env` (salen de las env vars del contenedor de
+prod: `docker exec … printenv`). Ver "Sesión 2026-08-01/02" para el flujo completo.
 
 ### Tests: dos comandos, dos bases (desde 2026-07-27)
 Antes había un solo `npm test` que **borraba la BD de desarrollo** en cada corrida
@@ -149,16 +656,16 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
     futuro requiere el fallback LLM.
 - **Modo prueba WhatsApp**: `WHATSAPP_TEST_MODE=true` hasta que las plantillas de
   Meta estén aprobadas y el digest se vea correcto una semana. NUNCA ponerlo en
-  `false` antes de eso. ⚠️ ANTES de apagarlo: arreglar el formato `+521` (ver abajo).
-- **⚠️ FORMATO `+521` CONFIRMADO COMO BUG (2026-07-25):** la app guarda los teléfonos
-  como `+52` + 10 dígitos, SIN el `1` que WhatsApp-MX usa. Se probó en sandbox
-  mandando a ambos formatos al número del usuario: a `+529223736016` (sin `1`) →
-  **falló, err 63015** (WhatsApp lo trata como número distinto no unido); a
-  `+5219223736016` (con `1`) → err 63016 (sólo ventana, número reconocido). ⇒ el
-  formato sin `1` NO entrega. **Decisión del usuario: NO arreglar aún; hacerlo al
-  integrar el sender de producción de Meta.** Fix propuesto: helper en `sendWhatsApp`
-  que inserte el `1` para móviles MX al enviar, sin tocar el almacenamiento canónico
-  `+52` (que sirve al dedup). Ver [[whatsapp-mx-521-format]] y `src/lib/auth/phone.ts`.
+  `false` antes de eso. El `+521` ya no bloquea (arreglado 2026-07-29); lo que
+  bloquea ahora es la verificación del negocio y las plantillas.
+  ⚠️ **El modo prueba ya no puede etiquetar el mensaje** con `[PRUEBA → +52…]`: el
+  cuerpo de una plantilla es fijo. El destinatario real se registra en consola.
+- ~~**FORMATO `+521`**~~ ✅ **ARREGLADO (2026-07-29, sin pushear).** El helper
+  `mxWhatsAppNumber` (`src/lib/auth/phone.ts`) repone el `1` al enviar, sin tocar el
+  almacenamiento canónico `+52` que sirve al dedup. Es idempotente. Contexto del bug:
+  a `+529223736016` (sin `1`) → err 63015; a `+5219223736016` → err 63016 (número
+  reconocido). Los fixtures de los tests de BD **usaban teléfonos imposibles** (`+52`
+  + 8 dígitos, que `normalizeMxPhone` nunca produce) y por eso no lo detectaban.
 - **⚠️ Ventana de 24 h del Sandbox (entendido 2026-07-27):** el Sandbox de WhatsApp
   sólo entrega mensajes de texto libre (OTP, recordatorios) **dentro de las 24 h**
   posteriores a que el usuario le escriba al número del sandbox (+1 415 523 8886).
@@ -224,34 +731,50 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
   producción (sólo aplicaría a deploys de preview, que no se usan), pero conviene
   limpiarlo para que nadie lo lea como el valor bueno.
 
+**📄 `META-WHATSAPP.md` (nuevo, 2026-07-28):** el plan completo para salir del Sandbox
+— trámite ante Meta en orden, categorías y precios de plantillas para México, qué hay
+que cambiar en el código (mandar `contentSid` en vez de `body`), los pendientes que se
+destraban con eso, y las fechas que cambian este trimestre. **Es el camino crítico del
+proyecto:** sin sender aprobado no puede haber usuarios reales.
+
+**⏳ TRÁMITE DE META ARRANCADO EL 2026-07-28 — quedó a medias.** Se compró el número
+`+1 734 767 0241` en Twilio y el Embedded Signup llegó hasta el paso de verificar el
+número; falta meter el código y terminar. **Leer la sección "ESTADO DEL TRÁMITE" de
+`META-WHATSAPP.md` ANTES de retomar**: tiene lo ya decidido (display name `Vibra MX`,
+categoría, por qué el número es de EE.UU. y no mexicano), cinco trampas ya pisadas
+—entre ellas que **la verificación por SMS es imposible con un número de Twilio** por
+filtrado A2P de operadora— y, sobre todo, **estado efímero que ya no existe**: el
+`voice_url` del número apunta a un túnel de Cloudflare muerto y hay que rehacerlo o
+limpiarlo.
+
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
   pulir al final).
 - (El bug de `reminderSentAt` ya se arregló — ver "Resuelto (2026-07-27, tercera tanda)".)
-- **⚠️ PENDIENTE (1 de 2): apuntar el webhook del Sandbox a la app.** El código de
-  "baja" ya está arreglado (ver "Resuelto (2026-07-28)"), pero **el Sandbox de Twilio
-  sigue apuntando a la función demo de Twilio**, así que el handler todavía no se
-  ejecuta en producción. Falta poner `callback_url` =
-  `https://vibramx.fun/api/whatsapp/webhook` (método POST) en el sender
-  `XEfa539e8303cb08c337a9bfbdab02ab0b`. Dos vías: `POST` a
-  `https://messaging.twilio.com/v2/Channels/Senders/{sid}` (no probado — Twilio
-  puede bloquear la escritura sobre el sender compartido del Sandbox), o a mano en
-  la consola: Messaging → Try it out → Send a WhatsApp message → *Sandbox settings*
-  → "WHEN A MESSAGE COMES IN".
-  **Orden a propósito:** primero el fix del código, después el webhook. Apuntarlo
-  antes habría cambiado "te contesta el demo de Twilio" por "nuestra app te confirma
-  una baja que no ocurrió", que es peor.
-  **Efecto secundario al cambiarlo:** *todos* los entrantes del sandbox llegarán a
-  la app, y el handler responde `<Response/>` vacío a lo que no sea "baja" → mandar
-  `hola` para reabrir la ventana de 24 h dejará de tener respuesta visible (la
-  ventana sí se reabre; eso lo maneja Meta, no el webhook).
+- ~~Apuntar el webhook del Sandbox a la app~~ ✅ **HECHO (2026-07-28).** El
+  `callback_url` del sender `XEfa539e8303cb08c337a9bfbdab02ab0b` es ahora
+  `https://vibramx.fun/api/whatsapp/webhook` (POST). **La escritura por API SÍ
+  funciona** sobre el sender del Sandbox — no hace falta la consola:
+  `POST https://messaging.twilio.com/v2/Channels/Senders/{sid}` con
+  `{"webhook":{"callback_url":"…","callback_method":"POST"}}` → HTTP 202.
+  El Auth Token sale de las env vars del contenedor (`docker exec … printenv
+  TWILIO_AUTH_TOKEN`), sin necesidad de exponerlo.
+  **Orden seguido a propósito:** primero el fix del código en prod, después el
+  webhook. Apuntarlo antes habría cambiado "te contesta el demo de Twilio" por
+  "nuestra app te confirma una baja que no ocurrió", que es peor — y la prueba
+  habría salido en verde por la razón equivocada.
+  **Efecto secundario ya vigente:** *todos* los entrantes del sandbox llegan a la
+  app, y el handler responde `<Response/>` vacío a lo que no sea "baja" → mandar
+  `hola` para reabrir la ventana de 24 h ya no tiene respuesta visible (la ventana
+  sí se reabre; eso lo maneja Meta, no el webhook).
   - Pendiente de decidir: si "baja" debe apagar también los recordatorios de
     eventos guardados (`SavedEvent.reminder`), no sólo el digest. Hoy sólo pone
     `digestDay = null`, así que quien escriba "baja" esperando "ya no me manden
     nada" seguirá recibiendo recordatorios. Para el opt-out que Meta exige en
     plantillas MARKETING probablemente no alcanza.
-  - El match es exacto (`body === "baja"`, ya en minúsculas y sin espacios): no
-    entra `darme de baja` ni `baja.`.
+  - ~~El match es exacto (`body === "baja"`, ya en minúsculas y sin espacios): no
+    entra `darme de baja` ni `baja.`.~~ ✅ **ARREGLADO (2026-08-03, commit `a6177b0`,
+    sin pushear):** `esBaja()` acepta las variantes. Ver "Sesión 2026-08-03".
   - **Cómo se descubrió (2026-07-28):**
     `GET https://messaging.twilio.com/v2/Channels/Senders?Channel=whatsapp` (auth
     básica con el Account SID + Auth Token) → el `webhook.callback_url` del sender
@@ -262,6 +785,10 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
     dice `No enviarme el resumen (baja)` (`src/components/PerfilForm.tsx:99`) — ese
     "(baja)" no explica nada y confunde. Cambiarla a `No enviarme el resumen` + un
     texto de ayuda que enseñe la palabra clave.
+    **Menos urgente desde el 2026-08-03:** el cuerpo aprobado del digest ya la enseña
+    ("Responde BAJA para dejar de recibir este resumen") y `esBaja()` acepta variantes,
+    así que la app ya no es el único lugar donde podría aprenderse. El texto de
+    `/perfil` sigue igual de confuso.
 - **Reintento real de recordatorios — DESPUÉS de las plantillas (decidido 2026-07-28).**
   Hoy el cron corre 1 vez al día y la consulta filtra eventos de *mañana*, así que un
   rebote no se reintenta nunca (a la siguiente pasada el evento ya es hoy y sale de la
@@ -290,8 +817,20 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
   pasarían de todos modos), y end-to-end por HTTP contra el build de producción
   (`digestDay` 1 → NULL mandando el `From` con `+521`). **80 tests** (54 puros + 26
   de BD), lint y build limpios.
-  ⚠️ **Esto NO surte efecto en prod hasta apuntar el webhook del Sandbox** — ver el
-  pendiente de arriba.
+  **EN PRODUCCIÓN Y VERIFICADO (2026-07-28):** pusheado (commit `5d6dd59`) y
+  desplegado (`s70k0d46zyjv2etitkbtedh0`, `finished`), con el webhook del Sandbox ya
+  apuntando a la app. Dos verificaciones independientes:
+  1. **Con un mensaje real de WhatsApp, antes de pushear:** se apuntó el sandbox a un
+     túnel de Cloudflare contra un server local con el fix y la BD desechable; el
+     usuario mandó `baja` desde su teléfono y el `digestDay` pasó de `1` a `NULL`.
+     Es la primera vez que ese handler corría con el payload real de Twilio.
+  2. **Contra prod ya desplegado**, sin tocar datos (números que no existen en la BD,
+     así el `updateMany` no puede afectar a nadie): un `+521` válido inexistente
+     responde "No encontramos una cuenta", un `From` que no es móvil MX responde "No
+     pudimos identificar tu número", y un mensaje que no es "baja" responde vacío.
+     **Con el código viejo los tres primeros habrían contestado "Listo, ya no
+     recibirás el resumen"** — ése es el discriminador que prueba que el fix está
+     arriba.
 - ✅ **`*.sslip.io` retirado; `vibramx.fun` es el único dominio** — ver el detalle en
   la sección de pendientes de FASE 4 (arriba). Cambio sólo de infraestructura
   (Coolify), sin tocar código.
