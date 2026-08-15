@@ -20,11 +20,17 @@ export async function runReminders(
   sender?: MessageSender,
   esperas?: number[],
 ): Promise<ResultadoRecordatorios> {
-  const start = new Date(now);
-  start.setDate(start.getDate() + 1);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 1);
+  // Ventana: de AHORA hasta el final de mañana. El inicio es `now` y no
+  // "mañana 00:00" a propósito. Con el corte anterior, un recordatorio que
+  // rebotaba el día D (típicamente 63016, fuera de la ventana de 24 h) dejaba
+  // `reminderSentAt` en null para reintentarlo... pero la corrida siguiente ya
+  // buscaba en [D+2, D+3) y el evento —que era de D+1— nunca volvía a entrar:
+  // el reintento que promete el `catch` de abajo era imposible. Arrancando en
+  // `now`, el evento sigue siendo alcanzable mientras no haya empezado.
+  const start = now;
+  const end = new Date(now);
+  end.setDate(end.getDate() + 2);
+  end.setHours(0, 0, 0, 0);
 
   const saved = await prisma.savedEvent.findMany({
     where: {

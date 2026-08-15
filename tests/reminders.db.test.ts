@@ -29,6 +29,8 @@ const YA = [0];
 
 describe("runReminders", () => {
   const now = new Date("2026-07-16T10:00:00");
+  /** La corrida del día siguiente: el cron es diario, no dos veces el mismo instante. */
+  const manana = new Date("2026-07-17T10:00:00");
 
   async function setup(
     overrides: { reminder?: boolean; startsAt?: Date; status?: string; phone?: string } = {},
@@ -127,10 +129,25 @@ describe("runReminders", () => {
     expect(s.reminderError).toContain("63016");
 
     // Sigue siendo elegible: la siguiente corrida lo reintenta y ahí sí entrega.
+    // El reloj avanza 24 h, que es lo que hace el cron diario de verdad: con
+    // `now` repetido este test pasaba aunque el reintento fuera imposible.
     const ok = recorder({ status: "delivered" });
-    expect((await runReminders(now, ok.sender, YA)).enviados).toBe(1);
+    expect((await runReminders(manana, ok.sender, YA)).enviados).toBe(1);
     expect(ok.sent).toHaveLength(1);
     expect((await prisma.savedEvent.findFirstOrThrow()).reminderError).toBeNull();
+  });
+
+  it("alcanza al evento de HOY que aún no empieza (el rebotado de ayer)", async () => {
+    await setup({ startsAt: new Date("2026-07-16T21:00:00") });
+    const { sent, sender } = recorder({ status: "delivered" });
+    expect((await runReminders(now, sender, YA)).enviados).toBe(1);
+    expect(varsDe(sent[0])["2"]).toContain("hoy");
+  });
+
+  it("no envía si el evento ya empezó", async () => {
+    await setup({ startsAt: new Date("2026-07-16T09:00:00") });
+    const { sender } = recorder();
+    expect((await runReminders(now, sender, YA)).enviados).toBe(0);
   });
 
   it("cuenta como enviado el que no alcanza estado final, para no duplicar", async () => {

@@ -1,7 +1,10 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-08-08 (**los 7 eventos huérfanos, borrados** — y de paso se
+> Última actualización: 2026-08-08 (**el cron del digest de vuelta a las 18:00** —estaba
+> en una hora de prueba desde el 2-ago— y **arreglado un bug de recordatorios: el
+> reintento de un mensaje rebotado era imposible** y su test pasaba por llamar dos veces
+> con el mismo reloj. Además, **los 7 eventos huérfanos, borrados** — y de paso se
 > desmintió el doc que los llamaba "de origen desconocido": estaban **sólo en dev** (prod
 > tenía 0) y son residuo de eventos **reprogramados**, porque el dedupe empata por
 > mismo-venue+mismo-día y una fecha nueva crea fila nueva. Ver "Sesión 2026-08-08").
@@ -81,9 +84,12 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **131 tests puros pasan** (`npm test`; los de BD van aparte con
-  `npm run test:borra-bd`, ver más abajo), **lint limpio** (`npm run lint`) y
-  `tsc --noEmit` limpio.
+- **213 tests puros pasan** (`npm test`) + **35 de BD** (`npm run test:borra-bd`, ver
+  más abajo). **Lint limpio** (`npm run lint`).
+  ⚠️ **`tsc --noEmit` NO está limpio: 5 errores**, todos en `tests/fever.test.ts` y
+  todos del commit `16b7159` (2026-08-07). Son de tipado del fixture de `fetch`
+  (`Record<string, string>` contra un objeto de claves literales), no afectan a los
+  tests —pasan— ni al build de producción. Medido el 2026-08-08. Sin arreglar.
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
@@ -138,7 +144,47 @@ En cascada se fue **1 `SavedEvent`**: el del recordatorio de prueba del 2026-08-
    un evento que la fuente deja de publicar se queda en la BD para siempre. Hoy no duele
    —los eventos con fuente ligada están todos frescos, 0 con `lastSeenAt` de más de 7
    días— pero es el mecanismo que fabricó estos 7 y los volverá a fabricar.
-2. El cron del digest sigue en `25 4 * * *` (22:25 de Monterrey). Ver abajo.
+2. 🟡 **`runDigest` elige a quién mandarle con `now.getDay()`**, que usa la zona del
+   proceso. A las 18:00 de Monterrey en UTC **ya es el día siguiente**, así que si ese
+   contenedor dejara de estar en `America/Monterrey` todos recibirían su digest un día
+   antes del que eligieron. Hoy no pasa sólo por `ENV TZ=America/Monterrey`
+   (`Dockerfile:26`). Propuesto calcular el día con zona explícita; **el usuario lo dejó
+   fuera** de este lote a propósito.
+3. Los 5 errores de `tsc` en `tests/fever.test.ts` (ver "Estado", arriba).
+
+### El cron del digest, corregido — y por qué la hora no era el hueco
+
+`25 4 * * *` (22:25 de Monterrey) era una hora de prueba del 2026-08-02 que se quedó
+puesta. **Ya está en `0 0 * * *` = 18:00 MTY**, la intención original, aplicado por API y
+verificado. Las tres tareas quedan: ingesta 06:00, recordatorios 10:00, digest 18:00.
+
+Dos cosas que se verificaron para poder afirmar eso, porque de ellas depende:
+
+- **El contenedor de Coolify corre en UTC**, así que las expresiones cron se interpretan
+  en UTC (`docker exec coolify date`).
+- **El de la app corre en `America/Monterrey`** (`Dockerfile:26`, confirmado en vivo).
+
+Y **prod no tiene crons aparte**: hay 1 sola aplicación en Coolify, 0 servicios y ningún
+crontab en el host. Esas tres tareas son las únicas del sistema.
+
+### Bug arreglado: el reintento del recordatorio era imposible
+
+`src/lib/reminders/run.ts` prometía en un comentario que un mensaje rebotado deja
+`reminderSentAt` en null "para que siga siendo elegible para el próximo run". **No podía
+pasar nunca**: la ventana era `[mañana 00:00, pasado 00:00)`, así que si el envío rebotaba
+el día D para un evento de D+1, la corrida de D+1 ya buscaba en `[D+2, D+3)` y el evento
+quedaba fuera para siempre.
+
+Importa por el caso que el propio test simula: **63016 = "fuera de la ventana de 24 h"**,
+el rebote más probable en WhatsApp. Se perdía el recordatorio en silencio.
+
+- **El test no lo detectaba porque llamaba a `runReminders` dos veces con el mismo
+  `now`**, cosa que un cron diario jamás hace. Ahora avanza el reloj 24 h; con el código
+  viejo, esa segunda corrida manda **0**.
+- **El arreglo**: la ventana arranca en `now` en vez de "mañana 00:00", así que el evento
+  sigue siendo alcanzable mientras no haya empezado. Se mantiene `reminderSentAt: null`
+  como única guarda contra duplicados. Dos tests nuevos: el evento de hoy que aún no
+  empieza (y que el texto diga "hoy") y el que ya empezó, que no debe enviarse.
 
 ---
 
@@ -735,8 +781,8 @@ hace. Si alguien "corrige" el digest a `0 6 * * *` pensando en medianoche, lo ro
    ```
    (Ojo: el sandbox y el número de producción son **senders distintos**. El de prod es
    `XE4508db748ef8a40888bb3982835a01af` / `whatsapp:+17347670241`.)
-2. **Cron del digest en Coolify** quedó en `25 4 * * *` para las pruebas; el original
-   es `0 0 * * *`. Se cambia en `scheduled_tasks` de la BD de Coolify.
+2. ~~**Cron del digest en Coolify** quedó en `25 4 * * *` para las pruebas; el original
+   es `0 0 * * *`.~~ ✅ **REVERTIDO el 2026-08-08** — ver "Sesión 2026-08-08".
 3. **Datos de prueba en la BD local:** un evento movido al día siguiente y un
    `SavedEvent` con recordatorio, creados a mano para disparar el recordatorio.
 
@@ -747,6 +793,9 @@ Lo que **NO** hay que revertir: la migración `optOutAt` aplicada a la BD de pro
 > (túnel muerto) y el cron del digest sigue en `25 4 * * *` — o sea, corriendo a las
 > **22:25 de Monterrey** en vez de las 18:00. El sandbox aparece `OFFLINE`, así que su
 > webhook ya no hace daño; el cron sí está vivo. El punto 3 sí se limpió.
+>
+> **Al 2026-08-08: el punto 2 ya está revertido** (`0 0 * * *` = 18:00 MTY). El punto 1
+> sigue sin revertir, y sigue sin hacer daño mientras el sandbox esté `OFFLINE`.
 
 ### Sigue pendiente
 
