@@ -6,6 +6,9 @@ import { lumaConnector } from "./sources/luma";
 import { superboletosConnector } from "./sources/superboletos";
 import { aremaConnector } from "./sources/arema";
 import { feverConnector } from "./sources/fever";
+import { tigresConnector } from "./sources/tigres";
+import { marcoConnector } from "./sources/marco";
+import { culturaUanlConnector } from "./sources/cultura-uanl";
 
 // Agregar una fuente nueva = agregar una entrada aquí.
 export const connectors: Connector[] = [
@@ -36,6 +39,24 @@ export const connectors: Connector[] = [
   // semana. Dos etapas: la home de la ciudad da los ids y la página de cada plan
   // da las funciones de verdad.
   feverConnector(),
+  // Tigres NO está en Ticketmaster: su Estadio Universitario da 0 eventos ahí,
+  // aunque Rayados sí entre por la consulta geográfica. Su calendario lo pinta un
+  // componente de terceros sobre una API JSON con la liga entera; se filtran los
+  // partidos de local. Son 7 por torneo, pero son los eventos más grandes de la
+  // ciudad junto con los de Rayados.
+  tigresConnector(),
+  // El museo privado grande de la ciudad, que no cubre nadie más: CONARTE es
+  // cultura del estado y Fever no vende sus actividades. Su WordPress expone una
+  // REST API que NO sirve (acf y content vacíos, igual que la de CONARTE), así
+  // que se parsea el HTML del listado, que agrupa por día.
+  marcoConnector(),
+  // El programa cultural de la universidad pública: Colegio Civil CCU, Sala
+  // Fósforo, Capilla Alfonsina y el Teatro Universitario de Mederos. Casi todo
+  // de entrada libre, que es justo lo que no vende ninguna boletera y lo que
+  // CONARTE no cubre por ser cultura del estado y no de la UANL. Su WordPress
+  // usa The Events Calendar, cuya REST API sí trae sede, hora y costo — al revés
+  // que la REST API estándar de WordPress, que en CONARTE y MARCO no sirve.
+  culturaUanlConnector(),
   // Auditorio Citibanamex se quitó (2026-07-23): Ticketmaster ya cubre ese
   // venue ("Auditorio Banamex") y el pageConnector solo vivía del fallback
   // LLM que nunca tuvo ANTHROPIC_API_KEY.

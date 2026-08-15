@@ -1,0 +1,91 @@
+[
+ {
+  "name": "Match #15 - Tigres vs Atlético San Luis",
+  "start": "2026-07-26T03:00:00+00:00",
+  "status": {
+   "value": "6",
+   "name": "Finish"
+  },
+  "matchday_id": "2",
+  "home": {
+   "id": "0a447649-1ed4-49dd-8a22-3bacb5d990b1",
+   "name": "Tigres"
+  },
+  "visitor": {
+   "id": "52ec70a4-decc-47af-b395-269e8d434f6a",
+   "name": "Atlético San Luis"
+  },
+  "edition": {
+   "name": "2026 Liga Mx - 2 Apertura",
+   "end_date": "2027-01-01 05:06:16"
+  }
+ },
+ {
+  "name": "Match #37 - Tigres vs Atlante",
+  "start": "2026-08-22T01:00:00+00:00",
+  "status": {
+   "name": "Not Started",
+   "value": "1"
+  },
+  "matchday_id": "5",
+  "home": {
+   "id": "0a447649-1ed4-49dd-8a22-3bacb5d990b1",
+   "name": "Tigres"
+  },
+  "visitor": {
+   "id": "759ccbc6-53aa-48a1-aa52-56ee015f4486",
+   "name": "Atlante"
+  }
+ },
+ {
+  "name": "Match #59 - Tigres vs Necaxa",
+  "start": "2026-09-06T01:00:00+00:00",
+  "status": {
+   "name": "Not Started",
+   "value": "1"
+  },
+  "matchday_id": "7",
+  "home": {
+   "id": "0a447649-1ed4-49dd-8a22-3bacb5d990b1",
+   "name": "Tigres"
+  },
+  "visitor": {
+   "id": "c78bb167-8f24-4db6-b50d-c4dc8a2fc6c5",
+   "name": "Necaxa"
+  }
+ },
+ {
+  "name": "Match #2 - Club Tijuana vs Tigres",
+  "start": "2026-07-17T03:10:00+00:00",
+  "status": {
+   "name": "Finish",
+   "value": "6"
+  },
+  "matchday_id": "1",
+  "home": {
+   "id": "a9eb47a5-9270-414c-affe-01b7fe6ce471",
+   "name": "Club Tijuana"
+  },
+  "visitor": {
+   "id": "0a447649-1ed4-49dd-8a22-3bacb5d990b1",
+   "name": "Tigres"
+  }
+ },
+ {
+  "name": "Match #1 - Necaxa vs Atlante",
+  "start": "2026-07-17T01:00:00+00:00",
+  "status": {
+   "value": "6",
+   "name": "Finish"
+  },
+  "matchday_id": "1",
+  "home": {
+   "id": "c78bb167-8f24-4db6-b50d-c4dc8a2fc6c5",
+   "name": "Necaxa"
+  },
+  "visitor": {
+   "id": "759ccbc6-53aa-48a1-aa52-56ee015f4486",
+   "name": "Atlante"
+  }
+ }
+]

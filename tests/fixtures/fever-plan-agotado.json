@@ -1,0 +1,65 @@
+{
+  "id": 660823,
+  "name": "La Odisea IMAX - Subtitulada",
+  "slug": "la-odisea-imax-subtitulada-660823",
+  "city_slug": "monterrey",
+  "is_timeless": false,
+  "type": "standard",
+  "category": "cinema",
+  "categories": [
+    "Entertainment",
+    "Mainstream Cinema",
+    "Movies"
+  ],
+  "description": "⚔️ Revive&nbsp;<strong><em>La Odisea</em></strong>, una épica aventura que redefine la leyenda bajo el lente de Christopher Nolan.<br> Tras años de guerra, Ulises emprende el viaje más peligroso de todos: regresar a casa. Pero dioses, monstruos y destinos implacables se interponen en su camino. ¿Estás listo para embarcarte en la travesía? Compra ya tus boletos y descúbrela en cines.<br><br><strong>Actores</strong>: Matt Damon, Tom Holland, Anne Hathaway, Zendaya<br><strong>Director</strong>: Christopher Nolan<br><br><strong>Qué vas a disfrutar</strong><br> 🎬 La única Megapantalla IMAX Laser GT Dual de México.<br> 🎞️ Formato IMAX 1.43:1 (Full IMAX) —mismo tamaño que 70mm—.<br> 🔊 Sonido IMAX de 12 canales que te coloca en el centro de la acción.<br><br><strong>Información</strong><br> 📅 Fecha y hora: elige la fecha y hora que quieras directamente en el selector de boletos<br> ⏳ Duración: 2 horas y 52 minutos<br> 📍 Lugar: IMAX en Papalote Museo del Niño Monterrey<br> 👤 Clasificación: B12 — A partir de los 12 años<br> ♿ Accesibilidad: accesible para personas con movilidad reducida<br><span> ❓ Puedes consultar las preguntas frecuentes y sus respuestas </span><a href=\"https://docs.google.com/document/d/e/2PACX-1vTpgSnfMLi_2mncRCkWjUydlp4rdIckNVDo0twv3xuUT_kCoJ97RUGDREsRlk5SM2G2Pdx5XqB89mlE/pub\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a><br><br><strong>Descripción</strong><br> De Christopher Nolan, director de “Oppenheimer”, “Interestelar” y “El Caballero de la Noche”, llega una nueva visión de uno de los relatos más grandes de todos los tiempos: “La Odisea”. Tras la caída de Troya, Ulises emprende un viaje extraordinario para regresar a Ítaca y reunirse con su familia. En el camino deberá enfrentarse a criaturas míticas, fuerzas divinas y desafíos que pondrán a prueba su valentía, su ingenio y su destino. Los dioses tejen desdichas para que a las futuras generaciones no les falte algo que cantar. ¡Compra tus boletos!<br>",
+  "is_calendar_selector": true,
+  "price_info": {
+    "type": "single",
+    "currency": "MXN",
+    "amount": 170,
+    "strikethrough": 200
+  },
+  "first_active_session_date": "2026-08-21T19:30:00-06:00",
+  "default_session": {
+    "id": 521027401,
+    "attend_text": "¡Apúntate!",
+    "available_tickets": 0,
+    "has_available_tickets": false,
+    "currency": "MXN",
+    "ends_at_iso": "2026-08-16T17:22:00-06:00",
+    "expiration_iso": "2026-08-16T15:30:00-06:00",
+    "label": "Acceso General Subtitulada",
+    "last_tickets": true,
+    "max_num_tickets": 0,
+    "min_num_tickets": 0,
+    "place_id": 27749,
+    "price": 170,
+    "starts_at_iso": "2026-08-16T15:10:00-06:00",
+    "surcharge_per_ticket": 18.65,
+    "surcharge_per_transaction": 0,
+    "timezone": "America/Mexico_City"
+  },
+  "media_gallery": [
+    {
+      "media_type": "photo",
+      "url": "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/dee307dc-6f56-11f1-9c59-56966117d6fb.jpeg",
+      "playback_rate": null,
+      "poster": null,
+      "g_auto_enabled": true,
+      "category": {
+        "role": "cover_image"
+      }
+    }
+  ],
+  "gallery": [
+    "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/dee307dc-6f56-11f1-9c59-56966117d6fb.jpeg"
+  ],
+  "places": [
+    {
+      "id": 27749,
+      "name": "Papalote Museo del Niño-Monterrey",
+      "address": "Avenida Fundidora Interior Papalote, Obrera, Monterrey, 64010",
+      "slug": "papalote-monterrey"
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+{
+ "events": [
+  {
+   "id": 8162,
+   "url": "https://cultura.uanl.mx/actividad/juan-rulfo-exposicion-fotografica-en-colegio-civil-cuna-de-la-uanl/",
+   "title": "Inauguración y conferencia magistral",
+   "description": "<div class=\"xdj266r x14z9mp xat24cr x1lziwak x1vvkbs x126k92a\">\n<div dir=\"auto\">Además de su extraordinaria sensibilidad literaria, Juan Rulfo poseía una mirada artística única det",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Foto-Monterrey.jpg",
+    "id": 8200
+   },
+   "all_day": false,
+   "start_date": "2026-08-12 12:00:00",
+   "end_date": "2026-08-12 20:30:00",
+   "utc_start_date": "2026-08-12 18:00:00",
+   "utc_end_date": "2026-08-13 02:30:00",
+   "timezone": "America/Mexico_City",
+   "cost": "Entrada libre",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": [
+     "entrada-libre"
+    ]
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Exposición",
+     "slug": "exposicion",
+     "id": 24
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 4652,
+    "url": "https://cultura.uanl.mx/lugar/colegio-civil-centro-cultural-universitario-2/",
+    "venue": "Colegio Civil Centro Cultural Universitario",
+    "slug": "colegio-civil-centro-cultural-universitario-2",
+    "address": "Colegio Civil s/n, entre 5 de Mayo y Washington, Monterrey, Nuevo León, C.P. 64000",
+    "city": "Monterrey",
+    "country": "Mexico",
+    "province": "Nuevo León",
+    "stateprovince": "Nuevo León",
+    "zip": "64000"
+   }
+  },
+  {
+   "id": 8242,
+   "url": "https://cultura.uanl.mx/actividad/alfonsina-en-concierto-2026/",
+   "title": "“Alfonsina en concierto” 2026",
+   "description": "<h4 style=\"text-align: center;\"><span style=\"color: #000000;\">La Universidad Autónoma de Nuevo León, a través de la Secretaría de Extensión</span><br />\n<span style=\"color: #000000",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Captura-de-Pantalla-2026-08-10-a-las-9.25.09.png",
+    "id": 8244
+   },
+   "all_day": false,
+   "start_date": "2026-08-20 12:00:00",
+   "end_date": "2026-08-20 13:00:00",
+   "utc_start_date": "2026-08-20 18:00:00",
+   "utc_end_date": "2026-08-20 19:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": []
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Concierto",
+     "slug": "concierto",
+     "id": 48
+    },
+    {
+     "name": "Música",
+     "slug": "musica",
+     "id": 25
+    }
+   ],
+   "tags": [],
+   "venue": {
+    "id": 4266,
+    "url": "https://cultura.uanl.mx/lugar/capilla-alfonsina-biblioteca-universitaria/",
+    "venue": "Capilla Alfonsina Biblioteca Universitaria",
+    "slug": "capilla-alfonsina-biblioteca-universitaria",
+    "address": "Av. Universidad, Pedro de Alba s/n, Ciudad Universitaria",
+    "city": "San Nicolás de los Garza",
+    "country": "Mexico",
+    "province": "Nuevo León",
+    "stateprovince": "Nuevo León",
+    "zip": "66455"
+   }
+  },
+  {
+   "id": 8253,
+   "url": "https://cultura.uanl.mx/actividad/circulo-de-lectura-y-creacion-fotografica/",
+   "title": "Círculo de lectura y creación fotográfica",
+   "description": "<p><span style=\"font-weight: 400;\">Círculo de lectura y creación fotográfica</span></p>\n<p><b>&#8220;El llano en llamas. Leer para mirar, mirar para crear&#8221;</b></p>\n<p><span s",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Captura-de-pantalla-2026-08-10-a-las-14.26.59.png",
+    "id": 8255
+   },
+   "all_day": false,
+   "start_date": "2026-08-19 18:00:00",
+   "end_date": "2026-09-23 20:00:00",
+   "utc_start_date": "2026-08-20 00:00:00",
+   "utc_end_date": "2026-09-24 02:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "Entrada libre",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": [
+     "entrada-libre"
+    ]
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Literatura",
+     "slug": "literatura",
+     "id": 32
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 4587,
+    "url": "https://cultura.uanl.mx/lugar/centro-de-investigacion-innovacion-y-desarrollo-de-las-artes-uanl/",
+    "venue": "Centro de Investigación, Innovación y Desarrollo de las Artes UANL.",
+    "slug": "centro-de-investigacion-innovacion-y-desarrollo-de-las-artes-uanl",
+    "address": "Praga S/N, CAMPUS MEDEROS, 64930 Monterrey, N.L.",
+    "city": "Monterrey",
+    "country": "Mexico",
+    "province": "Nuevo León",
+    "stateprovince": "Nuevo León",
+    "zip": "64930"
+   }
+  },
+  {
+   "id": 8228,
+   "url": "https://cultura.uanl.mx/actividad/nos-han-dado-la-tierra/",
+   "title": "Nos han dado la tierra",
+   "description": "<p>Espectáculo</p>\n<p><strong><em>Nos han dado la tierra</em>, de Juan Rulfo</strong></p>\n<p>Ilustración del cuento, Pablo Rulfo</p>\n<p>Ensamble de Guitarras de la UANL. Director: ",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/INTERIORES-Nos-han-dado-la-tierra-3-scaled.jpg",
+    "id": 8229
+   },
+   "all_day": false,
+   "start_date": "2026-08-13 18:00:00",
+   "end_date": "2026-08-13 19:00:00",
+   "utc_start_date": "2026-08-14 00:00:00",
+   "utc_end_date": "2026-08-14 01:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": []
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Especial",
+     "slug": "especial",
+     "id": 44
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 923,
+    "url": "https://cultura.uanl.mx/lugar/colegio-civil-centro-cultural-universitario/",
+    "venue": "Aula Magna Fray Servando Teresa de Mier del Colegio Civil CCU",
+    "slug": "colegio-civil-centro-cultural-universitario",
+    "address": "Calle Colegio Civil s/n, Centro",
+    "city": "Monterrey",
+    "country": "Mexico",
+    "province": "Nuevo León",
+    "stateprovince": "Nuevo León",
+    "zip": "64000"
+   }
+  },
+  {
+   "id": 9001,
+   "url": "https://cultura.uanl.mx/actividad/coloquio-cdmx/",
+   "title": "Coloquio en la Ciudad de México",
+   "description": "<div class=\"xdj266r x14z9mp xat24cr x1lziwak x1vvkbs x126k92a\">\n<div dir=\"auto\">Además de su extraordinaria sensibilidad literaria, Juan Rulfo poseía una mirada artística única det",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Foto-Monterrey.jpg",
+    "id": 8200
+   },
+   "all_day": false,
+   "start_date": "2026-08-25 18:00:00",
+   "end_date": "2026-08-25 20:00:00",
+   "utc_start_date": "2026-08-26 00:00:00",
+   "utc_end_date": "2026-08-26 02:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": [
+     "entrada-libre"
+    ]
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Literatura",
+     "slug": "literatura",
+     "id": 30
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 4892,
+    "url": "https://cultura.uanl.mx/lugar/capilla-alfonsina-inbal/",
+    "venue": "Capilla Alfonsina INBAL",
+    "slug": "capilla-alfonsina-inbal",
+    "address": "Gral. Benjamín Hill 122, Hipódromo Condesa, Cuauhtémoc, 06170 Ciudad de México, CDMX",
+    "city": "Ciudad de México",
+    "country": "Mexico",
+    "zip": "06170"
+   }
+  },
+  {
+   "id": 9002,
+   "url": "https://cultura.uanl.mx/actividad/charla-prepa-2/",
+   "title": "Charla en la Preparatoria 2",
+   "description": "<div class=\"xdj266r x14z9mp xat24cr x1lziwak x1vvkbs x126k92a\">\n<div dir=\"auto\">Además de su extraordinaria sensibilidad literaria, Juan Rulfo poseía una mirada artística única det",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Foto-Monterrey.jpg",
+    "id": 8200
+   },
+   "all_day": false,
+   "start_date": "2026-08-26 11:00:00",
+   "end_date": "2026-08-26 13:00:00",
+   "utc_start_date": "2026-08-26 17:00:00",
+   "utc_end_date": "2026-08-26 19:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "$120",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": [
+     "entrada-libre"
+    ]
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Academia",
+     "slug": "academia",
+     "id": 12
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 4899,
+    "url": "https://cultura.uanl.mx/lugar/preparatoria-2-de-la-uanl/",
+    "venue": "Preparatoria 2 de la UANL",
+    "slug": "preparatoria-2-de-la-uanl",
+    "address": "C. Mariano Matamoros 328, Obispado, 64060 Monterrey, N.L.",
+    "city": "Monterrey",
+    "country": "Mexico"
+   }
+  },
+  {
+   "id": 9003,
+   "url": "https://cultura.uanl.mx/actividad/funcion-pasada/",
+   "title": "Función de teatro que ya pasó",
+   "description": "<div class=\"xdj266r x14z9mp xat24cr x1lziwak x1vvkbs x126k92a\">\n<div dir=\"auto\">Además de su extraordinaria sensibilidad literaria, Juan Rulfo poseía una mirada artística única det",
+   "image": {
+    "url": "https://cultura.uanl.mx/wp-content/uploads/2026/08/Foto-Monterrey.jpg",
+    "id": 8200
+   },
+   "all_day": false,
+   "start_date": "2026-08-01 20:00:00",
+   "end_date": "2026-08-01 22:00:00",
+   "utc_start_date": "2026-08-02 02:00:00",
+   "utc_end_date": "2026-08-02 04:00:00",
+   "timezone": "America/Mexico_City",
+   "cost": "",
+   "cost_details": {
+    "currency_symbol": "$",
+    "currency_code": "MXN",
+    "currency_position": "prefix",
+    "values": [
+     "entrada-libre"
+    ]
+   },
+   "status": "publish",
+   "categories": [
+    {
+     "name": "Teatro",
+     "slug": "teatro",
+     "id": 33
+    }
+   ],
+   "tags": [
+    {
+     "name": "Jornadas Juan Rulfo",
+     "slug": "jornadas-juan-rulfo"
+    }
+   ],
+   "venue": {
+    "id": 4582,
+    "url": "https://cultura.uanl.mx/lugar/teatro-universitario-unidad-mederos/",
+    "venue": "Teatro Universitario, Unidad Mederos",
+    "slug": "teatro-universitario-unidad-mederos",
+    "address": "Praga y, Trieste s/n, Las Torres, 64930 Monterrey, N.L.",
+    "city": "Monterrey",
+    "country": "Mexico",
+    "province": "Nuevo León",
+    "stateprovince": "Nuevo León",
+    "zip": "64930"
+   }
+  }
+ ],
+ "rest_url": "https://cultura.uanl.mx/wp-json/tribe/events/v1/events/",
+ "total": 7,
+ "total_pages": 1
+}

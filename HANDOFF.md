@@ -1,7 +1,47 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-08-12 (**`/perfil` reordenado, y un agujero de
+> Última actualización: 2026-08-14 (**AREMA publicaba 147 de sus 150 eventos sin
+> precio, y el precio estaba ahí todo el tiempo**: su `sinopsis` no es prosa, es una
+> ficha con el mismo formato en 114 de las 115 distintas de la BD, con `Zonas y
+> Precios:` y `Dirección del evento:`. `parseFicha()` la lee y ahora el **100 % de los
+> eventos vigentes de AREMA tiene precio** y 155 de 163 tienen dirección. Los precios se
+> publican **por persona** (una mesa de 6 a $2,700 son $450, no $2,700). La fecha y la
+> hora **no** se parsean: `dates[]` ya las da en epoch y son correctas. **Cultura UANL
+> tenía el mismo problema en chico**: 6 de sus 7 sin precio decían "Entrada libre" en la
+> descripción y su conector sólo leía el campo `cost`; ahora sus 10 vigentes salen
+> "Gratis". Y el **"día adelantado" no era un bug**: el VPS corre en UTC y todo preview
+> levantado a mano pinta seis horas de más; producción está en `America/Monterrey` y
+> siempre estuvo bien. Queda documentado un hueco que salió al revisar esto: **un evento
+> que desaparece de su fuente se sigue publicando** (la ingesta sólo agrega, y 8 de 10
+> fuentes no exponen cancelaciones) — ver `FUENTES.md` § "La ingesta sólo agrega".
+> Ver "Sesión 2026-08-14". Commits locales, **sin pushear**).
+> Antes, 2026-08-13 (noche) (**se cierran los tres pendientes del
+> triaje de fuentes**. De "los auditorios universitarios" salió la **décima fuente**:
+> **Cultura UANL**, ~12 eventos en cinco sedes que no tiene nadie más, por la REST API
+> del plugin *The Events Calendar* — no la de WordPress, que aquí también está y también
+> es inútil. **Meetup: descartado por contenido** (9 eventos en Monterrey, 6 online, y la
+> ruta útil prohibida por su `robots.txt`). **Passline: cerrada**, ahora sí con la doble
+> prueba de User-Agent. **Tec de Monterrey: cerrado de derecho** (`Disallow: /`).
+> Ver "Sesión 2026-08-13 (noche)". Commit local, **sin pushear**).
+> Antes, 2026-08-13 (tarde) (**Fever arreglada**: la etapa 2 ya no lee el
+> HTML de la página del plan —que Fever migró de Astro a Angular y dejó de precargar las
+> funciones— sino la **API REST** que ese mismo Angular llama. Vuelve a rendir **56
+> eventos**. De paso se limpiaron los 5 errores viejos de `tsc` en `tests/fever.test.ts`.
+> Ver "Sesión 2026-08-13 (tarde)". Commit local, **sin pushear**).
+> Antes, 2026-08-13 (**la consulta de Ticketmaster se comía un tercio
+> de la fuente**, y dos fuentes nuevas. `city=Monterrey` sólo devuelve el municipio y
+> Monterrey es un área metro: faltaban **41 de 131** eventos —el Foro Corona entero,
+> más Rayados y tres fechas de Karol G en el Estadio BBVA—. Ahora se pregunta por
+> geohash + radio, se pagina de verdad y revienta si el filtro geográfico se cae.
+> Además, **octava y novena fuentes: Tigres UANL y MARCO**, las dos con solape cero.
+> Y un hallazgo que en su momento **no** se arregló: **Fever está rota** —migró de Astro
+> a Angular— y rinde cero; se arregló esa misma tarde, arriba. Del triaje del resto
+> quedan dos pendientes de verdad: **Meetup** (sin sondear) y **Sultanes**, que no está
+> cerrada sino que **filtra por User-Agent** y es una decisión de política, no técnica.
+> Ver "Sesión 2026-08-13".
+> Commits locales, **sin pushear**).
+> Antes, 2026-08-12 (**`/perfil` reordenado, y un agujero de
 > verdad tapado: un perfil nuevo nacía en silencio permanente**. La lista de
 > categorías vacía no significaba "todo" sino "nada" —el match sólo dice que sí
 > cuando la categoría del evento está en la lista, y el digest trata "cero
@@ -116,12 +156,10 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **213 tests puros pasan** (`npm test`) + **35 de BD** (`npm run test:borra-bd`, ver
-  más abajo). **Lint limpio** (`npm run lint`).
-  ⚠️ **`tsc --noEmit` NO está limpio: 5 errores**, todos en `tests/fever.test.ts` y
-  todos del commit `16b7159` (2026-08-07). Son de tipado del fixture de `fetch`
-  (`Record<string, string>` contra un objeto de claves literales), no afectan a los
-  tests —pasan— ni al build de producción. Medido el 2026-08-08. Sin arreglar.
+- **301 tests puros pasan** (`npm test`) + los de BD (`npm run test:borra-bd`, ver
+  más abajo). **Lint limpio** (`npm run lint`) y **`tsc --noEmit` limpio**: los 5
+  errores que arrastraba `tests/fever.test.ts` desde el 2026-08-07 se fueron al
+  reescribir ese archivo el 2026-08-13. Medido el 2026-08-13.
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
@@ -144,6 +182,347 @@ completos si están presentes.
   mismo lenguaje visual. Se eligió entre 2 prototipos, que vivían sin trackear en
   `design/` y **se borraron el 2026-08-06** (ya no aportaban: el diseño elegido
   lleva semanas en producción). `formatPrecio` ahora usa separador de miles.
+
+## Sesión 2026-08-14 — el precio de AREMA estaba en la descripción
+
+Salió de mirar la app: en el detalle de "Gran Feria Nuevo León" el precio, la dirección y
+las fechas venían **dentro del texto de la descripción**, y la ficha del evento arriba
+salía vacía. Se midió antes de tocar nada, y el hueco era grande:
+
+| Fuente | eventos | sin precio | …pero con `$` en la descripción |
+|---|---|---|---|
+| **arema** | 150 | **147** | **147** |
+| ticketmaster | 127 | 127 | 0 (no trae descripción) |
+| superboletos | 91 | 91 | 0 |
+| arena-monterrey | 51 | 51 | 0 |
+
+**AREMA es la única fuente con el dato escondido en el texto**; las demás sin precio
+tampoco traen descripción, así que ahí no hay nada que parsear. El trabajo se limitó a
+AREMA a propósito.
+
+### Qué se hizo
+
+`parseFicha()` en `src/lib/ingest/sources/arema.ts`. Su `sinopsis` **no es prosa**: es una
+ficha con el mismo formato en **114 de las 115** distintas que había en la BD (`Fecha:`,
+`Hora:`, `Lugar:`, `Dirección del evento:`, `Zonas y Precios:`, `Puntos de venta
+oficiales:`). Se leen **dos** cosas: el bloque de precios y la dirección.
+
+- **100 % de los eventos vigentes de AREMA ahora tiene precio** (los 31 que quedan sin él
+  ya pasaron y la fuente dejó de listarlos: nunca se vuelven a tocar).
+- **155 de 163 tienen dirección**; antes 35 de sus 39 recintos no tenían ninguna.
+
+### Lo que NO se hizo, y por qué
+
+- **La fecha y la hora no se parsean.** `dates[]` ya las da en epoch y son correctas —se
+  verificó contra la ficha en la muestra—. Reparsear texto en español para pisar un dato
+  estructurado que ya está bien sólo agrega maneras de romperlo, y la ficha las escribe en
+  formatos que ni coinciden entre sí ("Del Viernes 17 de Julio al Domingo 16 de Agosto").
+- **`Lugar:` tampoco.** A veces es más completo que `venue_name` ("Rincón Tostitos By
+  Jardín 85" vs "Jardin 85"), pero el nombre del recinto es la cuerda de la que cuelgan el
+  dedupe y `ALIAS_VENUE`. Sólo se llena `address`.
+- **Las cifras sin `$` se ignoran.** `General (día del evento): 1,100` es un precio, pero
+  sin el signo no se distingue de un código postal. Se pierde algún máximo, ningún mínimo.
+
+Las reglas finas (mesas a precio por persona, precios de grupo sin cupo, el corte del
+bloque antes de `Puntos de venta`) están en `FUENTES.md` § AREMA, con la tabla de trampas.
+Once pruebas nuevas en `tests/arema.test.ts`, todas con recortes literales de sinopsis
+reales. `npm test`: 314 en 22 archivos, verde. `tsc` y `eslint` limpios.
+
+### Cultura UANL tenía el mismo problema, en chico
+
+Al revisar si AREMA era la única, salió que **no**. De los 7 eventos de Cultura UANL sin
+precio, **6 dicen "Entrada libre" en la descripción**: su conector sólo leía el campo
+`cost` de la API y nunca el texto. `entradaLibreEnTexto()` lo usa de respaldo y ahora
+**los 10 que la fuente lista están en `0` ("Gratis")** — que es justo lo que le da valor
+a esa fuente, siendo casi todo su programa gratuito.
+
+No se reusó `parsePrecio` sobre la descripción: en un campo corto como `cost` buscar
+cifras está bien, en prosa larga tomaría `2023, 127 min` y `19:00 horas` por pesos. Sólo
+se reconoce la frase completa (`libre` a secas es "aire libre"), y si el texto menciona
+un monto no se declara gratis.
+
+⚠️ **Medirlo contra la BD da menos de lo real**: el conector guarda la descripción
+recortada a 500 caracteres pero evalúa la completa, y la frase suele ir al final ("Los
+recuerdos de la luz" la tiene en el 612). Para esto hay que pegarle a la API.
+
+**CONARTE fue falsa alarma**: 18 de sus eventos parecían traer dirección en el texto, pero
+lo que dice es `Dirección Angélica Rogel` — el **director de la obra**. Sus 50 sin
+dirección no la traen en ningún lado.
+
+Las demás fuentes sin precio (ticketmaster 127, superboletos 91, arena-monterrey 51,
+tigres 7) **no traen descripción**: ahí no hay nada que parsear, es otro problema.
+
+### El "día adelantado" NO era un bug: el VPS corre en UTC
+
+Se reportó que algunos eventos salían un día adelantados, con hora `12:00 am`. **No lo
+era, y no se cambió ni una línea de fechas.** El host está en `Etc/UTC`, `formatFecha`
+usa la hora local del proceso, y cualquier preview levantado a mano pinta seis horas de
+más. Producción corre en `America/Monterrey` (`ENV TZ` del `Dockerfile`, verificado con
+`date` dentro del contenedor: `Fri Aug 14 11:38 CST`) y su cartelera de AREMA tiene
+**cero** eventos a las 12:00 am — 72 a las 9:00 pm y 13 a las 8:00 pm.
+
+Queda anotado en `AGENTS.md` § "El VPS corre en UTC", con el comando para levantar el
+preview en la zona correcta. **Descartar esto antes de perseguir cualquier bug de fechas.**
+
+### Pendiente que dejó a la vista
+
+🟡 **Las descripciones con markdown se enseñan crudas** (`**Fecha:**` con asteriscos). El
+parser los ignora, pero la descripción se guarda tal cual y `upsertEvents` conserva la
+existente (`existing.description ?? ev.description`), así que arreglarlo no es sólo tocar
+el conector.
+
+🟡 **Un evento que desaparece de su fuente se sigue publicando.** `upsertEvents` sólo
+agrega y actualiza —lo que la fuente dejó de traer ni se mira— y **nada borra eventos
+nunca** (578 filas, 90 ya pasadas). Sólo `ticketmaster` y `tigres` pueden marcar
+`cancelado`; las otras ocho escriben `"activo"` a fuerza porque sus sitios no exponen
+cancelaciones: ahí una cancelación **se ve como el evento desapareciendo del listado**, y
+la fila se queda publicada hasta que su fecha pasa. Al 2026-08-14 eran **3 huérfanos**
+(2 de Fever, 1 de Superboletos — uno de ellos publicado para el día siguiente después de
+seis días sin aparecer en su fuente).
+
+No está arreglado porque la corrección obvia es donde está el peligro: hay que distinguir
+**"la fuente se rompió"** de **"el evento se canceló"** —confundirlas vacía la cartelera
+por un error de red— y además un evento puede desaparecer porque **se agotó** o porque lo
+movieron de sección, que desde aquí se ve idéntico. El dato para detectarlos ya existe
+(`EventSource.lastSeenAt`). **La consulta para medirlos y el detalle están en `FUENTES.md`
+§ "La ingesta sólo agrega".**
+
+## Sesión 2026-08-13 (noche) — se cierran los tres pendientes del triaje
+
+Los tres que quedaban sin resolver en `FUENTES.md` § "Fuentes sin explorar": **Meetup**,
+**los auditorios universitarios** y **Passline**. Los tres tienen ya veredicto medido, y
+de ellos salió la **décima fuente**.
+
+### 1. Décima fuente: Cultura UANL (~12 eventos, todos de sedes nuevas)
+
+De los "auditorios universitarios" salió una fuente: `cultura.uanl.mx`, el programa
+cultural de la universidad pública. Ciclos de cine, exposiciones y conferencias en
+**cinco recintos que no tiene ninguna otra fuente** (Colegio Civil CCU, Sala Fósforo,
+Aula Magna, Capilla Alfonsina, CIIDA), casi todo de entrada libre.
+
+⚠️ **Lo que no funcionó fue el método, no el contenido:** buscarle el sitio a cada
+auditorio por su cuenta no lleva a ningún lado; la agenda que los publica juntos, sí.
+El contenido **es** de auditorios universitarios — el Aula Magna Fray Servando es el
+auditorio grande del Colegio Civil y entró. `FUENTES.md` tiene la tabla de qué recinto
+universitario trae quién; el resumen es que después de esta sesión están cubiertos
+todos los que programan para público: los cinco nuevos, más el **Luis Elizondo** (que
+ya entraba por Ticketmaster y AREMA), el **Teatro Universitario** (AREMA) y el
+**Estadio Universitario** (Tigres). Quedan fuera sólo los auditorios de facultad
+sueltos, que publican capacitaciones internas.
+
+**Lo que enseña, y por eso va aquí:** su WordPress usa el plugin **The Events Calendar**,
+que expone una REST API **documentada y versionada** con sede, hora, costo y categoría.
+Una petición, ~900 ms, sin etapa 2. Estuvo a punto de no mirarse: la REST API **estándar**
+de WordPress ya había resultado inútil dos veces (CONARTE y MARCO), y eso empuja a dar
+"WordPress" por sinónimo de "hay que scrapear". Son dos APIs distintas en el mismo sitio.
+Ver la regla 8 de `FUENTES.md`, ampliada con esto.
+
+Dos defensas que no son opcionales (detalle en su ficha):
+
+- **El catálogo de sedes no es sólo de Monterrey** — tiene la Capilla Alfonsina del
+  **INBAL (CDMX)** y la **Casa da América Latina (Lisboa)**. Y `province === "Nuevo León"`
+  no basta: una sede lo escribe `"N.L."` y otra no trae provincia, sólo el CP.
+- **Dos de sus sedes ya estaban en la BD con otro nombre**, puestas por AREMA →
+  `ALIAS_VENUE`. Sin eso el resultado no habría sido "cero duplicados" sino "cero
+  duplicados **detectables**", que es peor.
+
+### 2. Meetup: descartado por CONTENIDO, no por técnica
+
+Se esperaba que complementara a Luma en tech. Medido: la búsqueda de Monterrey devuelve
+**9 eventos reales y 6 son online**; el AWS User Group tiene **0** futuros, LFDT tiene 6 y
+**los 6 son webinars**, Kong tiene 1. El único grupo con volumen es un club de juegos de
+mesa con **30 fechas casi idénticas**. Encima, la ruta con el catálogo
+(`/find/?location=…`) está **prohibida por su `robots.txt`** (`Disallow: /*?location=*`), y
+la permitida es una página de teaser de 5 eventos. No se hace.
+
+### 3. Passline: cerrada, y esta vez con la doble prueba
+
+403 **con los dos User-Agents**. Es un desafío gestionado de Cloudflare (`cf-mitigated:
+challenge`): pasarlo es evadir el WAF, la misma línea que se decidió no cruzar con Boletia.
+El veredicto viejo ("cerrada") era correcto, pero estaba apoyado en una sola prueba de UA —
+que es justo lo que hizo dar Sultanes por muerta. Ahora está comprobado.
+
+### 4. El Tec queda fuera, y por escrito
+
+`tec.mx` tiene `robots.txt` = `User-agent: * / Disallow: /`: el sitio entero. Cerrado **de
+derecho**, no de hecho. Y tampoco hay agenda que scrapear: `/es/eventos` redirige a un 404
+servido con 403, y lo que su sitemap llama "eventos" es la sección para **rentar** sus
+venues. El Auditorio Luis Elizondo ya entra por Ticketmaster y AREMA.
+
+También se descartó la **agenda institucional de la UANL** (`uanl.mx/eventos`), que es la
+más fácil de scrapear de todas y aun así no conviene: 46 eventos de vida interna
+(capacitaciones, cursos de agronomía), **24 sin hora**, y repite los culturales **con otro
+nombre de sede** — duplicaría media programación sin que el dedupe pudiera verlo.
+
+### Estado
+
+Un commit local **sin pushear**. `npm test`: **301 pasan** (eran 273), 22 archivos.
+`tsc --noEmit` y `eslint` limpios. Cero duplicados contra la BD dev, verificado por pares
+sede+día y no con la función que dedupea (regla 5).
+
+⚠️ El push **sigue bloqueado** por lo de § "LO PRIMERO", que no tiene nada que ver con las
+fuentes.
+
+## Sesión 2026-08-13 (tarde) — Fever arreglada: la etapa 2 se pasó a su API
+
+Venía de la sesión de la mañana como el pendiente con nombre propio. Estaba rota de
+verdad, y el arreglo terminó dejando el conector **menos** frágil que antes.
+
+### Qué estaba roto
+
+La etapa 2 leía `/m/<id>` y sacaba todo de un `<script id="astro-tools-transfer-state">`.
+Fever migró esa página a **Angular** y ese script ya no existe. Pero lo importante no es
+el renombre (`serverApp-state`), sino que **el estado nuevo ya no precarga las
+funciones**: para un Candlelight sólo trae el detalle y UNA sesión (`default_session`).
+Renombrar la clave habría dado un conector que "funciona" y publica un evento por plan
+en vez de sus tres fechas. La etapa 1 (los ids de la home) **nunca se rompió**: sigue
+siendo Astro y sigue soltando los 49 planes.
+
+### Cómo se encontró la API
+
+La receta de la regla 8 falla en el paso obvio: **cargar la página con CDP y anotar la
+red no muestra nada**, porque lo que trae el SSR ya no se vuelve a pedir. Lo que la
+destapó fue bajar los ~220 chunks del bundle de Angular y grepearlos por el **nombre de
+la clave del estado precargado** — Angular usa como clave el nombre del método
+(`getPlanSessionsForPlaceAndDate`), y ahí al lado está la plantilla de la URL. La
+versión de la API (`getApiBaseUrl("4.4")`) estaba en otro chunk, y la base
+`https://feverup.com/api/` no aparece como literal: se probó a mano contra tres
+candidatas. Todo eso ya está en `FUENTES.md` (regla 8 y la ficha de Fever).
+
+### La decisión que sí importaba: qué endpoint para qué plan
+
+Hay un `sessions/` que responde 200 para cualquier plan, y era tentador usar sólo ése.
+**No sirve para los planes con calendario**: medido sobre los 9 de la home, a "La Odisea
+IMAX" le daba lugar hoy mientras el calendario la daba agotada hasta ocho días después.
+El sitio nunca llama a `sessions/` para esos planes —usa `availability/` y luego
+`sessions_for_date/` del día elegido—, y el conector ahora hace lo mismo. Se comprobó
+plan por plan antes de escribir el código, no después.
+
+De paso, el evento de un plan de temporada ya no sale con el precio de la primera zona
+que aparezca (880 en el Laberinto de Tim Burton) sino con el rango real de ese día
+(225–880): se publican **todas** las funciones del día elegido y el precio sale del más
+barato al más caro, como en cualquier otro plan.
+
+### Estado
+
+- **56 eventos**, los mismos que rendía antes de romperse, en ~3 s y ~79 peticiones
+  (1 la home + 1 detalle por plan + 1 o 2 de disponibilidad).
+- Fixtures nuevos: los 4 HTML de páginas de plan se fueron y quedaron **7 JSON** de la
+  API, capturados en vivo y podados.
+- `npm test` **273/273**. Y `tsc --noEmit` queda **limpio**: los 5 errores viejos de
+  `tests/fever.test.ts`, que arrastrábamos desde el 7 de agosto, eran del tipado de las
+  rutas del `fakeFetch` y se fueron con la reescritura.
+
+---
+
+## Sesión 2026-08-13 — Ticketmaster perdía un tercio, y dos fuentes nuevas
+
+Arrancó con "¿podemos agregar más conectores?". La respuesta corta es sí, pero lo más
+caro que había no era una fuente nueva: era un bug en la que ya teníamos.
+
+### 1. `city=Monterrey` se comía 41 de 131 eventos
+
+La consulta a Ticketmaster llevaba desde siempre `city=Monterrey`, y **Monterrey es un
+área metropolitana**: para ellos el Estadio BBVA está en *Guadalupe* y el Foro Corona
+en *"Col. Centro Monterrey"*. Faltaban:
+
+| Venue | Eventos | Qué había ahí |
+|---|---|---|
+| Foro Corona Monterrey | 34 | un venue entero, invisible desde el día uno |
+| Estadio BBVA | 5 | **Rayados** y tres fechas de **Karol G** |
+| Parque Diego Rivera | 2 | los dos `Miscellaneous`, se descartan igual |
+
+`FUENTES.md` decía que la fuente traía "0 eventos de `Sports`" y lo daba por un dato
+curioso sobre el deporte. Era geografía. Ahora se pregunta por **geohash + radio de
+30 km** (con 50 km sale el mismo conjunto; Saltillo está a 85). Verificado por id que
+la consulta nueva es **superconjunto estricto** de la vieja: 0 eventos se perdieron.
+
+De paso, dos cosas que estaban a un evento de romperse:
+
+- **Se pagina.** Pedía `size=100` y traía 90 de 90. Una truncadura es invisible para
+  `hayCaida()`, que sólo ve la caída a cero.
+- **Revienta si >20% de los eventos no son de Nuevo León.** Esta API responde 200
+  aunque un parámetro no le guste (la trampa de Luma), y el filtro geográfico es lo
+  único que nos separa del catálogo nacional.
+
+Resultado en vivo: **127 eventos normalizados** contra ~87 de antes.
+
+### 2. Octava fuente: Tigres UANL (~7 partidos)
+
+Rayados entra por Ticketmaster; **Tigres no está ahí en absoluto** —consultado por
+`venueId`, el Estadio Universitario da 0—. Su calendario lo pinta un componente de
+terceros sobre una API JSON con la Liga MX entera; se filtran los de local.
+
+La URL **no estaba en el bundle**: salió de capturar la red con CDP. Dos trampas que
+valen para el siguiente: los atributos del componente traen **espacios alrededor del
+`=`** (`edition = "…"`), y la página se queda apuntando a un **torneo vencido** — la
+del femenil sigue en un Clausura que terminó en junio, y por eso da cero. El conector
+revienta si la edición ya terminó, porque si no, en enero se apagaría en silencio.
+
+### 3. Novena fuente: MARCO (~5 eventos)
+
+El museo privado grande, que no cubre nadie más. WordPress, y su REST API estándar
+**no sirve** (igual que la de CONARTE: `acf` y `content` vacíos). Se parsea el HTML
+del listado, que agrupa por día.
+
+La trampa buena: **la paginación miente**. Los enlaces dicen `/eventos/page/2/` y esa
+URL responde **404**; el tema los intercepta con JS y pide una ruta REST propia. Sin
+encontrarla se perdía la segunda página entera y **nada fallaba**.
+
+### 4. Regla 7: cero duplicados
+
+Medido con las 9 fuentes en memoria. `Estadio Universitario` y `MARCO` son venues
+**exclusivos** de su fuente, y los dos venues que entraron por el arreglo geográfico
+(Foro Corona, Estadio BBVA) tampoco los tiene nadie más.
+
+### 🔴 Lo que se encontró aquí y se arregló después: Fever está rota
+
+Salió de rebote al correr las 9 fuentes. **Fever migró las páginas de plan de Astro a
+Angular**: el `<script id="astro-tools-transfer-state">` del que cuelga toda la etapa 2
+ya no existe (ahora hay un `serverApp-state`). El conector revienta —hace lo correcto,
+regla 1— pero **rinde cero**. ✅ Arreglado esa misma tarde: ver "Sesión 2026-08-13
+(tarde)", arriba.
+
+### 5. Triaje de las fuentes que quedan, y dos veredictos corregidos
+
+La lista completa vive en `FUENTES.md` § "Fuentes sin explorar", ya con la distinción
+entre **cerrada**, **filtra por User-Agent** y **descartada por contenido**. Lo que
+hay que saber aquí es que **la primera versión de esa tabla se equivocó en dos de
+seis filas**, y las dos por el mismo motivo: dar un 403 por definitivo.
+
+- **Sultanes NO está cerrada.** Da 403 a nuestro User-Agent y **200 a uno de
+  navegador**. Es un filtro de UA, no un muro: alcanzable quitando el UA
+  identificable, que es exactamente lo que la regla 6 pide conservar. **Decisión
+  pendiente del dueño del proyecto, no técnica.** Es la única candidata con
+  contenido que de verdad falta (béisbol, temporada larga).
+- **Ticketon no es una fuente de Monterrey.** Se había anotado como "habría que
+  buscarle la estructura". No: es una boletera del mercado latino de **Estados
+  Unidos** y no tiene una sola ciudad de México. Por eso las rutas por ciudad daban
+  404. Descartada por contenido, que es más definitivo que por técnica.
+- **Resident Advisor sí está cerrada**, y ahí el veredicto aguantó la doble prueba:
+  403 con los dos UA. Con un matiz: su `robots.txt` **nos permite** todo lo que nos
+  interesa. Cerrada de hecho, no de derecho.
+
+⚠️ **Método, para la próxima:** un 403 con nuestro User-Agent no prueba nada por sí
+solo. Repetir con UA de navegador **antes** de escribir "cerrada" — que es lo que el
+reconocimiento de Boletia sí hizo en su día, y por eso ése sigue en pie.
+
+### Cómo revisar una fuente nueva en la cartelera
+
+`?fuente=<slug>` filtra por conector (`/?fuente=marco`, `/?fuente=tigres`). No tiene
+chip en la UI a propósito: es para revisar qué trajo cada fuente después de una
+ingesta. Ojo al usarlo: **la cartelera arranca en el mes en curso**, así que de los 7
+partidos de Tigres sólo se ve el de agosto hasta que cambies de pestaña.
+
+### Estado
+
+Tres commits locales **sin pushear**. Tests: 264 pasan (eran 231). ⚠️ `npx tsc
+--noEmit` tiene 5 errores **preexistentes** en `tests/fever.test.ts`, ajenos a esto.
+
+⚠️ Ojo con la tentación de pushear "ya que estamos": **el push sigue bloqueado** por
+lo de arriba (§ "LO PRIMERO"), que no tiene nada que ver con las fuentes. Verificado
+este día en el contenedor de prod: `TWILIO_CONTENT_SID_OTP` no existe y
+`WHATSAPP_TEST_MODE=true`.
 
 ## Sesión 2026-08-12 — `/perfil`: un agujero real y cuatro cambios de forma
 
@@ -594,7 +973,8 @@ En cascada se fue **1 `SavedEvent`**: el del recordatorio de prueba del 2026-08-
    antes del que eligieron. Hoy no pasa sólo por `ENV TZ=America/Monterrey`
    (`Dockerfile:26`). Propuesto calcular el día con zona explícita; **el usuario lo dejó
    fuera** de este lote a propósito.
-3. Los 5 errores de `tsc` en `tests/fever.test.ts` (ver "Estado", arriba).
+3. ~~Los 5 errores de `tsc` en `tests/fever.test.ts`~~ — arreglados el 2026-08-13 al
+   reescribir ese archivo.
 
 ### El cron del digest, corregido — y por qué la hora no era el hueco
 

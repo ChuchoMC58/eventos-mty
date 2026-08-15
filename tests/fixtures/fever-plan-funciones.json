@@ -1,0 +1,80 @@
+{
+  "id": 114535,
+  "name": "Candlelight: Las Cuatro Estaciones de Vivaldi",
+  "slug": null,
+  "city_slug": "monterrey",
+  "is_timeless": false,
+  "type": "standard",
+  "category": "nightlife",
+  "categories": [
+    "Candlelight concert",
+    "Classical Music",
+    "Classical Solo & Ensembles",
+    "Music Genre",
+    "Musical Event",
+    "Nightlife & Concerts",
+    "Small Gig",
+    "Social/Music Events"
+  ],
+  "description": "<p>⭐ <em><strong>Candlelight</strong> son los conciertos a la luz de las velas que traen la magia de una experiencia musical y multisensorial en vivo a lugares increíbles en Monterrey. Compra ya tus boletos para descubrir Las Cuatro Estaciones de A. Vivaldi en El Museo de Historia Mexicana, bajo la tenue luz de las velas.</em></p>\r\n<em>Esta experiencia de concierto es un tributo. No está vinculada, respaldada ni patrocinada por el artista, sus herederos ni sus representantes oficiales.</em>\r\n\r\n<p><strong>Información:</strong><br>\r\n📍 Lugar: Museo de Historia Mexicana, Sala Madre Tierra<br>\r\n📅 Fecha y hora: selecciona la fecha y hora que quieras directamente en el selector de boletos<br>\r\n⏳ Duración: 65 minutos aprox&nbsp;<br>\r\n🛑 No se permitirá el ingreso una vez iniciada la función (apertura de puertas 30 minutos antes)<br>\r\n👤 Edad: a partir de 8 años. Los menores de 16 años deberán acudir acompañados por un adulto<br>\r\n♿ Accesibilidad: accesible para sillas de ruedas<br>\r\n❓ Puedes consultar las preguntas frecuentes de este evento <a href=\"https://docs.google.com/document/d/e/2PACX-1vThYML0awKOxjBJk6U-PpgrSuRXyZgrEf7Yzs-g3_vPvpSHdcqmBu6VFKYvF9oF8-N9FCxtty5c6HOW/pub\" rel=\"noopener\" target=\"_blank\">aquí</a><br>\r\n🚗 Estacionamiento:&nbsp;el recinto cuenta con estacionamiento propio (acceso por la calle Diego de Montemayor), y hay varios estacionamientos cercanos<br>\r\n🪑 Los asientos se asignarán según orden de llegada por cada zona<br>\r\n🕯️ Si quieres reservar un concierto privado o comprar boletos para un grupo grande (+30 personas), haz clic <a href=\"https://candlelightexperience.com/groups/es/#groups-form\" rel=\"noopener\" target=\"_blank\">aquí</a><br>\r\n🎻 Consulta todos los <a href=\"https://feverup.com/es/monterrey/candlelight\" rel=\"noopener\" target=\"_blank\">conciertos Candlelight</a> en Monterrey<br>\r\n🎁 Consigue una tarjeta regalo para tus amigos y familia <a href=\"https://feverup.com/m/499310\" rel=\"noopener\" target=\"_blank\">aquí</a></p>\r\n\r\n<p><strong>Programa:</strong></p>\r\n\r\n<ul>\r\n\t<li>Primavera: Allegro/Largo/Danza Pastoral</li>\r\n\t<li>Verano: Allegro non molto/Adagio/Presto</li>\r\n\t<li>Otoño: Allegro/Adagio Molto/Allegro</li>\r\n\t<li>Invierno: Allegro non molto/Largo/Allegro</li>\r\n</ul>\r\n\r\n<p><strong>Intérpretes:</strong></p>\r\n\r\n<ul>\r\n\t<li>Ensamble formado por 3 violines, viola y violonchelo - Ensamble Madero</li>\r\n</ul>\r\n\r\n<center><img align=\"middle\" class=\"extra-image-plan\" src=\"https://applications-media.feverup.com/image/upload/f_auto,w_480/fever2/plan/photo/d78ff58a-fdc2-11ec-97ff-b2a363a1264c.jpg\" width=\"290px\"></center>",
+  "is_calendar_selector": false,
+  "price_info": {
+    "type": "from",
+    "currency": "MXN",
+    "amount": 500,
+    "strikethrough": null
+  },
+  "first_active_session_date": "2026-09-26T19:00:00-06:00",
+  "default_session": {
+    "id": 469653851,
+    "attend_text": "¡Apúntate!",
+    "available_tickets": 30,
+    "has_available_tickets": true,
+    "currency": "MXN",
+    "ends_at_iso": "2026-09-26T20:00:00-06:00",
+    "expiration_iso": "2026-09-26T19:00:00-06:00",
+    "label": "Zona A por MX$1.190,00",
+    "last_tickets": false,
+    "max_num_tickets": 30,
+    "min_num_tickets": 1,
+    "place_id": 22981,
+    "price": 1190,
+    "starts_at_iso": "2026-09-26T19:00:00-06:00",
+    "surcharge_per_ticket": 59.5,
+    "surcharge_per_transaction": 0,
+    "timezone": "America/Mexico_City"
+  },
+  "media_gallery": [
+    {
+      "media_type": "video",
+      "url": "https://applications-media.feverup.com/video/upload/f_auto,w_720,h_720/fever2/plan/video/d55f8ab6-7775-11f0-91c3-ee1c15b8ea6c.mp4",
+      "playback_rate": 0.75,
+      "poster": null,
+      "g_auto_enabled": false,
+      "category": {
+        "role": "default"
+      }
+    },
+    {
+      "media_type": "photo",
+      "url": "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/7c807528-1ab3-11f0-9eff-324ba1e3eb01.jpg",
+      "playback_rate": null,
+      "poster": null,
+      "g_auto_enabled": false,
+      "category": {
+        "role": "cover_image"
+      }
+    }
+  ],
+  "gallery": [
+    "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/7c807528-1ab3-11f0-9eff-324ba1e3eb01.jpg"
+  ],
+  "places": [
+    {
+      "id": 22981,
+      "name": "Museo de Historia Mexicana",
+      "address": "Dr. José Ma. Coss 445, Centro, Monterrey, N.L., 64000",
+      "slug": "museo-de-historia-mexicana"
+    }
+  ]
+}

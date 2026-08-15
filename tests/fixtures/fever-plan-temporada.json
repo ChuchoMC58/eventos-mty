@@ -1,0 +1,76 @@
+{
+  "id": 587490,
+  "name": "El Laberinto de Tim Burton Monterrey",
+  "slug": null,
+  "city_slug": "monterrey",
+  "is_timeless": false,
+  "type": "standard",
+  "category": null,
+  "categories": [
+    "Art Gallery",
+    "Arts",
+    "Entertainment",
+    "Exhibition"
+  ],
+  "description": "⭐ <em>El Laberinto de Tim Burton ofrece un viaje envolvente, a modo de laberinto, a través de sus personajes más emblemáticos y sus vibrantes mundos cinematográficos, que cobran vida gracias a ilustraciones originales, objetos de interés cinematográfico y el uso de la luz, el sonido y la escenografía. Con personajes y escenarios emblemáticos de toda su aclamada filmografía, la experiencia propone un recorrido autoguiado por un legado creativo que sigue marcando la narrativa visual. Adéntrate en la singular imaginación de Tim Burton, un artista visionario que redefinió la creación de mundos</em>.<br><br><strong> 🚨 ¡No te pierdas la última semana del laberinto! Consigue 2 entradas por el precio de 1</strong><br><br> 🔥 El universo surrealista de Tim Burton ya abrió sus puertas ¿Listo para descubrir su mundo fantástico antes que nadie?🔥<br><br> 🎁 ¿Ya visitaste el laberinto? Llévate un recuerdo oficial a casa con nuestra <strong>colección de merchandise exclusiva </strong><a href=\"https://feverup.com/m/706010\" target=\"_blank\" rel=\"noopener noreferrer\"><strong>aquí</strong></a><br><br> 👉 Para <strong>grupos </strong>de 10 o más personas, contáctanos en <a href=\"mailto:grupos@letsgocompany.com\" target=\"_blank\" rel=\"noopener noreferrer\">grupos@letsgocompany.com</a><br><br><strong>Qué vas a disfrutar</strong><br> 🎬 La primera experiencia inmersiva basada en la obra de uno de los directores de cine más aclamados del mundo, Tim Burton.<br> 🌍 El éxito que ha cautivado a más de 1.000.000 de usuarios en toda Europa.<br> 🎨 Un proyecto con más de 200 obras originales e inéditas del director.<br> 🕹️ Un juego interactivo que te hará perderte en la mente y los mundos más conocidos de la filmografía de Tim Burton.<br> 🎥 Una experiencia única para los amantes del cine y para toda la familia.<br> 🤝 Con la colaboración personal del mismísimo Tim Burton.<br> 🎁 ¡Regala recuerdos a alguien especial! Compra una tarjeta regalo para El Laberinto de Tim Burton Monterrey <a href=\"https://feverup.com/m/646721\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a><br><br><strong>Información</strong><br> 📅 Fecha y hora: elige en el selector de boletos<br> 📍 Lugar: Centro Convex<br> ⏳ Duración: 60 minutos.<br> 👤 Edad: Para todos los públicos.<br> ♿ Accesibilidad: accesible para personas con movilidad reducida<br> ❓ Puedes consultar las preguntas frecuentes y sus respuestas <a href=\"https://www.timburtonexhibition.com/monterrey-home/#preguntas-frecuentes-div\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a><br><br><strong>Descripción</strong><br> El Laberinto es un portal hacia la mente de su creador, repleto de cientos de piezas originales que susurran los secretos que se esconden tras su obra y tras cada puerta que te atrevas a atravesar.<br> Camina entre las sombras del bosque, guiado por los ecos de «La novia cadáver». Conoce al encantador reparto de Eduardo Manostijeras. Sumérgete en la dulce fantasía de Charlie y la fábrica de chocolate, y pronuncia con cuidado: Beetlejuice, Beetlejuice, Beetlejuice. Detrás de cada puerta, con más de 150 combinaciones posibles, El Laberinto te llevará a sus profundidades. ¡Pero ten cuidado! Elegir los caminos podría llevarte a lugares donde el tiempo se detiene y los sueños se hacen realidad… ¿Crees que podrás escapar de El Laberinto?<br>",
+  "is_calendar_selector": true,
+  "price_info": {
+    "type": "from",
+    "currency": "MXN",
+    "amount": 175,
+    "strikethrough": 350
+  },
+  "first_active_session_date": "2026-08-14T15:00:00-06:00",
+  "default_session": {
+    "id": 402956484,
+    "attend_text": "¡Apúntate!",
+    "available_tickets": 9,
+    "has_available_tickets": true,
+    "currency": "MXN",
+    "ends_at_iso": "2026-08-14T15:30:00-06:00",
+    "expiration_iso": "2026-08-14T15:15:00-06:00",
+    "label": "Boleto Premium",
+    "last_tickets": false,
+    "max_num_tickets": 9,
+    "min_num_tickets": 1,
+    "place_id": 117176,
+    "price": 880,
+    "starts_at_iso": "2026-08-14T15:00:00-06:00",
+    "surcharge_per_ticket": 105.6,
+    "surcharge_per_transaction": 0,
+    "timezone": "America/Mexico_City"
+  },
+  "media_gallery": [
+    {
+      "media_type": "video",
+      "url": "https://applications-media.feverup.com/video/upload/f_auto,w_720,h_720/fever2/plan/video/7ae0443e-161a-11f0-924a-8e19997f4894",
+      "playback_rate": 1,
+      "poster": "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/7b165da8-161a-11f0-924a-8e19997f4894",
+      "g_auto_enabled": false,
+      "category": {
+        "role": "default"
+      }
+    },
+    {
+      "media_type": "photo",
+      "url": "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/018cf09a-1611-11f0-a76f-9a434eb12399.jpg",
+      "playback_rate": null,
+      "poster": null,
+      "g_auto_enabled": true,
+      "category": {
+        "role": "cover_image"
+      }
+    }
+  ],
+  "gallery": [
+    "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/018cf09a-1611-11f0-a76f-9a434eb12399.jpg"
+  ],
+  "places": [
+    {
+      "id": 117176,
+      "name": "Centro Convex",
+      "address": "Av. Ignacio Morones Prieto 1500, Nuevas Colonias, Monterrey, 64710",
+      "slug": "centro-convex"
+    }
+  ]
+}

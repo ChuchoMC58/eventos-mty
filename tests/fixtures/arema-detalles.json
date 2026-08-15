@@ -1,10 +1,24 @@
 {
+  "19112": {
+    "error": false,
+    "data": {
+      "event_id": 19112,
+      "sinopsis": null,
+      "dates": [
+        {
+          "date_id": 90004,
+          "date": 1785376800,
+          "active": true
+        }
+      ]
+    }
+  },
   "20420": {
     "error": false,
     "data": {
       "event_id": 20420,
       "event_name": "Siete Veces Adios en Monterrey",
-      "sinopsis": "  Elenco: María León y Osvaldo Benavides  ",
+      "sinopsis": "**Fecha:** 04 de Septiembre 2026\n**Hora:** 20:00 horas\n**Lugar:** Café Iguana\n**Dirección del evento:** C. Diego de Montemayor 927-Sur, Barrio Antiguo, Centro, 64000 Monterrey, N.L.\n\n**Zonas y Precios:**\n• Vip: $800\n• General: $500\n(Precios más cargos por servicio)\n\n**Elenco:** María León y Osvaldo Benavides\n\n**Puntos de venta oficiales:**\n- Museo del Noreste (MUNE): Dr. José Ma. Coss 445, Centro, 64000 Monterrey, N.L.",
       "dates": [
         {
           "date_id": 81488,
@@ -34,20 +48,6 @@
       ]
     }
   },
-  "20841": {
-    "error": false,
-    "data": {
-      "event_id": 20841,
-      "sinopsis": null,
-      "dates": [
-        {
-          "date_id": 90001,
-          "date": 1791687600,
-          "active": true
-        }
-      ]
-    }
-  },
   "20713": {
     "error": false,
     "data": {
@@ -57,6 +57,28 @@
         {
           "date_id": 90002,
           "date": 1789837200,
+          "active": true
+        }
+      ]
+    }
+  },
+  "20777": {
+    "error": false,
+    "data": {
+      "event_id": 20777,
+      "sinopsis": null,
+      "dates": []
+    }
+  },
+  "20841": {
+    "error": false,
+    "data": {
+      "event_id": 20841,
+      "sinopsis": null,
+      "dates": [
+        {
+          "date_id": 90001,
+          "date": 1791687600,
           "active": true
         }
       ]
@@ -82,28 +104,6 @@
           "active": true
         }
       ]
-    }
-  },
-  "19112": {
-    "error": false,
-    "data": {
-      "event_id": 19112,
-      "sinopsis": null,
-      "dates": [
-        {
-          "date_id": 90004,
-          "date": 1785376800,
-          "active": true
-        }
-      ]
-    }
-  },
-  "20777": {
-    "error": false,
-    "data": {
-      "event_id": 20777,
-      "sinopsis": null,
-      "dates": []
     }
   }
 }

@@ -79,7 +79,9 @@ export default async function Explorar({
   }>;
 }) {
   // `fuente` (slug del conector) no tiene chip: es para revisar qué trae cada
-  // fuente después de una ingesta, no un filtro que le sirva al público.
+  // fuente después de una ingesta, no un filtro que le sirva al público. Cómo
+  // se usa y qué NO significa: FUENTES.md § "Ver en la cartelera qué trae una
+  // fuente".
   const { categoria, fecha, venue, fuente, q: qRaw, mes } = await searchParams;
   // Un `q` vacío llega igual porque el form serializa todos sus campos.
   const q = qRaw?.trim() || undefined;

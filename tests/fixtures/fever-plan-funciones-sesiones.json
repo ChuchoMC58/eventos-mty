@@ -1,0 +1,195 @@
+{
+  "next": null,
+  "level": {
+    "type": "date",
+    "items": [
+      {
+        "default_label": "2026-09-26",
+        "value": {
+          "from": "2026-09-26T12:00:00-06:00",
+          "timezone": "America/Mexico_City"
+        },
+        "level": {
+          "type": "time",
+          "items": [
+            {
+              "default_label": "19:00",
+              "value": {
+                "from": "2026-09-26T19:00:00-06:00",
+                "timezone": "America/Mexico_City"
+              },
+              "level": {
+                "type": "session",
+                "items": [
+                  {
+                    "default_label": "Zona C por MX$650.00",
+                    "value": {
+                      "id": 469653846,
+                      "label": "Zona C por MX$650.00",
+                      "label_without_format": "Zona C",
+                      "item_type": "647487",
+                      "details": null,
+                      "starts_at_iso": "2026-09-26T19:00:00-06:00",
+                      "ends_at_iso": "2026-09-26T20:00:00-06:00",
+                      "expiration_iso": "2026-09-26T19:00:00-06:00",
+                      "timezone": "America/Mexico_City",
+                      "available_tickets": 30,
+                      "has_available_tickets": true,
+                      "last_tickets": false,
+                      "min_num_tickets": 1,
+                      "max_num_tickets": 30,
+                      "price": 650,
+                      "currency": "MXN",
+                      "surcharge_per_ticket": 32.5,
+                      "surcharge_per_transaction": 0,
+                      "requires_price_breakdown": false,
+                      "attend_text": "¡Apúntate!",
+                      "seating_pool_id": null,
+                      "seating_category": null,
+                      "rule": null,
+                      "sorting": 1,
+                      "is_pack": false,
+                      "session_type_group": null,
+                      "ticket_selector_step_quantity": 1,
+                      "sessions_group": []
+                    },
+                    "level": null
+                  },
+                  {
+                    "default_label": "Zona D por MX$620.00",
+                    "value": {
+                      "id": 469653847,
+                      "label": "Zona D por MX$620.00",
+                      "label_without_format": "Zona D",
+                      "item_type": "650466",
+                      "details": null,
+                      "starts_at_iso": "2026-09-26T19:00:00-06:00",
+                      "ends_at_iso": "2026-09-26T20:00:00-06:00",
+                      "expiration_iso": "2026-09-26T19:00:00-06:00",
+                      "timezone": "America/Mexico_City",
+                      "available_tickets": 1,
+                      "has_available_tickets": true,
+                      "last_tickets": true,
+                      "min_num_tickets": 1,
+                      "max_num_tickets": 1,
+                      "price": 620,
+                      "currency": "MXN",
+                      "surcharge_per_ticket": 31,
+                      "surcharge_per_transaction": 0,
+                      "requires_price_breakdown": false,
+                      "attend_text": "¡Apúntate!",
+                      "seating_pool_id": null,
+                      "seating_category": null,
+                      "rule": null,
+                      "sorting": 2,
+                      "is_pack": false,
+                      "session_type_group": null,
+                      "ticket_selector_step_quantity": 1,
+                      "sessions_group": []
+                    },
+                    "level": null
+                  }
+                ],
+                "session_selector_group_hash": "1f9971b7895b5cd24d8fab5b6943a97e"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "default_label": "2026-12-19",
+        "value": {
+          "from": "2026-12-19T12:00:00-06:00",
+          "timezone": "America/Mexico_City"
+        },
+        "level": {
+          "type": "time",
+          "items": [
+            {
+              "default_label": "21:00",
+              "value": {
+                "from": "2026-12-19T21:00:00-06:00",
+                "timezone": "America/Mexico_City"
+              },
+              "level": {
+                "type": "session",
+                "items": [
+                  {
+                    "default_label": "Zona C por MX$600.00",
+                    "value": {
+                      "id": 469653860,
+                      "label": "Zona C por MX$600.00",
+                      "label_without_format": "Zona C",
+                      "item_type": "647487",
+                      "details": null,
+                      "starts_at_iso": "2026-12-19T21:00:00-06:00",
+                      "ends_at_iso": "2026-12-19T22:00:00-06:00",
+                      "expiration_iso": "2026-12-19T21:00:00-06:00",
+                      "timezone": "America/Mexico_City",
+                      "available_tickets": 30,
+                      "has_available_tickets": true,
+                      "last_tickets": false,
+                      "min_num_tickets": 1,
+                      "max_num_tickets": 30,
+                      "price": 600,
+                      "currency": "MXN",
+                      "surcharge_per_ticket": 30,
+                      "surcharge_per_transaction": 0,
+                      "requires_price_breakdown": false,
+                      "attend_text": "¡Apúntate!",
+                      "seating_pool_id": null,
+                      "seating_category": null,
+                      "rule": null,
+                      "sorting": 1,
+                      "is_pack": false,
+                      "session_type_group": null,
+                      "ticket_selector_step_quantity": 1,
+                      "sessions_group": []
+                    },
+                    "level": null
+                  },
+                  {
+                    "default_label": "Zona D por MX$500.00",
+                    "value": {
+                      "id": 469653861,
+                      "label": "Zona D por MX$500.00",
+                      "label_without_format": "Zona D",
+                      "item_type": "650466",
+                      "details": null,
+                      "starts_at_iso": "2026-12-19T21:00:00-06:00",
+                      "ends_at_iso": "2026-12-19T22:00:00-06:00",
+                      "expiration_iso": "2026-12-19T21:00:00-06:00",
+                      "timezone": "America/Mexico_City",
+                      "available_tickets": 18,
+                      "has_available_tickets": true,
+                      "last_tickets": false,
+                      "min_num_tickets": 1,
+                      "max_num_tickets": 18,
+                      "price": 500,
+                      "currency": "MXN",
+                      "surcharge_per_ticket": 25,
+                      "surcharge_per_transaction": 0,
+                      "requires_price_breakdown": false,
+                      "attend_text": "¡Apúntate!",
+                      "seating_pool_id": null,
+                      "seating_category": null,
+                      "rule": null,
+                      "sorting": 2,
+                      "is_pack": false,
+                      "session_type_group": null,
+                      "ticket_selector_step_quantity": 1,
+                      "sessions_group": []
+                    },
+                    "level": null
+                  }
+                ],
+                "session_selector_group_hash": "d9820b9712da147d1d776697f4bee5b6"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "add_ons": []
+}

@@ -1,0 +1,245 @@
+{
+  "next": null,
+  "level": {
+    "type": "time",
+    "items": [
+      {
+        "default_label": "15:00",
+        "value": {
+          "from": "2026-08-14T15:00:00-06:00",
+          "timezone": "America/Mexico_City"
+        },
+        "level": {
+          "type": "session",
+          "items": [
+            {
+              "default_label": "Boleto Premium",
+              "value": {
+                "id": 402956484,
+                "label": "Boleto Premium",
+                "label_without_format": "Boleto Premium",
+                "item_type": "29513424",
+                "details": "<strong>Boleto para 1 persona:</strong> incluye dos vueltas + edición limitada de Lámina Impresive + acceso exclusivo.<br>\r\n<em>¡Cada vuelta es una oportunidad de descubrir nuevas salas!</em><br>",
+                "starts_at_iso": "2026-08-14T15:00:00-06:00",
+                "ends_at_iso": "2026-08-14T15:30:00-06:00",
+                "expiration_iso": "2026-08-14T15:15:00-06:00",
+                "timezone": "America/Mexico_City",
+                "available_tickets": 9,
+                "has_available_tickets": true,
+                "last_tickets": false,
+                "min_num_tickets": 1,
+                "max_num_tickets": 9,
+                "price": 880,
+                "currency": "MXN",
+                "surcharge_per_ticket": 105.6,
+                "surcharge_per_transaction": 0,
+                "requires_price_breakdown": false,
+                "attend_text": "¡Apúntate!",
+                "seating_pool_id": null,
+                "seating_category": null,
+                "rule": null,
+                "sorting": 2,
+                "is_pack": false,
+                "session_type_group": 144871,
+                "ticket_selector_step_quantity": 1,
+                "sessions_group": [],
+                "shared_availability_rule": {
+                  "item_types_sharing_availability_all_of": [
+                    {
+                      "type": "stg_ts-31be26fc-b109-4ff8-bbeb-c1f42a44e0b4",
+                      "min": 0,
+                      "max": 29,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 29 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    },
+                    {
+                      "type": "ts-2b3a9df3-115a-4b42-844d-1a5c00c410e9",
+                      "min": 0,
+                      "max": 29,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 29 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    }
+                  ]
+                }
+              },
+              "level": null
+            },
+            {
+              "default_label": "2x1 en Boleto General",
+              "value": {
+                "id": 536360477,
+                "label": "2x1 en Boleto General",
+                "label_without_format": "2x1 en Boleto General",
+                "item_type": "30781876",
+                "details": "<strong>Boleto para 1 persona</strong> de una vuelta, se debe acceder a la hora establecida del ticket.<br /><strong>El precio mostrado es por entrada.</strong><br />",
+                "starts_at_iso": "2026-08-14T15:00:00-06:00",
+                "ends_at_iso": "2026-08-14T15:30:00-06:00",
+                "expiration_iso": "2026-08-14T15:15:00-06:00",
+                "timezone": "America/Mexico_City",
+                "available_tickets": 0,
+                "has_available_tickets": false,
+                "last_tickets": false,
+                "min_num_tickets": 2,
+                "max_num_tickets": 10,
+                "price": 225,
+                "currency": "MXN",
+                "surcharge_per_ticket": 27,
+                "surcharge_per_transaction": 0,
+                "requires_price_breakdown": false,
+                "attend_text": "¡Apúntate!",
+                "seating_pool_id": null,
+                "seating_category": null,
+                "rule": null,
+                "sorting": 11,
+                "is_pack": false,
+                "session_type_group": 122893,
+                "ticket_selector_step_quantity": 2,
+                "sessions_group": [],
+                "strikethrough_price": "450.00",
+                "shared_availability_rule": {
+                  "item_types_sharing_availability_all_of": [
+                    {
+                      "type": "ts-2b3a9df3-115a-4b42-844d-1a5c00c410e9",
+                      "min": 0,
+                      "max": 29,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 29 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    }
+                  ]
+                }
+              },
+              "level": null
+            }
+          ],
+          "session_selector_group_hash": "728b9331225f78db27d0cd25d4b052c7"
+        }
+      },
+      {
+        "default_label": "15:30",
+        "value": {
+          "from": "2026-08-14T15:30:00-06:00",
+          "timezone": "America/Mexico_City"
+        },
+        "level": {
+          "type": "session",
+          "items": [
+            {
+              "default_label": "Boleto Premium",
+              "value": {
+                "id": 402956504,
+                "label": "Boleto Premium",
+                "label_without_format": "Boleto Premium",
+                "item_type": "29513424",
+                "details": "<strong>Boleto para 1 persona:</strong> incluye dos vueltas + edición limitada de Lámina Impresive + acceso exclusivo.<br>\r\n<em>¡Cada vuelta es una oportunidad de descubrir nuevas salas!</em><br>",
+                "starts_at_iso": "2026-08-14T15:30:00-06:00",
+                "ends_at_iso": "2026-08-14T16:00:00-06:00",
+                "expiration_iso": "2026-08-14T15:45:00-06:00",
+                "timezone": "America/Mexico_City",
+                "available_tickets": 9,
+                "has_available_tickets": true,
+                "last_tickets": false,
+                "min_num_tickets": 1,
+                "max_num_tickets": 9,
+                "price": 880,
+                "currency": "MXN",
+                "surcharge_per_ticket": 105.6,
+                "surcharge_per_transaction": 0,
+                "requires_price_breakdown": false,
+                "attend_text": "¡Apúntate!",
+                "seating_pool_id": null,
+                "seating_category": null,
+                "rule": null,
+                "sorting": 2,
+                "is_pack": false,
+                "session_type_group": 144871,
+                "ticket_selector_step_quantity": 1,
+                "sessions_group": [],
+                "shared_availability_rule": {
+                  "item_types_sharing_availability_all_of": [
+                    {
+                      "type": "stg_ts-cd48b567-d289-48f8-b01a-c7c496d320ea",
+                      "min": 0,
+                      "max": 40,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 40 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    },
+                    {
+                      "type": "ts-8246ed37-3688-4d37-bfa9-8d41f1f2e39a",
+                      "min": 0,
+                      "max": 56,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 56 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    }
+                  ]
+                }
+              },
+              "level": null
+            },
+            {
+              "default_label": "2x1 en Boleto General",
+              "value": {
+                "id": 536360478,
+                "label": "2x1 en Boleto General",
+                "label_without_format": "2x1 en Boleto General",
+                "item_type": "30781876",
+                "details": "<strong>Boleto para 1 persona</strong> de una vuelta, se debe acceder a la hora establecida del ticket.<br /><strong>El precio mostrado es por entrada.</strong><br />",
+                "starts_at_iso": "2026-08-14T15:30:00-06:00",
+                "ends_at_iso": "2026-08-14T16:00:00-06:00",
+                "expiration_iso": "2026-08-14T15:45:00-06:00",
+                "timezone": "America/Mexico_City",
+                "available_tickets": 10,
+                "has_available_tickets": true,
+                "last_tickets": false,
+                "min_num_tickets": 2,
+                "max_num_tickets": 10,
+                "price": 225,
+                "currency": "MXN",
+                "surcharge_per_ticket": 27,
+                "surcharge_per_transaction": 0,
+                "requires_price_breakdown": false,
+                "attend_text": "¡Apúntate!",
+                "seating_pool_id": null,
+                "seating_category": null,
+                "rule": null,
+                "sorting": 11,
+                "is_pack": false,
+                "session_type_group": 122893,
+                "ticket_selector_step_quantity": 2,
+                "sessions_group": [],
+                "strikethrough_price": "450.00",
+                "shared_availability_rule": {
+                  "item_types_sharing_availability_all_of": [
+                    {
+                      "type": "stg_ts-9cc77e4c-68d9-4220-a981-8315a7160f49",
+                      "min": 0,
+                      "max": 16,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 16 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    },
+                    {
+                      "type": "ts-8246ed37-3688-4d37-bfa9-8d41f1f2e39a",
+                      "min": 0,
+                      "max": 56,
+                      "quantity_multiplier": 1,
+                      "message_on_failure": "Solo hay 56 boletos disponibles para esta hora. Por favor, ajusta tu selección para continuar.",
+                      "message_on_failure_min": null
+                    }
+                  ]
+                }
+              },
+              "level": null
+            }
+          ],
+          "session_selector_group_hash": "86c653aabe266c3c05c568ad07bdb5b5"
+        }
+      }
+    ]
+  },
+  "add_ons": []
+}

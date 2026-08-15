@@ -1,0 +1,66 @@
+{
+  "id": 610541,
+  "name": "Ricardo Arjona “Lo Que el Seco No Dijo” - Aguascalientes",
+  "slug": null,
+  "city_slug": "aguascalientes",
+  "is_timeless": false,
+  "type": "standard",
+  "category": "concert",
+  "categories": [
+    "Concert",
+    "Musical Event",
+    "Nightlife & Concerts",
+    "Social/Music Events"
+  ],
+  "description": "<strong><em>⭐ </em></strong>Ricardo Arjona regresa a los escenarios con \"Lo Que el Seco No Dijo\", un tour espectacular que llega a México en 2026. Tras triunfar con 23 shows agotados en Guatemala y presentaciones históricas en el Madison Square Garden y el Kaseya Center, el cantautor inicia una gira mundial de más de 150 conciertos.<br>\n<br>\nEl espectáculo combinará sus grandes éxitos con las nuevas canciones de su álbum \"Lo que el seco no dijo\", una continuación íntima y honesta de Seco. Fiel a su estilo, Arjona ofrecerá una experiencia escénica envolvente, llena de narrativa, músicos excepcionales y una puesta en escena de gran impacto.<br>\n<br>\n<strong>⚽ ¡Con motivo del inicio del Mundial, todas las zonas tienen un descuento del 10% hasta el 27 de junio!&nbsp;⚽</strong><br>\n<br>\n<strong>Qué vas a disfrutar</strong><br>\n🎼 El esperado concierto de Ricardo Arjona en directo<br>\n💫 Un show especial con una propuesta visual muy innovadora<br>\n🎵 Una experiencia total que reafirma su lugar como uno de los artistas más relevantes<br>\n👉 Con una acústica privilegiada<br>\n🎁 ¡Regala recuerdos a alguien especial! Compra una tarjeta regalo para Ricardo Arjona “Lo Que el Seco No Dijo” - Aguascalientes <a target=\"_blank\" href=\"https://feverup.com/m/637122\" rel=\"noopener noreferrer\">aquí</a><br>\n<br>\n<strong>Información</strong><br>\n📅 Fecha y hora: 9 de Diciembre<br>\n📍 Lugar: Estadio Parque Alberto Romo Chavez<br>\n👤 Edad: todos los públicos<br>\n♿ Accesibilidad: accesible para personas con movilidad reducida<br>\n<br>\n<strong>Descripción</strong><br>\n¡No te pierdas a Ricardo Arjona en concierto! El famoso artista se presentará en Aguascalientes con un espectáculo en vivo donde los fans podrán disfrutar de sus canciones más reconocidas y de una experiencia musical única. El concierto promete una noche llena de grandes momentos, interpretaciones memorables y una producción pensada para vivir la música de cerca. ¡Apúntate a la lista de espera para Ricardo Arjona en Aguascalientes!",
+  "is_calendar_selector": false,
+  "price_info": {
+    "type": "from",
+    "currency": "MXN",
+    "amount": 2550,
+    "strikethrough": null
+  },
+  "first_active_session_date": "2026-12-09T21:00:00-06:00",
+  "default_session": {
+    "id": 416176207,
+    "attend_text": "¡Apúntate!",
+    "available_tickets": 21,
+    "has_available_tickets": true,
+    "currency": "MXN",
+    "ends_at_iso": "2026-12-09T23:00:00-06:00",
+    "expiration_iso": "2026-12-09T21:00:00-06:00",
+    "label": "21:00 General de pie - General MX$1.000,00",
+    "last_tickets": false,
+    "max_num_tickets": 21,
+    "min_num_tickets": 1,
+    "place_id": 122340,
+    "price": 1000,
+    "starts_at_iso": "2026-12-09T21:00:00-06:00",
+    "surcharge_per_ticket": 230,
+    "surcharge_per_transaction": 0,
+    "timezone": "America/Mexico_City"
+  },
+  "media_gallery": [
+    {
+      "media_type": "photo",
+      "url": "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/39c43144-2790-11f1-b6c8-fe06bc0418c2.jpg",
+      "playback_rate": null,
+      "poster": null,
+      "g_auto_enabled": true,
+      "category": {
+        "role": "cover_image"
+      }
+    }
+  ],
+  "gallery": [
+    "https://applications-media.feverup.com/image/upload/f_auto,w_720,h_720/fever2/plan/photo/39c43144-2790-11f1-b6c8-fe06bc0418c2.jpg"
+  ],
+  "places": [
+    {
+      "id": 122340,
+      "name": "ESTADIO PARQUE ALBERTO ROMO CHAVEZ",
+      "address": "Juan de La Barrera 102, Héroes, Aguascalientes, 20190",
+      "slug": "estadio-parque-alberto-romo-chavez"
+    }
+  ]
+}

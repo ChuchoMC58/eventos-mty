@@ -11,21 +11,39 @@ import { fechaZonaAUtc } from "@/lib/ingest/fechas";
  *  1. `/es/monterrey` (Astro) sólo se usa para sacar la LISTA de ids. Cada
  *     tarjeta es una isla cuyo `props` trae el plan en JSON escapado como HTML y
  *     con cada valor envuelto en una tupla `[0, valor]`.
- *  2. `/m/<id>` trae el plan de verdad en un `<script id="astro-tools-transfer-state">`
- *     que es JSON limpio: `page-config.planDetail` (ciudad, sede con dirección,
- *     categorías, descripción, precio) y `ticket-selector-config.transferState`
- *     (las FUNCIONES reales o el calendario de disponibilidad).
+ *  2. La **API REST** del sitio da el plan de verdad, en JSON: el detalle
+ *     (`/api/4.4/plans/<id>/`) y, según cómo se venda, sus funciones o su
+ *     calendario de días disponibles.
  *
  * Por qué la etapa 2 no es opcional: en la home `startDate`/`endDate` son un
  * RANGO ("El Laberinto de Tim Burton" del 6 al 16 de agosto en un solo plan), no
  * una función. Publicar sólo el rango pondría el evento el día del estreno y lo
- * desaparecería el resto de la corrida. La página del plan sí trae las fechas.
+ * desaparecería el resto de la corrida. El detalle sí trae las fechas.
+ *
+ * ⚠️ La etapa 2 se leía del HTML de `/m/<id>`, que era Astro y traía todo en un
+ * `<script id="astro-tools-transfer-state">`. Fever migró esa página a **Angular**
+ * (2026-08, el script ahora es `serverApp-state` y NO precarga las funciones de
+ * los planes con selector de fecha) y el conector se quedó en cero. La API que se
+ * usa ahora es la misma que llama ese Angular, así que ya no dependemos de su
+ * markup.
  *
  * Ver FUENTES.md para el reconocimiento completo.
  */
 const HOME = "https://feverup.com/es/monterrey";
 const PLAN = (id: number) => `https://feverup.com/m/${id}`;
 const UA = "eventos-mty/1.0 (+https://github.com/ChuchoMC58/eventos-mty)";
+
+/** El detalle va por la 4.4 y la disponibilidad por la 4.2; así las pide el sitio. */
+const API_DETALLE = (id: number) => `https://feverup.com/api/4.4/plans/${id}/`;
+const API_SESIONES = (id: number, placeId: number) =>
+  `https://feverup.com/api/4.2/plans/${id}/place/${placeId}/sessions/?exclude_sessions_as_add_ons=true`;
+const API_CALENDARIO = (id: number, placeId: number, desde: string, hasta: string) =>
+  `https://feverup.com/api/4.2/plans/${id}/place/${placeId}/availability/?from=${desde}&to=${hasta}`;
+const API_SESIONES_DIA = (id: number, placeId: number, dia: string) =>
+  `https://feverup.com/api/4.2/plans/${id}/place/${placeId}/sessions_for_date/${dia}/?exclude_sessions_as_add_ons=true`;
+
+/** Ventana del calendario de un plan de temporada: sólo se publica el próximo día. */
+const DIAS_CALENDARIO = 60;
 
 const TZ = "America/Monterrey";
 const CITY_SLUG = "monterrey"; // `planDetail.citySlug`, no el nombre de la sede
@@ -109,7 +127,7 @@ export function planesEnHome(html: string): PlanEnHome[] {
   return [...vistos.values()];
 }
 
-// ── Etapa 2: la página del plan ─────────────────────────────────────────────
+// ── Etapa 2: la API del plan ────────────────────────────────────────────────
 
 /** Un renglón del calendario de disponibilidad de un plan de temporada. */
 interface DiaCalendario {
@@ -127,6 +145,8 @@ export interface Funcion {
 
 export interface PlanFever {
   id: number;
+  /** El recinto es parte de la ruta de disponibilidad, no sólo un dato del evento. */
+  placeId?: number;
   title: string;
   citySlug: string;
   isTimeless: boolean;
@@ -217,71 +237,86 @@ function resumen(s: string): string | undefined {
   return (fin > LARGO_DESCRIPCION / 2 ? cortado.slice(0, fin + 1) : `${cortado.trimEnd()}…`).trim();
 }
 
+interface LugarApi {
+  id?: number;
+  name?: string;
+  address?: string;
+}
+
 /**
- * `<script id="astro-tools-transfer-state">` es JSON limpio —sin tuplas ni
- * entidades—, al revés que las islas de la home.
+ * `/api/4.4/plans/<id>/` — el detalle, en JSON y en `snake_case` (la página lo
+ * traía en `camelCase` porque el Angular ya lo había mapeado). No trae funciones:
+ * ésas son otra petición, y cuál depende de `is_calendar_selector`.
  */
-export function parsePaginaPlan(html: string, id: number): PlanFever | null {
-  const crudo = html.match(
-    /<script id="astro-tools-transfer-state" type="application\/json">([\s\S]*?)<\/script>/,
-  )?.[1];
-  if (!crudo) return null;
+export function parsePlanDetalle(json: unknown, id: number): PlanFever | null {
+  const pd = json as Record<string, unknown> | null;
+  if (!pd || typeof pd !== "object" || typeof pd.name !== "string") return null;
 
-  let estado: {
-    "page-config"?: { planDetail?: Record<string, unknown> };
-    "ticket-selector-config"?: { transferState?: Record<string, unknown> };
-  };
-  try {
-    estado = JSON.parse(crudo);
-  } catch {
-    return null;
-  }
-  const pd = estado["page-config"]?.planDetail;
-  if (!pd || typeof pd.name !== "string") return null;
-
-  const funciones: Funcion[] = [];
-  const calendario: DiaCalendario[] = [];
-  for (const [clave, valor] of Object.entries(estado["ticket-selector-config"]?.transferState ?? {})) {
-    if (clave.startsWith("LevelTicketSelectorLoader.")) {
-      sesionesDelNivel((valor as { level?: Nivel })?.level, funciones);
-    }
-    if (clave.startsWith("PlanCalendarSelectorService.getCalendarAvailability")) {
-      const dias = (valor as { dates?: Record<string, { status?: string; minTicketPrice?: number }> })?.dates ?? {};
-      for (const [fecha, info] of Object.entries(dias)) {
-        calendario.push({
-          fecha,
-          precioMin: typeof info?.minTicketPrice === "number" ? info.minTicketPrice : undefined,
-          // "low" es "quedan pocos", no "no hay"; el único estado que descarta
-          // un día es `sold_out` (La Odisea IMAX tiene agotadas las dos primeras
-          // semanas y su primer día real es el 22).
-          agotado: info?.status === "sold_out",
-        });
-      }
-    }
-  }
-
-  const lugar = (pd.defaultPlace ?? (pd.places as unknown[] | undefined)?.[0]) as
-    | { name?: string; address?: string }
-    | undefined;
-  const precio = pd.priceInfo as { amount?: number } | undefined;
+  const lugares = (Array.isArray(pd.places) ? pd.places : []) as LugarApi[];
+  const sesionPorDefecto = pd.default_session as { place_id?: number } | undefined;
+  // Un plan puede tener varios recintos; el que manda es el de su sesión por
+  // defecto, que es el que la página abre.
+  const lugar = lugares.find((l) => l.id === sesionPorDefecto?.place_id) ?? lugares[0];
+  const precio = pd.price_info as { amount?: number } | undefined;
 
   return {
     id,
-    title: texto(String(pd.name)),
-    citySlug: typeof pd.citySlug === "string" ? pd.citySlug : "",
-    isTimeless: pd.isTimeless === true,
+    placeId: typeof lugar?.id === "number" ? lugar.id : undefined,
+    title: texto(pd.name),
+    citySlug: typeof pd.city_slug === "string" ? pd.city_slug : "",
+    isTimeless: pd.is_timeless === true,
     tipo: typeof pd.type === "string" ? pd.type : "standard",
     categoria: typeof pd.category === "string" ? pd.category : "",
     categorias: Array.isArray(pd.categories) ? pd.categories.map((c) => texto(String(c))) : [],
     description: typeof pd.description === "string" ? resumen(pd.description) : undefined,
-    imageUrl: typeof pd.coverImage === "string" ? pd.coverImage : undefined,
-    venue: lugar?.name ? { name: texto(lugar.name), address: lugar.address ? texto(lugar.address) : undefined } : undefined,
-    esTemporada: pd.isCalendarSelector === true,
+    imageUrl: portada(pd),
+    venue: lugar?.name
+      ? { name: texto(lugar.name), address: lugar.address ? texto(lugar.address) : undefined }
+      : undefined,
+    esTemporada: pd.is_calendar_selector === true,
     precioDesde: typeof precio?.amount === "number" ? precio.amount : undefined,
-    primeraActiva: typeof pd.firstActiveSessionDate === "string" ? pd.firstActiveSessionDate : undefined,
-    funciones: funciones.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()),
-    calendario: calendario.sort((a, b) => a.fecha.localeCompare(b.fecha)),
+    primeraActiva: typeof pd.first_active_session_date === "string" ? pd.first_active_session_date : undefined,
+    funciones: [],
+    calendario: [],
   };
+}
+
+/**
+ * La portada está marcada por su `role` dentro de `media_gallery`, que también
+ * trae vídeos: quedarse con el primer elemento daría un `.mp4` como imagen del
+ * evento. `gallery` (sólo fotos) es el respaldo.
+ */
+function portada(pd: Record<string, unknown>): string | undefined {
+  const medios = (Array.isArray(pd.media_gallery) ? pd.media_gallery : []) as {
+    media_type?: string;
+    url?: string;
+    category?: { role?: string };
+  }[];
+  const cover = medios.find((m) => m.category?.role === "cover_image" && typeof m.url === "string");
+  if (cover?.url) return cover.url;
+  const fotos = (Array.isArray(pd.gallery) ? pd.gallery : []) as unknown[];
+  return typeof fotos[0] === "string" ? fotos[0] : undefined;
+}
+
+/** `…/place/<placeId>/sessions/` — el árbol del selector de boletos. */
+export function sesionesDeApi(json: unknown): Funcion[] {
+  const funciones = sesionesDelNivel((json as { level?: Nivel } | null)?.level);
+  return funciones.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+}
+
+/** `…/place/<placeId>/availability/` — el calendario de un plan de temporada. */
+export function calendarioDeApi(json: unknown): DiaCalendario[] {
+  const dias = (json as { dates?: Record<string, { status?: string; min_ticket_price?: number }> } | null)?.dates ?? {};
+  return Object.entries(dias)
+    .map(([fecha, info]) => ({
+      fecha,
+      precioMin: typeof info?.min_ticket_price === "number" ? info.min_ticket_price : undefined,
+      // "low" es "quedan pocos", no "no hay"; el único estado que descarta un día
+      // es `sold_out` (La Odisea IMAX llegó a tener agotadas las dos primeras
+      // semanas, y su primer día real era el 22).
+      agotado: info?.status === "sold_out",
+    }))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
 }
 
 // ── Categorías ──────────────────────────────────────────────────────────────
@@ -341,49 +376,64 @@ function horaDe(iso: string): string | undefined {
  * seguidos y publicarlos todos sería inundar la cartelera con el mismo título.
  * Como la ingesta corre a diario, la fecha se va recorriendo sola.
  */
-function eventoDeTemporada(plan: PlanFever, hoy: string): Funcion | null {
-  const dia = plan.calendario.find((d) => !d.agotado && d.fecha >= hoy);
+export function proximoDiaAbierto(calendario: DiaCalendario[], hoy: string): DiaCalendario | undefined {
+  return calendario.find((d) => !d.agotado && d.fecha >= hoy);
+}
+
+/**
+ * Las funciones de ESE día —todas, para que el precio del evento salga del más
+ * barato al más caro como en cualquier otro plan—; el resto del calendario se
+ * tira aquí.
+ */
+function funcionesDeTemporada(plan: PlanFever, hoy: string): Funcion[] {
+  const dia = proximoDiaAbierto(plan.calendario, hoy);
   if (!dia) {
     // Sin calendario legible queda la primera función activa del propio plan:
     // degradarse a un evento es mejor que perderlo entero.
-    if (!plan.primeraActiva) return null;
+    if (!plan.primeraActiva) return [];
     const startsAt = new Date(plan.primeraActiva);
-    return Number.isNaN(startsAt.getTime()) ? null : { startsAt, disponible: true };
+    return Number.isNaN(startsAt.getTime()) ? [] : [{ startsAt, disponible: true }];
   }
 
-  // La hora sale del selector que la página trae precargado para ese día; si no
-  // coincide, de la primera función activa; y si tampoco, de un default.
+  // El calendario da el día y el precio, pero no la hora: ésa sale de las
+  // funciones de ese día, que el conector pide aparte. Si faltan, la hora de la
+  // primera función activa; y si tampoco, un default.
   const delDia = plan.funciones.filter((f) => diaEnMonterrey(f.startsAt) === dia.fecha);
-  if (delDia.length > 0) {
-    return { ...delDia[0], precio: delDia[0].precio ?? dia.precioMin };
-  }
+  if (delDia.length > 0) return delDia;
+
   const hora = (plan.primeraActiva && horaDe(plan.primeraActiva)) || HORA_POR_DEFECTO;
   const startsAt = fechaZonaAUtc(`${dia.fecha}T${hora}`, TZ);
-  return startsAt ? { startsAt, precio: dia.precioMin, disponible: true } : null;
+  return startsAt ? [{ startsAt, precio: dia.precioMin, disponible: true }] : [];
+}
+
+/**
+ * Los filtros que separan los ~34 planes publicables de los 49 de la home. Se
+ * aplican sobre el detalle y ANTES de pedir la disponibilidad: un plan que se va
+ * a descartar no merece una segunda petición.
+ */
+export function esPublicable(plan: PlanFever): plan is PlanFever & { venue: { name: string; address?: string } } {
+  if (plan.isTimeless) return false; // tarjetas de regalo y entradas sin fecha fija
+  if (plan.citySlug !== CITY_SLUG) return false; // se cuelan planes de otras ciudades
+  if (plan.tipo !== "standard") return false; // `waitlist`: no es un evento, es apuntarse
+  return Boolean(plan.venue?.name) && Boolean(plan.title);
 }
 
 export function mapPlan(plan: PlanFever, ahora: Date = new Date()): NormalizedEvent[] {
-  // Los tres filtros que separan los ~34 planes publicables de los 49 de la home.
-  if (plan.isTimeless) return []; // tarjetas de regalo y entradas sin fecha fija
-  if (plan.citySlug !== CITY_SLUG) return []; // se cuelan planes de otras ciudades
-  if (plan.tipo !== "standard") return []; // `waitlist`: no es un evento, es apuntarse
-  if (!plan.venue?.name || !plan.title) return [];
+  if (!esPublicable(plan)) return [];
 
   const hoy = diaEnMonterrey(ahora);
 
-  let funciones: Funcion[];
-  if (plan.esTemporada) {
-    const una = eventoDeTemporada(plan, hoy);
-    funciones = una ? [una] : [];
-  } else {
-    // Un día entero agotado no se publica; pero si el plan no marca
-    // disponibilidad en ninguna, se publica igual (el dato falta, no es un "no").
-    const conCupo = plan.funciones.filter((f) => f.disponible);
-    funciones = conCupo.length > 0 ? conCupo : plan.funciones;
-    if (funciones.length === 0 && plan.primeraActiva) {
-      const startsAt = new Date(plan.primeraActiva);
-      if (!Number.isNaN(startsAt.getTime())) funciones = [{ startsAt, disponible: true }];
-    }
+  // Un plan de temporada se reduce a las funciones de un solo día; los demás
+  // traen las suyas enteras.
+  const todas = plan.esTemporada ? funcionesDeTemporada(plan, hoy) : plan.funciones;
+
+  // Un día entero agotado no se publica; pero si el plan no marca disponibilidad
+  // en ninguna, se publica igual (el dato falta, no es un "no").
+  const conCupo = todas.filter((f) => f.disponible);
+  let funciones = conCupo.length > 0 ? conCupo : todas;
+  if (funciones.length === 0 && plan.primeraActiva) {
+    const startsAt = new Date(plan.primeraActiva);
+    if (!Number.isNaN(startsAt.getTime())) funciones = [{ startsAt, disponible: true }];
   }
 
   // Una función por DÍA: las dos del mismo Candlelight (19:00 y 21:00) las
@@ -449,6 +499,11 @@ async function enTandas<T, R>(items: T[], tam: number, fn: (item: T) => Promise<
   return out;
 }
 
+/** "YYYY-MM-DD" de hoy en Monterrey, más `dias`. */
+function diaMas(ahora: Date, dias: number): string {
+  return diaEnMonterrey(new Date(ahora.getTime() + dias * 86_400_000));
+}
+
 export function feverConnector(fetchFn: typeof fetch = fetch, ahora?: () => Date): Connector {
   const now = ahora ?? (() => new Date());
 
@@ -456,7 +511,13 @@ export function feverConnector(fetchFn: typeof fetch = fetch, ahora?: () => Date
     slug: "fever",
     name: "Fever",
     async fetchEvents() {
-      const pedir = (url: string) => fetchFn(url, { headers: { "user-agent": UA } });
+      const pedir = (url: string) =>
+        fetchFn(url, { headers: { "user-agent": UA, "accept-language": "es-MX" } });
+      const pedirJson = async (url: string) => {
+        const r = await pedir(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      };
 
       const res = await pedir(HOME);
       if (!res.ok) throw new Error(`Fever home HTTP ${res.status}`);
@@ -471,11 +532,30 @@ export function feverConnector(fetchFn: typeof fetch = fetch, ahora?: () => Date
       let sinLeer = 0;
       const detalles = await enTandas(aPedir, DETALLES_EN_PARALELO, async (p) => {
         try {
-          const r = await pedir(PLAN(p.id));
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          const plan = parsePaginaPlan(await r.text(), p.id);
-          if (!plan) throw new Error("sin transfer-state legible");
-          return plan;
+          const plan = parsePlanDetalle(await pedirJson(API_DETALLE(p.id)), p.id);
+          if (!plan) throw new Error("detalle sin nombre de plan");
+          if (!esPublicable(plan) || !plan.placeId) return plan;
+
+          // Cada forma de venta tiene su endpoint, igual que en el sitio: las
+          // funciones sueltas salen del selector de boletos y las corridas
+          // continuas del calendario de días. Pedirle el selector a un plan de
+          // temporada devuelve disponibilidad que el sitio NO usa (La Odisea
+          // aparecía con lugar hoy y el calendario la daba agotada hasta el 21).
+          if (plan.esTemporada) {
+            const ahoraMismo = now();
+            const hoy = diaEnMonterrey(ahoraMismo);
+            const calendario = calendarioDeApi(
+              await pedirJson(API_CALENDARIO(plan.id, plan.placeId, hoy, diaMas(ahoraMismo, DIAS_CALENDARIO))),
+            );
+            // El calendario no trae horas. Las del día que se va a publicar —y
+            // sólo las de ése— salen de una tercera petición.
+            const dia = proximoDiaAbierto(calendario, hoy);
+            const funciones = dia
+              ? sesionesDeApi(await pedirJson(API_SESIONES_DIA(plan.id, plan.placeId, dia.fecha)))
+              : [];
+            return { ...plan, calendario, funciones };
+          }
+          return { ...plan, funciones: sesionesDeApi(await pedirJson(API_SESIONES(plan.id, plan.placeId))) };
         } catch {
           sinLeer++;
           return null;

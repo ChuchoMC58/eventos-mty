@@ -58,6 +58,25 @@ para que el usuario lo revise antes de darlo por cerrado:
 No basta con tests o build verdes: el usuario quiere ver el cambio funcionando
 en la app real.
 
+## ⚠️ El VPS corre en UTC: todo preview miente en las horas
+
+**El host está en `Etc/UTC` y producción en `America/Monterrey`** (`ENV TZ` en el
+`Dockerfile`, verificado con `date` dentro del contenedor). `formatFecha` usa la hora
+local del proceso, así que **cualquier preview levantado a mano —`next dev` o el build
+standalone— pinta las horas seis horas adelantadas**, y las funciones de tarde-noche
+saltan al día siguiente: un concierto de las 6:00 pm se ve como "12:00 am" del día
+después.
+
+Ya costó un diagnóstico falso el 2026-08-14 ("los eventos están adelantados un día").
+**Antes de perseguir un bug de fechas, descartar esto**: levantar el preview con la zona
+de producción y volver a mirar.
+
+```bash
+setsid env TZ=America/Monterrey PORT=3107 HOSTNAME=127.0.0.1 node .next/standalone/server.js
+```
+
+Los datos en la BD están en UTC y son correctos; lo que cambia es cómo se pintan.
+
 ## ⚠️ Previews con `next dev`: hidratación y orígenes permitidos
 
 Dos trampas ya pisadas (2026-07-23) al levantar el dev server para revisión:
