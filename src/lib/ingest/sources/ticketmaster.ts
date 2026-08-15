@@ -58,9 +58,28 @@ export function ticketmasterConnector(fetchFn: typeof fetch = fetch): Connector 
       const res = await fetchFn(url);
       if (!res.ok) throw new Error(`Ticketmaster HTTP ${res.status}`);
       const data = (await res.json()) as { _embedded?: { events?: TmEvent[] } };
-      return (data._embedded?.events ?? [])
-        .map(mapTicketmasterEvent)
-        .filter((e): e is NormalizedEvent => e !== null);
+      const eventos = data._embedded?.events ?? [];
+
+      // Los segmentos que no están en el mapa se tiraban sin dejar rastro: ni
+      // log, ni caída visible del conteo. Medido el 2026-08-05 con la llave de
+      // prod, son 2 de 89 (ambos Miscellaneous), así que el mapa está bien como
+      // está — pero si un día Ticketmaster mueve las cosas de segmento, esto
+      // tiene que verse.
+      const ajenos = eventos.filter((e) => {
+        const s = e.classifications?.[0]?.segment?.name;
+        return !s || !SEGMENT_TO_CATEGORY[s];
+      });
+      if (ajenos.length > 0) {
+        const cuenta = new Map<string, number>();
+        for (const e of ajenos) {
+          const s = e.classifications?.[0]?.segment?.name ?? "(sin segmento)";
+          cuenta.set(s, (cuenta.get(s) ?? 0) + 1);
+        }
+        const detalle = [...cuenta].map(([s, n]) => `${s}: ${n}`).join(", ");
+        console.warn(`⚠️  Ticketmaster: ${ajenos.length}/${eventos.length} descartados por segmento (${detalle})`);
+      }
+
+      return eventos.map(mapTicketmasterEvent).filter((e): e is NormalizedEvent => e !== null);
     },
   };
 }

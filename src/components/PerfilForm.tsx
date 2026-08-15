@@ -1,12 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CATEGORIAS_EN_ORDEN } from "@/lib/events/categorias";
 
-const CATEGORIAS = [
-  { valor: "musica", nombre: "🎵 Música y conciertos" },
-  { valor: "deportes", nombre: "⚽ Deportes" },
-  { valor: "cultura", nombre: "🎭 Cultura y teatro" },
-];
 const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
 export default function PerfilForm({ next }: { next: string }) {
@@ -85,20 +81,20 @@ export default function PerfilForm({ next }: { next: string }) {
 
       <fieldset>
         <legend className="mb-1 font-semibold">Categorías que te interesan</legend>
-        {CATEGORIAS.map((c) => (
-          <label key={c.valor} className="block">
+        {CATEGORIAS_EN_ORDEN.map((c) => (
+          <label key={c.slug} className="block">
             <input
               type="checkbox"
-              checked={categories.includes(c.valor)}
+              checked={categories.includes(c.slug)}
               onChange={(e) =>
                 setCategories(
                   e.target.checked
-                    ? [...categories, c.valor]
-                    : categories.filter((x) => x !== c.valor),
+                    ? [...categories, c.slug]
+                    : categories.filter((x) => x !== c.slug),
                 )
               }
             />{" "}
-            {c.nombre}
+            {c.nombreLargo}
           </label>
         ))}
       </fieldset>

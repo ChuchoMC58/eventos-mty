@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { Connector } from "./connector";
+import { Connector, hayCaida } from "./connector";
 import { upsertEvents } from "@/lib/events/upsert";
 
 export interface IngestReport {
@@ -32,7 +32,12 @@ export async function runIngest(connectors: Connector[]): Promise<IngestReport[]
         slug: c.slug,
         ok: true,
         count: events.length,
-        dropAlert: (prev?.eventCount ?? 0) >= 5 && events.length === 0,
+        dropAlert: hayCaida({
+          ok: true,
+          count: events.length,
+          prevCount: prev?.eventCount ?? 0,
+          minExpected: c.minExpected,
+        }),
       });
     } catch (err) {
       await prisma.sourceRun.create({

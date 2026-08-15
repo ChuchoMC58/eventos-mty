@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { hayCaida } from "@/lib/ingest/connector";
+import { connectors } from "@/lib/ingest/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +33,16 @@ export default async function Salud({
         <tbody>
           {sources.map((s) => {
             const [last, prev] = s.runs;
-            const caida = last && (!last.ok || ((prev?.eventCount ?? 0) >= 5 && last.eventCount === 0));
+            // Mismo criterio que runIngest, incluido el umbral propio de las
+            // fuentes chicas (CONARTE, Luma), que con el global no alertarían.
+            const caida =
+              last &&
+              hayCaida({
+                ok: last.ok,
+                count: last.eventCount,
+                prevCount: prev?.eventCount ?? 0,
+                minExpected: connectors.find((c) => c.slug === s.slug)?.minExpected,
+              });
             return (
               <tr key={s.id} className="border-b">
                 <td className="p-2">{s.name}</td>

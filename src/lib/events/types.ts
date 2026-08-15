@@ -1,4 +1,7 @@
-export const CATEGORIES = ["musica", "deportes", "cultura"] as const;
+// El orden es el de los chips de la cartelera. `tecnologia` y `bienestar` son
+// para lo que las boleteras no venden (meetups, pilates, clubs de correr) y que
+// hasta 2026-08-05 ni se pedía a Luma por no tener dónde ponerlo.
+export const CATEGORIES = ["musica", "deportes", "cultura", "tecnologia", "bienestar"] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 export type EventStatus = "activo" | "cancelado" | "pospuesto";

@@ -58,4 +58,9 @@ describe("formatPrecio", () => {
   it("rango", () => expect(formatPrecio(300, 2500)).toBe("$300–$2,500"));
   it("solo mínimo", () => expect(formatPrecio(500, null)).toBe("desde $500"));
   it("sin precio", () => expect(formatPrecio(null, null)).toBeNull());
+  // CONARTE y Luma traen entrada libre como 0: "$0" se leería como bug.
+  it("gratis", () => expect(formatPrecio(0, null)).toBe("Gratis"));
+  it("gratis con max 0", () => expect(formatPrecio(0, 0)).toBe("Gratis"));
+  it("gratis con boletos de pago sigue siendo rango", () =>
+    expect(formatPrecio(0, 500)).toBe("$0–$500"));
 });

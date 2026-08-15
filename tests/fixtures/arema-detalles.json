@@ -1,0 +1,109 @@
+{
+  "20420": {
+    "error": false,
+    "data": {
+      "event_id": 20420,
+      "event_name": "Siete Veces Adios en Monterrey",
+      "sinopsis": "  Elenco: María León y Osvaldo Benavides  ",
+      "dates": [
+        {
+          "date_id": 81488,
+          "date": 1788487200,
+          "active": true
+        },
+        {
+          "date_id": 81489,
+          "date": 1788573600,
+          "active": true
+        },
+        {
+          "date_id": 81490,
+          "date": 1788652800,
+          "active": true
+        },
+        {
+          "date_id": 81491,
+          "date": 1785549600,
+          "active": true
+        },
+        {
+          "date_id": 81492,
+          "date": 1788746400,
+          "active": false
+        }
+      ]
+    }
+  },
+  "20841": {
+    "error": false,
+    "data": {
+      "event_id": 20841,
+      "sinopsis": null,
+      "dates": [
+        {
+          "date_id": 90001,
+          "date": 1791687600,
+          "active": true
+        }
+      ]
+    }
+  },
+  "20713": {
+    "error": false,
+    "data": {
+      "event_id": 20713,
+      "sinopsis": "",
+      "dates": [
+        {
+          "date_id": 90002,
+          "date": 1789837200,
+          "active": true
+        }
+      ]
+    }
+  },
+  "20905": {
+    "error": false,
+    "data": {
+      "event_id": 20905,
+      "sinopsis": null,
+      "dates": []
+    }
+  },
+  "20988": {
+    "error": false,
+    "data": {
+      "event_id": 20988,
+      "sinopsis": null,
+      "dates": [
+        {
+          "date_id": 90003,
+          "date": 1787970600,
+          "active": true
+        }
+      ]
+    }
+  },
+  "19112": {
+    "error": false,
+    "data": {
+      "event_id": 19112,
+      "sinopsis": null,
+      "dates": [
+        {
+          "date_id": 90004,
+          "date": 1785376800,
+          "active": true
+        }
+      ]
+    }
+  },
+  "20777": {
+    "error": false,
+    "data": {
+      "event_id": 20777,
+      "sinopsis": null,
+      "dates": []
+    }
+  }
+}

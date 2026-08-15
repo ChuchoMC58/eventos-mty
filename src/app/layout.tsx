@@ -21,7 +21,7 @@ const archivoBlack = Archivo_Black({
 
 export const metadata: Metadata = {
   title: "Vibra MX — qué hacer en Monterrey",
-  description: "Conciertos, deportes y cultura en Monterrey. Recibe cada semana los eventos que te interesan por WhatsApp.",
+  description: "Conciertos, deportes, cultura, tecnología y bienestar en Monterrey. Recibe cada semana los eventos que te interesan por WhatsApp.",
 };
 
 export default function RootLayout({

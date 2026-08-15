@@ -1,0 +1,270 @@
+{
+  "entries": [
+    {
+      "api_id": "evt-yihMs3aesT41pLF",
+      "event": {
+        "api_id": "evt-yihMs3aesT41pLF",
+        "name": "“PARANORMAL” Listening party",
+        "url": "67dh9kur",
+        "cover_url": "https://images.lumacdn.com/uploads/z2/369bfd94-27a1-4c19-905c-0c2ee39b9286.jpg",
+        "start_at": "2026-08-08T23:00:00.000Z",
+        "end_at": "2026-08-09T02:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "Victoria Records",
+          "short_address": "Alpes 22, Obispado, Monterrey",
+          "sublocality": "Obispado",
+          "city": "Monterrey",
+          "region": "Nuevo León",
+          "country": "Mexico",
+          "localized": {
+            "es": {
+              "address": "Victoria Records",
+              "short_address": "Alpes 22, Obispado, Monterrey",
+              "sublocality": "Obispado",
+              "city": "Monterrey",
+              "region": "Nuevo León",
+              "country": "México"
+            }
+          }
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": false,
+        "max_price": null,
+        "is_sold_out": true,
+        "spots_remaining": 0,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-j2bwiwKr2uDrFaB",
+      "event": {
+        "api_id": "evt-j2bwiwKr2uDrFaB",
+        "name": "CURSO DE CORTE Y CONFECCIÓN DE PRENDAS (PRINCIPIANTES) (PRESENCIAL)",
+        "url": "dgdpnrae",
+        "cover_url": "https://images.lumacdn.com/uploads/g0/6b516f27-ccae-42ec-935f-59925f5238e1.png",
+        "start_at": "2026-08-10T20:00:00.000Z",
+        "end_at": "2026-09-04T23:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "Maquiladora Pueblo Nuevo",
+          "short_address": "Río la Paz 538, Pueblo Nuevo V, Cdad. Apodaca",
+          "sublocality": "Pueblo Nuevo V",
+          "city": "Ciudad Apodaca",
+          "region": "Nuevo León",
+          "country": "Mexico",
+          "localized": {
+            "es": {
+              "address": "Maquiladora Pueblo Nuevo",
+              "short_address": "Río la Paz 538, Pueblo Nuevo V, Cdad. Apodaca",
+              "sublocality": "Pueblo Nuevo V",
+              "city": "Ciudad Apodaca",
+              "region": "Nuevo León",
+              "country": "México"
+            }
+          }
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": true,
+        "max_price": null,
+        "is_sold_out": false,
+        "spots_remaining": 4,
+        "is_near_capacity": true,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-oYFheBfnbJ53MT1",
+      "event": {
+        "api_id": "evt-oYFheBfnbJ53MT1",
+        "name": "Phoebe Bridgers - Listening Party - Monterrey",
+        "url": "t4mb6ztl",
+        "cover_url": "https://images.lumacdn.com/uploads/ld/e68436b2-1eb1-4f14-b7f4-aca4dbda8e13.jpg",
+        "start_at": "2026-08-14T03:00:00.000Z",
+        "end_at": "2026-08-14T05:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "Las Dunas Record Café",
+          "short_address": "Calle Río Amazonas 150-4 Oriente, Río Amazonas 150, Del Valle, San Pedro Garza García",
+          "sublocality": "Del Valle",
+          "city": "San Pedro Garza García",
+          "region": "Nuevo León",
+          "country": "Mexico",
+          "localized": {
+            "es": {
+              "address": "Las Dunas Record Café",
+              "short_address": "Calle Río Amazonas 150-4 Oriente, Río Amazonas 150, Del Valle, San Pedro Garza García",
+              "sublocality": "Del Valle",
+              "city": "San Pedro Garza García",
+              "region": "Nuevo León",
+              "country": "México"
+            }
+          }
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": true,
+        "max_price": null,
+        "is_sold_out": true,
+        "spots_remaining": 0,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-ag0M6IY3DahzRBw",
+      "event": {
+        "api_id": "evt-ag0M6IY3DahzRBw",
+        "name": "Santos de la Rosa-En vivo Casa Dam",
+        "url": "irugds6h",
+        "cover_url": "https://images.lumacdn.com/uploads/xi/d3729114-8df5-4fe6-86d5-bf3d0551ae1d.png",
+        "start_at": "2026-08-16T01:30:00.000Z",
+        "end_at": "2026-08-16T05:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "Casa Dam",
+          "short_address": "C. Rubí 100-Loc 6, Cuauhtémoc, San Nicolás de los Garza",
+          "sublocality": "Cuauhtémoc",
+          "city": "San Nicolás de los Garza",
+          "region": "Nuevo León",
+          "country": "Mexico",
+          "localized": {
+            "es": {
+              "address": "Casa Dam",
+              "short_address": "C. Rubí 100-Loc 6, Cuauhtémoc, San Nicolás de los Garza",
+              "sublocality": "Cuauhtémoc",
+              "city": "San Nicolás de los Garza",
+              "region": "Nuevo León",
+              "country": "México"
+            }
+          }
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": true,
+        "max_price": null,
+        "is_sold_out": false,
+        "spots_remaining": 8,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-pagado",
+      "event": {
+        "api_id": "evt-pagado",
+        "name": "Concierto de cámara — Cuarteto Monterrey",
+        "url": "pagadoslug",
+        "cover_url": "https://images.lumacdn.com/uploads/aa/cuarteto.jpg",
+        "start_at": "2026-08-20T02:00:00.000Z",
+        "end_at": "2026-08-20T04:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "Casa de la Cultura",
+          "short_address": "Padre Mier 100, Centro, Monterrey",
+          "sublocality": "Centro",
+          "city": "Monterrey",
+          "region": "Nuevo León",
+          "country": "Mexico",
+          "localized": {
+            "es": {
+              "address": "Casa de la Cultura",
+              "short_address": "Padre Mier 100, Centro, Monterrey",
+              "sublocality": "Centro",
+              "city": "Monterrey",
+              "region": "Nuevo León",
+              "country": "México"
+            }
+          }
+        }
+      },
+      "ticket_info": {
+        "price": {
+          "cents": 25000,
+          "currency": "mxn",
+          "is_flexible": false
+        },
+        "is_free": false,
+        "max_price": {
+          "cents": 60000,
+          "currency": "mxn",
+          "is_flexible": false
+        },
+        "is_sold_out": false,
+        "spots_remaining": 30,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-0ssAQMOEzt1XGHi",
+      "event": {
+        "api_id": "evt-0ssAQMOEzt1XGHi",
+        "name": "Bolishe One - Monterrey (Full Band)",
+        "url": "4jihneu1",
+        "cover_url": "https://images.lumacdn.com/uploads/py/b9bad7bd-3ad4-4003-a7dd-d40d5a533c6c.jpg",
+        "start_at": "2026-08-17T00:00:00.000Z",
+        "end_at": "2026-08-17T02:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "obfuscated",
+          "sublocality": "Cuauhtémoc",
+          "city": "San Nicolás de los Garza",
+          "region": "Nuevo León",
+          "country": "Mexico"
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": true,
+        "max_price": null,
+        "is_sold_out": true,
+        "spots_remaining": 0,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    },
+    {
+      "api_id": "evt-boston",
+      "event": {
+        "api_id": "evt-boston",
+        "name": "Cambridge Poetry Night",
+        "url": "bostonslug",
+        "cover_url": "https://images.lumacdn.com/uploads/z2/369bfd94-27a1-4c19-905c-0c2ee39b9286.jpg",
+        "start_at": "2026-08-08T23:00:00.000Z",
+        "end_at": "2026-08-09T02:00:00.000Z",
+        "timezone": "America/Monterrey",
+        "geo_address_info": {
+          "mode": "shown",
+          "address": "The Sinclair",
+          "short_address": "52 Church St",
+          "city": "Cambridge",
+          "region": "Massachusetts"
+        }
+      },
+      "ticket_info": {
+        "price": null,
+        "is_free": false,
+        "max_price": null,
+        "is_sold_out": true,
+        "spots_remaining": 0,
+        "is_near_capacity": false,
+        "require_approval": false
+      }
+    }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}

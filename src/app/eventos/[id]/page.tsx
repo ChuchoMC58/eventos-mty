@@ -1,22 +1,12 @@
 import { prisma } from "@/lib/db";
 import { formatFecha, formatPrecio } from "@/lib/format";
 import { googleCalendarUrl, androidCalendarIntentUrl } from "@/lib/calendar";
+import { infoCategoria } from "@/lib/events/categorias";
 import { getSessionUserId } from "@/lib/auth/session";
 import SaveButton from "@/components/SaveButton";
 import GoogleCalendarButton from "@/components/GoogleCalendarButton";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-
-const NOMBRE_CATEGORIA: Record<string, string> = {
-  musica: "Música",
-  deportes: "Deportes",
-  cultura: "Cultura",
-};
-const ESTILO_CATEGORIA: Record<string, string> = {
-  musica: "text-musica bg-musica/15",
-  deportes: "text-deportes bg-deportes/15",
-  cultura: "text-cultura bg-cultura/15",
-};
 
 export default async function DetalleEvento({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -45,7 +35,11 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
   };
   const gcal = googleCalendarUrl(calEvent);
   const gcalIntent = androidCalendarIntentUrl(calEvent);
-  const precio = formatPrecio(e.priceMin ? Number(e.priceMin) : null, e.priceMax ? Number(e.priceMax) : null);
+  // Ojo con `e.priceMin ? …`: 0 es un precio real (entrada libre), no un hueco.
+  const precio = formatPrecio(
+    e.priceMin != null ? Number(e.priceMin) : null,
+    e.priceMax != null ? Number(e.priceMax) : null,
+  );
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6">
@@ -61,9 +55,9 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
         />
       )}
       <span
-        className={`mt-4 block w-fit rounded-sm px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] ${ESTILO_CATEGORIA[e.category] ?? "bg-hueso/10 text-humo"}`}
+        className={`mt-4 block w-fit rounded-sm px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] ${infoCategoria(e.category)?.clases ?? "bg-hueso/10 text-humo"}`}
       >
-        {NOMBRE_CATEGORIA[e.category] ?? e.category}
+        {infoCategoria(e.category)?.nombre ?? e.category}
       </span>
       <h1 className="mt-3 font-display text-3xl uppercase leading-tight tracking-tight text-balance">
         {e.title}
@@ -91,7 +85,9 @@ export default async function DetalleEvento({ params }: { params: Promise<{ id: 
             rel="noopener noreferrer"
             className="rounded-md bg-musica px-5 py-2.5 text-sm font-extrabold text-ink transition-[filter] hover:brightness-110"
           >
-            Boletos
+            {/* Un evento de entrada libre (CONARTE, Luma) no tiene boletos que
+                comprar: el enlace es su página, no una taquilla. */}
+            {e.priceMin != null && Number(e.priceMin) === 0 ? "Más info" : "Boletos"}
           </a>
         )}
         <SaveButton eventId={e.id} saved={saved} reminderPref={reminderPref} />

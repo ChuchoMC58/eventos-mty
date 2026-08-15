@@ -42,7 +42,7 @@ model Event {
   description String?
   startsAt    DateTime
   endsAt      DateTime?
-  category    String // musica | deportes | cultura
+  category    String // la lista viva está en CATEGORIES (src/lib/events/types.ts)
   tags        String[]
   priceMin    Decimal?
   priceMax    Decimal?

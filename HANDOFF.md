@@ -1,14 +1,76 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-08-03 (**primer envío por plantilla real de todo el
+> Última actualización: 2026-08-08 (**los 7 eventos huérfanos, borrados** — y de paso se
+> desmintió el doc que los llamaba "de origen desconocido": estaban **sólo en dev** (prod
+> tenía 0) y son residuo de eventos **reprogramados**, porque el dedupe empata por
+> mismo-venue+mismo-día y una fecha nueva crea fila nueva. Ver "Sesión 2026-08-08").
+> Antes, 2026-08-07 (**séptima fuente: Fever**, ~56 eventos de 34 planes,
+> con **solape cero por construcción** —11 venues que ninguna otra fuente toca— y la
+> primera fuente que no es boletera de conciertos: Candlelight, museos, experiencias
+> inmersivas y juegos callejeros. El reconocimiento del mismo día decía que las fechas
+> por función estaban en el renderizado Angular: **estaban en la página de cada plan**,
+> en un `astro-tools-transfer-state` que además trae ciudad, sede con dirección y precio.
+> Ver "Sesión 2026-08-07 (tarde)". Commits locales, **sin pushear**).
+> Antes, el mismo día (**sexta fuente: AREMA Ticket**, ~143 eventos de NL
+> con **cero** solape con las otras fuentes, y con ella se **cierra la lista de fuentes
+> sin explorar**: Pabellón M ya entraba por Ticketmaster con su nombre nuevo y el Teatro
+> de la Ciudad ya entraba por CONARTE. Boletia queda descartado y Fever quedaba viable
+> pero sin implementar — eso último ya no vale: se implementó esa tarde, ver arriba.
+> Ver "Sesión 2026-08-07". Commits locales, **sin pushear**).
+> Antes, 2026-08-06 (**quinta fuente: Superboletos**, ~88 eventos de NL
+> de los que ~37 son netos nuevos; de paso **tacha Showcenter Complex** de la lista de
+> pendientes. Y se corrigió un dato falso de `FUENTES.md`: decía que Luma "corre a
+> diario en prod" y **no**, `origin/main` sigue con dos conectores. Ver "Sesión
+> 2026-08-06 (tarde)". Commits locales, **sin pushear**. Quedaron **2 duplicados** entre
+> Arena y Superboletos y **7 eventos huérfanos** sin fuente: ver "Lo que quedó ABIERTO").
+> Antes, el mismo día: **CONARTE traía 12 eventos, no 5**: dos bugs de
+> parseo se comían más de la mitad de la fuente, y el número del doc de
+> reconocimiento estaba mal porque se midió con el mismo parseo roto. Ver "Sesión
+> 2026-08-06". Antes, el 2026-08-05: **5 categorías: `tecnologia` y `bienestar`** —el
+> plan de categorías ya es código y Luma pasó de 4 a **16 eventos**. Ver
+> "Sesión 2026-08-05 (tarde)". Commits locales, **sin pushear**). Antes, el mismo
+> día: **dos conectores nuevos, CONARTE y Luma** —los
+> reportes de reconocimiento de CONARTE y Luma (hoy fundidos en `FUENTES.md`) ya son
+> código: 9 eventos nuevos ingeridos en la BD dev, ninguno de los cuales existe en
+> Ticketmaster. Ver "Sesión 2026-08-05". Commit local, **sin pushear**). Antes,
+> 2026-08-03 (**primer envío por plantilla real de todo el
 > proyecto**: recordatorio y digest salieron con `contentSid` desde el sender de
 > producción y llegaron bien —ver "Sesión 2026-08-03"—. De paso se desmintió que el
 > digest ya se hubiera probado así: lo del 2-ago fue texto libre desde el sandbox, y ahí
 > quedó **cómo distinguirlos en el log de Twilio**. Además, **la baja ya acepta las
 > variantes que la gente escribe** (`Baja.`, `darme de baja`, `BAJA por favor`) —commit
 > `a6177b0`, sin pushear—, que hacía falta porque la plantilla del digest dice "Responde
-> BAJA". Sigue el ⛔ del OTP. Antes, 2026-08-02: **flujo completo probado end-to-end en local** —login, digest, recordatorio, baja y reactivación, todo verde contra la BD **dev**; ver "Sesión 2026-08-01/02", que incluye la regla de qué recursos se usan en local y **estado efímero que hay que revertir**: el webhook del sandbox quedó apuntando a un túnel—. Antes, 2026-07-31: **plantillas de recordatorio y digest APROBADAS por Meta** —el recordatorio quedó UTILITY—; **el login ya se puede probar en local** con el fallback de texto libre en modo prueba; webhook del sender repuntado a `vibramx.fun` tras descubrir que llevaba 2.5 días apuntando a un dev server; plantillas de respaldo borradas; **el sitio ya se llama `Vibra MX`**, no "Eventos MTY"; **intento de verificación del negocio PAUSADO** por el régimen fiscal del RFC. **Nada está pusheado** y sigue el ⛔ por el OTP — ver "Sesión 2026-07-29" abajo, y `META-WHATSAPP.md` para el trámite).
+> BAJA". Sigue el ⛔ del OTP. Antes, 2026-08-02: **flujo completo probado end-to-end en local** —login, digest, recordatorio, baja y reactivación, todo verde contra la BD **dev**; ver "Sesión 2026-08-01/02", que incluye la regla de qué recursos se usan en local y **estado efímero que hay que revertir**: el webhook del sandbox quedó apuntando a un túnel—. Antes, 2026-07-31: **plantillas de recordatorio y digest APROBADAS por Meta** —el recordatorio quedó UTILITY—; **el login ya se puede probar en local** con el fallback de texto libre en modo prueba; webhook del sender repuntado a `vibramx.fun` tras descubrir que llevaba 2.5 días apuntando a un dev server; plantillas de respaldo borradas; **el sitio ya se llama `Vibra MX`**, no "Eventos MTY"; **intento de verificación del negocio PAUSADO** por el régimen fiscal del RFC. **Nada está pusheado** y sigue el ⛔ por el OTP — ver "Sesión 2026-07-29" abajo para el trámite).
+
+## ⛔ LO PRIMERO: el push está bloqueado — deployar tumba el login en producción
+
+(Vigente desde 2026-07-29. **Borrar esta sección cuando se destrabe.**)
+
+El código exige plantilla aprobada para todo mensaje que inicia el negocio,
+**incluido el OTP del login** — y la plantilla de OTP **no existe**: está atada a la
+verificación del negocio en Meta, pausada por el régimen fiscal del RFC. Si esto se
+deploya, `plantillaOtp()` lanza `Falta TWILIO_CONTENT_SID_OTP` y **nadie puede
+entrar**. Es intencional: es preferible a un login que aparenta funcionar.
+
+⚠️ El fallback de texto libre **NO destraba esto**: está atado a
+`WHATSAPP_TEST_MODE=true` a propósito. Sirve para probar en local, no para deployar.
+
+Antes de pushear tienen que estar las cuatro:
+
+1. ✅ Recordatorio y digest aprobados por Meta (2026-07-31).
+2. 🔴 **Que exista la plantilla de OTP** (o sea: verificación del negocio lista).
+   Es el único bloqueo real.
+3. Variables en Coolify: `TWILIO_CONTENT_SID_OTP`,
+   `TWILIO_CONTENT_SID_RECORDATORIO=HXdfa8086a05d711d7feaf5d52ce6d9e4b`,
+   `TWILIO_CONTENT_SID_DIGEST=HX626b23de0d02f571a3a841967d6667b9`,
+   `TWILIO_WHATSAPP_FROM=+17347670241`.
+   ⚠️ Los SIDs viejos (`HX97332f…`, `HX93686b…`) eran de plantillas de respaldo **ya
+   borradas**: configurarlos daría un 404 de Twilio en cada envío.
+4. `WHATSAPP_TEST_MODE=false` **hasta el final**, y sólo con todo lo anterior listo.
+
+El detalle del trámite y por qué se pausó están en las sesiones del 2026-07-29 al
+08-03, más abajo.
 
 ## Qué es
 
@@ -19,8 +81,9 @@ completos si están presentes.
 
 ## Estado: FASE 0–4 COMPLETAS. App DESPLEGADA en Coolify.
 
-- **100 tests pasan** (`npm run test:todo` = 68 puros + 32 de integración),
-  **lint limpio** (`npm run lint`) y `tsc --noEmit` limpio.
+- **131 tests puros pasan** (`npm test`; los de BD van aparte con
+  `npm run test:borra-bd`, ver más abajo), **lint limpio** (`npm run lint`) y
+  `tsc --noEmit` limpio.
 - Commits por fase (rama `main`, ya en GitHub `ChuchoMC58/eventos-mty`, público):
   - `fase 0` scaffold + esquema BD
   - `fase 1` ingesta (conectores, dedupe, salud de fuentes)
@@ -36,11 +99,442 @@ completos si están presentes.
 - Auto-deploy verificado end-to-end: `git push` a `main` → webhook de GitHub →
   Coolify reconstruye y cambia el contenedor (~2–3 min medidos).
 - **Rediseño UI "Marquesina" en producción (2026-07-21):** cartelera nocturna —
-  tokens Tailwind v4 (tinta/hueso/humo + categorías ámbar/verde/lila), fuente
+  tokens Tailwind v4 (tinta/hueso/humo + categorías ámbar/verde/lila, más cian y
+  coral desde que son 5 — ver `globals.css`), fuente
   display Archivo Black, home con agenda agrupada por día (Hoy/Mañana), filtros
   como chips, CTA de WhatsApp en el hero, y todas las páginas/formularios con el
-  mismo lenguaje visual. Se eligió entre 2 prototipos (quedan sin trackear en
-  `design/` local). `formatPrecio` ahora usa separador de miles.
+  mismo lenguaje visual. Se eligió entre 2 prototipos, que vivían sin trackear en
+  `design/` y **se borraron el 2026-08-06** (ya no aportaban: el diseño elegido
+  lleva semanas en producción). `formatPrecio` ahora usa separador de miles.
+
+## Sesión 2026-08-08 — los 7 huérfanos borrados, y no eran lo que el doc decía
+
+### El doc se equivocaba en las dos cosas que importaban
+
+`HANDOFF.md` los describía como de **origen desconocido** y decía que "aparecen en la
+cartelera como cualquier otro". Las dos falsas, y bastó una consulta a cada BD:
+
+- **Prod tenía 0 huérfanos.** Los 7 existían **sólo en la BD dev**, así que nunca
+  estuvieron en la cartelera pública. (`SELECT … LEFT JOIN "EventSource" … IS NULL`
+  contra el contenedor de prod: 0 de 141 eventos.)
+- **El origen no era un misterio: son eventos reprogramados.** 4 de los 7 tienen hoy un
+  gemelo vivo y con fuente en otra fecha — Kapo (8-ago huérfano → 5-nov con
+  `ticketmaster`), Lavoe Sinfónico (3-ago → 27-mar-2027), Ricardo Montaner (29-jul →
+  19-nov) y Camilo (`CAMILO 2026` 5-sep → `CAMILO 2027` 7-mar). El dedupe de
+  `upsertEvents` sólo empata **mismo venue + mismo día**, así que al moverse la fecha se
+  crea una fila nueva y la vieja se queda sin nadie que la refresque.
+- De los 3 restantes, 2 ya eran pasado (CA7RIEL 1-ago, Los Alegres 2-ago) y 1 era futuro
+  sin reemplazo (Tativerso Chicharrín, 30-ago).
+
+### Qué se borró
+
+Los 7, en una transacción contra la BD **dev**. Quedan 400 eventos y **0 huérfanos**.
+En cascada se fue **1 `SavedEvent`**: el del recordatorio de prueba del 2026-08-02
+(Lavoe Sinfónico, número de test del admin, evento ya pasado).
+
+### Lo que quedó ABIERTO
+
+1. 🟡 **La ingesta nunca da de baja lo que desaparece de su fuente.** No hay limpieza:
+   un evento que la fuente deja de publicar se queda en la BD para siempre. Hoy no duele
+   —los eventos con fuente ligada están todos frescos, 0 con `lastSeenAt` de más de 7
+   días— pero es el mecanismo que fabricó estos 7 y los volverá a fabricar.
+2. El cron del digest sigue en `25 4 * * *` (22:25 de Monterrey). Ver abajo.
+
+---
+
+## Sesión 2026-08-07 (tarde) — séptima fuente: Fever, la primera que no es boletera
+
+Se implementó lo que la sesión de la mañana había dejado documentado a propósito. La ficha
+completa está en `FUENTES.md` ("Fever — `fever`"); aquí lo que no se ve en el código.
+
+### El reconocimiento de la mañana estaba incompleto, y por eso el conector salió mejor
+
+La ficha decía que las fechas por función sólo existían en el renderizado Angular
+(`/es/monterrey/<categoria>`, 28 sesiones en `/candlelight`) y que la ciudad había que
+adivinarla por el nombre de la sede. Las dos cosas eran falsas, y salieron al abrir la
+página de **un plan** (`/m/<id>`) en vez de la home:
+
+- `<script id="astro-tools-transfer-state" type="application/json">` trae **JSON limpio**
+  —sin las tuplas `[0, valor]` de Astro y sin entidades— con `planDetail` (ciudad, sede
+  **con dirección**, categorías, descripción, precio) y el árbol del selector de boletos
+  con **las funciones reales**.
+- O sea: la etapa 2 sale de la misma página en la que ya estábamos, y el renderizado
+  Angular no hace falta para nada.
+
+Moraleja repetida (regla 8): el reconocimiento se había hecho sobre la home. Bastó abrir
+un plan para que la mitad de las trampas dejaran de serlo.
+
+### Números
+
+- **49 planes en la home → 34 publicables → 56 eventos.** Se van 13 por `isTimeless`
+  (tarjetas de regalo con fecha `2030-01-01` incluidas) y 2 por ser de otra ciudad.
+- **Solape cero, y esta vez por construcción**: sus 56 eventos caen en 11 venues (Museo de
+  Historia Mexicana, Saxy Jazz, Teatro Versalles, Papalote, Macroplaza…) y ninguna otra
+  fuente tiene **un solo evento** en ninguno. Se verificó por venue y mirando la lista
+  completa de venues de la BD a ojo, no con `sameEventTitle` (reglas 5 y 7).
+- Corrida completa: 1 + 36 peticiones en tandas de 4, ~40 s.
+
+### Tres decisiones que no son obvias
+
+1. **Un plan de temporada se publica UNA vez, no un día por renglón.** Los museos, las
+   exposiciones y los juegos callejeros se venden con un calendario de días disponibles
+   (hasta 55). Publicarlos todos sería repetir el mismo título 55 veces en la cartelera;
+   se publica el próximo día disponible y, como la ingesta corre a diario, la fecha se
+   recorre sola.
+2. **Lo mismo aplica a un plan que corre a diario aunque Fever no lo marque como
+   calendario.** Salió del dry-run: el "City Tour Hop On/Hop Off" publicaba 10 renglones
+   idénticos. Más de 6 días distintos ⇒ se trata como corrida continua. Los Candlelight,
+   que sí queremos expandir, no pasan de 3 fechas.
+3. **`nightlife` es música, no fiesta**: es la etiqueta con la que Fever clasifica varios
+   Candlelight. Y `mix` es su cajón de sastre, así que va a `cultura`, que es el nuestro.
+
+### Lo que quedó ABIERTO en esta sesión
+
+1. 🔴 **Los términos de uso de Fever: SIN REVISAR**, como los de Luma, Superboletos y
+   AREMA. Su `robots.txt` sí permite las dos rutas que se usan.
+2. 🟡 Las funciones que se publican son **las que la página precarga**, no la temporada
+   completa de cada plan. Alcanza de sobra para el horizonte de 10 días del digest; si
+   algún día hiciera falta más, el hilo es el endpoint detrás de `getPlanSessionsForPlace`.
+3. Sigue abierto todo lo de las sesiones anteriores (el duplicado del Mitote y los 2 de
+   Arena/Superboletos). Los 7 eventos huérfanos ya **no**: borrados el 2026-08-08.
+
+---
+
+## Sesión 2026-08-07 — sexta fuente: AREMA, y se acabó la lista de fuentes sin explorar
+
+### Lo que se investigó y lo que salió
+
+El punto de partida era la lista de "fuentes sin explorar" (Auditorio Pabellón M y Teatro
+de la Ciudad) más tres boleteras que agrega la competencia (Boletia, Arema, Fever). De
+cinco candidatos, **dos ya estaban cubiertos, uno se implementó, uno queda viable y uno
+está cerrado**:
+
+| Candidato | Veredicto |
+|---|---|
+| **Auditorio Pabellón M** | Ya entraba. Es el **`Escenario GNP Seguros`** de Ticketmaster (43 eventos en prod); se reconoció por la dirección, Av. Benito Juárez 1002. Su sitio propio está muerto (redirige a `/lander`) |
+| **Teatro de la Ciudad** | Ya entraba. Lo administra CONARTE: 6 de los 19 eventos que trae ese conector son suyos. Lo de paga entra por Arema y TM |
+| **AREMA Ticket** | ✅ Implementado, `arema` |
+| **Fever** | Reconocida a fondo y **no implementada ese momento** —decisión del usuario: documentarla en vez de escribirla—. Se implementó **esa misma tarde**: ver la sesión de arriba |
+| **Boletia** | ❌ Cerrado. Su CloudFront da 403 a todo, incluso a `robots.txt`, y también desde fuera de este VPS: bloquean clientes no-navegador |
+
+### AREMA (`arema`)
+
+Sexta fuente. Detalle completo —los dos endpoints, las trampas y sus defensas— en
+`FUENTES.md`. Lo esencial:
+
+- **No es scraping.** Dos endpoints JSON sin auth, encontrados en su bundle de React.
+  `events/list` con `{}` devuelve el catálogo **nacional entero en una petición** (648
+  eventos, 96 en NL).
+- **~143 eventos vigentes en NL** y **cero se fusionaron con otra fuente**: son venues que
+  literalmente nadie más nos daba — Auditorio Río 70 (24), Dramático (14), Café Iguana,
+  Jardín 85, los Zagar Comedy Bar. Es la primera fuente con **masa de comedia**.
+- **Cierra la lista de fuentes sin explorar**: ya no queda ninguna.
+
+Tres decisiones que no son obvias y conviene no "arreglar":
+
+1. **Hay una segunda etapa por evento, y es necesaria.** El listado trae **una sola fecha**
+   por evento —la primera función— aunque la obra tenga temporada; "Gran Feria Nuevo León"
+   tiene 10. Los 96 del listado se vuelven ~143 funciones. Son 96 peticiones extra en
+   tandas de 4; la corrida completa tarda 3.8 s.
+2. **Su API responde HTTP 200 aunque falle** (`{"error":true,"code":"UNXEND"}`). Mirar sólo
+   el status apagaría la fuente en silencio. `post()` mira el cuerpo.
+3. **Lo desconocido cae en `cultura`, no en `musica`** — al revés que Superboletos, porque
+   aquí la música sí tiene etiqueta propia (`Concierto`) y sin ambigüedad.
+
+Y una cuarta que es puro dedupe: **`Pabellon M` → `Escenario GNP Seguros`** y **`Teatro de
+la Ciudad de Monterrey` → `Teatro de la Ciudad`**, por nombre exacto. Con regex o
+"parecido", `Teatro de la Ciudad San Nicolás` —otro teatro, otro municipio— se fusionaría
+con el del centro.
+
+### Fever, que ese momento no se implementó
+
+No se escribió el conector **a propósito**: el usuario pidió documentar en vez de seguir.
+Lo hecho aquí fue el reconocimiento. **Se implementó esa misma tarde** — ver la sesión
+"2026-08-07 (tarde)" arriba, que además corrige dos cosas que este reconocimiento dio por
+buenas: las fechas por función NO están sólo en el renderizado Angular, y la ciudad no hay
+que adivinarla por el nombre de la sede.
+
+### Lo que quedó ABIERTO en esta sesión
+
+1. 🟡 **Un duplicado nuevo, del mismo bug de siempre**: el `34 Mitote Folklórico` aparece
+   3× los días 8 y 9 de agosto en Teatro de la Ciudad (1 de Arema + 2 de CONARTE, que
+   entre sí **no** son duplicados: son Gran Sala y Escenario al Aire Libre). Es otra vez
+   `sameEventTitle` comparando por substring. Se va solo cuando acabe el festival, y no se
+   tocó `normalize.ts` **a propósito**: es un cambio global a los 6 conectores y requiere
+   OK. Tabla en `FUENTES.md`, sección "Duplicados conocidos entre fuentes".
+2. 🔴 **Los términos de uso de AREMA: SIN REVISAR**, como los de Luma y Superboletos.
+3. Sigue todo lo abierto de la sesión anterior (los 2 duplicados Arena/Superboletos y los
+   7 eventos huérfanos).
+
+---
+
+## Sesión 2026-08-06 (tarde) — quinta fuente: Superboletos, y un dato falso en los docs
+
+### El dato falso, primero
+
+`FUENTES.md` afirmaba que la API interna de Luma *"corre a diario en prod"*, y **es
+mentira**. `origin/main` sólo tiene `ticketmaster` y `arena-monterrey` en el registry;
+`src/lib/ingest/sources/luma.ts` **no existe ahí**. `main` local va **37 commits
+adelante** sin pushear, así que CONARTE, Luma y ahora Superboletos están escritos y
+testeados pero **el cron de producción sigue ingiriendo con dos fuentes**.
+
+Se descubrió porque el dato se usó como argumento ("ya hay algo sin revisar corriendo en
+prod") y el usuario lo cuestionó. Tercera vez que un dato de los docs se repite como
+hecho y resulta falso — ver también `HANDOFF.md` sobre el conteo de commits de `fab2f0d`.
+**Verificar contra git/la BD antes de citar los docs**, sobre todo lo que afirme algo
+sobre producción.
+
+**Pendiente con nombre propio: desplegar los tres conectores.** Son ~28 eventos de
+CONARTE y Luma más ~37 de Superboletos que hoy no le llegan a nadie.
+
+### Superboletos (`superboletos`)
+
+Quinta fuente. Detalle completo —endpoint, las 10 trampas y sus defensas— en `FUENTES.md`.
+Lo esencial:
+
+- **No es scraping.** Su front Next.js lee un solo JSON en CloudFront con el catálogo
+  nacional (1,159 eventos). 3 peticiones fijas, cero por evento.
+- **88 vigentes en NL**, de los que 51 son de Arena Monterrey (ya cubiertos) → **~37
+  netos nuevos**: Showcenter Complex (21), Dion Live Center (9), Café Iguana y otros.
+- **Tacha Showcenter Complex** de las fuentes sin explorar. Quedan dos: Auditorio
+  Pabellón M y Teatro de la Ciudad.
+
+Tres decisiones que no son obvias y conviene no "arreglar":
+
+1. **Un precio `0` NO es gratis aquí.** Los 88 traen `0` y significa "no sé", al revés que
+   en CONARTE. Copiarlo pintaría toda la cartelera como entrada libre.
+2. **`claveTipoEvento` no sirve como señal de categoría.** "Familiares" es un cajón de
+   marketing: los 12 son conciertos (Melanie Martinez, Morat, Elefante). Manda
+   `claveGenero`.
+3. **Los rangos de fecha se descartan.** Sin año son ambiguos y **sí contienen eventos
+   pasados** — `THE BOOK OF MORMON` "Del Jue. 21 al Dom. 24 Mayo" era de mayo de 2026 y ya
+   había ocurrido. Se pierden ~13 de 97; mejor eso que publicar un evento que ya pasó.
+
+También: `fechaZonaAUtc()` salió de `sources/conarte.ts` a **`src/lib/ingest/fechas.ts`**
+para compartirlo (CONARTE lo re-exporta, sus tests siguen igual). Y se aclaró que
+`minExpected` **no es un piso de la corrida actual** sino un gate sobre la anterior, así
+que para una fuente de ~88 eventos el default basta; el piso real es una aserción dentro
+del conector, que es lo único que ve un colapso parcial (88 → 3), invisible para
+`hayCaida()`.
+
+### Facebook / Instagram: descartados
+
+Investigado y cerrado, con la razón en `FUENTES.md`: el Event API de Facebook es sólo para
+Facebook Marketing Partners (partnership comercial, no app review) e Instagram no tiene
+concepto de evento. Eventbrite tampoco: cerró su búsqueda pública en 2019.
+
+### Lo que quedó ABIERTO en esta sesión
+
+Todo esto salió **después** del commit `2bc5712` y no está arreglado:
+
+1. 🔴 **Dos eventos duplicados** entre `arena-monterrey` y `superboletos`:
+   `HARLEM GLOBETROTTERS 2026` / `…MONTERREY 2026`, y `SIN BANDERA: ESCENAS TOUR` /
+   `SIN BANDERA DIC 2026`. Los dos a la misma hora exacta. La causa es que
+   `sameEventTitle` compara por substring y no aguanta una palabra metida en medio.
+   Tabla completa, los casos que **no** hay que fusionar y por qué la solución obvia
+   rompe cosas: `FUENTES.md`, sección "Duplicados conocidos entre fuentes".
+   **No se tocó `normalize.ts` a propósito**: es un cambio global a los 5 conectores y
+   requiere OK.
+   - Cómo se encontró: listando a ojo los pares mismo-venue/mismo-día. **Contarlos con
+     `sameEventTitle` da 0 por construcción** — la misma trampa que con CONARTE.
+2. ~~**7 eventos huérfanos, sin ninguna fuente ligada** (`sources: none`), creados el
+   22–23 de julio~~ ✅ **BORRADOS el 2026-08-08.** Ver "Sesión 2026-08-08" arriba: eran
+   sólo de la BD **dev** (prod tenía **0**), y no había que investigar su origen porque
+   4 de los 7 tenían ya un reemplazo vivo y con fuente en otra fecha.
+3. **Ticketmaster duplica solo, desde antes**: `5 Seconds of Summer` vs
+   `5SOS - BITE THE APPLE UPGRADE`; `Dale Mixx 2026` partido en cuatro variantes de
+   boleto. Nada que ver con Superboletos.
+4. **ToS de Superboletos y de Luma: sin leer.** Los dos.
+
+## Sesión 2026-08-06 — CONARTE traía 12, no 5: dos bugs de parseo (commit `05d1cc5`)
+
+Salió de una pregunta del usuario —"¿sólo son 5 eventos de CONARTE?"— que resultó
+ser la pregunta correcta. **Son 12 en la misma ventana de 21 días**; el conector
+tiraba 7 en silencio.
+
+1. **El sitio envuelve el HTML por ancho**, así que las etiquetas salen partidas en
+   dos líneas según dónde caiga el corte: `<var\nclass="atc_date_start">`. Los
+   patrones buscaban el espacio literal, así que en esas páginas `parseDetalle`
+   devolvía **cero** eventos. Afectaba a fecha, sede, disciplina, descripción y
+   precio a la vez. Ahora todos los `class=` aceptan cualquier espacio en blanco.
+2. **La etiqueta es `agenda • Disciplina`, pero a veces `agenda • Disciplina •
+   Ciclo`**, y el código tomaba el **último** segmento. Con un ciclo de por medio
+   leía el nombre del ciclo como disciplina — y como de ahí sale
+   `DISCIPLINA_MUSICAL`, **un concierto dentro de un festival habría caído en
+   `cultura`**. Se toma el segundo, que es donde vive siempre.
+
+**Por qué pasó callado tanto tiempo:** había defensa para "ningún detalle
+respondió" (todos HTTP != 200), pero no para "respondió 200 y no pude leer nada".
+Ahora un detalle mudo se avisa por `console.warn` y, si **todos** lo son, revienta.
+
+⚠️ **El reporte de reconocimiento de CONARTE tenía el volumen mal por esto mismo**: los "5 eventos en
+21 días" del reconocimiento se midieron con el parseo que tenía el bug, o sea que
+**la medición heredó el bug**. Ya está corregido en ese doc. Moraleja para el
+próximo reconocimiento: un conteo bajo puede ser la fuente… o el parser.
+
+Fixture nuevo (`conarte-detalle-envuelto.html`) con la página real que fallaba.
+131 tests puros en verde. Ingesta real: `conarte: 12`, `luma: 17`.
+
+## Sesión 2026-08-05 (tarde) — 5 categorías y Luma completo (commits locales, SIN PUSHEAR)
+
+El plan de categorías pasó a código: commits `011b750` (refactor puro) y `8a81f32`
+(feature). **Luma pasa de 4 a 16 eventos** — 6 tecnología, 6 bienestar, 3 música,
+1 cultura — en ingesta real contra la **BD dev**, corrida dos veces sin duplicados.
+Nada de esto lo vende una boletera.
+
+### Lo primero fue tirar la hipótesis más cara del plan
+
+El plan abría con "Ticketmaster puede estar escondiendo más inventario que Luma
+entera, mídelo antes de invertir". Medido con la llave de prod: **2 de 89**, ambos
+`Miscellaneous`, y uno ni siquiera es un evento (un meet & greet que se vende
+aparte). Cero cambios a la taxonomía. Lo que quedó vivo del hallazgo es que ese
+descarte **ya no es mudo**: `ticketmaster.ts` avisa con el conteo por segmento.
+
+Dato suelto que salió de ahí y nadie había mirado: esa consulta trae **0 eventos
+de Sports**. Rayados y Sultanes no entran por `city=Monterrey`.
+
+### Las decisiones que eran del usuario
+
+1. **"Todo" sigue siendo todo** — los cinco chips en la misma fila.
+2. El chip se llama **"Tecnología"**.
+3. **Sin aviso** en la cartelera: las categorías nuevas nacen desmarcadas y se
+   descubren entrando a `/perfil`. ⚠️ Implica que **nadie las recibe en el digest
+   hasta que entre y las marque**.
+
+### Cómo quedó el conector de Luma
+
+De 1 consulta a 9: las 8 categorías **más el feed sin filtro**. Como el listado no
+dice a qué categoría pertenece cada evento, la categoría sale de *a qué endpoint se
+preguntó* — y un evento responde en varias, así que hay dedupe por `api_id` y una
+prioridad explícita (`musica > cultura > bienestar > tecnologia`); sin ella la
+categoría dependía del orden de los `for`.
+
+| Decisión | Por qué |
+|---|---|
+| La heurística de música corre **sólo** dentro de Arts & Culture y en lo que no trae categoría | "showcase" es palabra de concierto y de startups: suelta, un demo day se volvía concierto |
+| Climate → `tecnologia`, Food & Drink → `cultura`, **pero el conector avisa** la primera vez que traigan algo | Su destino se decidió con una muestra del feed global, sin un solo caso de Monterrey |
+| El corte por Nuevo León quedó **global**, no por consulta (el plan pedía por consulta) | Las coordenadas se ignoran para todas por igual; per-consulta, una categoría chica con un evento de Saltillo tumbaba la ingesta entera |
+| El tope de páginas sí es **por consulta** | Una categoría atorada no debe comerse el presupuesto de las otras ocho |
+
+### Dos cosas que sólo salieron al verificar contra datos reales
+
+- **El club de correr caía en `cultura` por descarte.** Era exactamente el criterio
+  nº 2 de verificación del plan, y falló en la primera corrida: `OWWR's Taylor
+  Swift-Themed Run` es el único evento que Luma no clasifica en ninguna categoría.
+  Se agregó `ES_BIENESTAR`, que corre **sólo** en el fallback.
+- 🔴 **`upsertEvents` no actualiza `category`** (`src/lib/events/upsert.ts`): sólo
+  la escribe al **crear**. Un evento ya guardado conserva su categoría aunque el
+  conector aprenda a clasificarlo mejor — se vio en vivo con ese mismo club de
+  correr, que siguió en `cultura` hasta borrar la fila y reingerirla. **No se
+  cambió**: afecta a todos los conectores y abre el caso de dos fuentes que cubren
+  el mismo evento (Ticketmaster y Arena lo hacen) pisándose la categoría en cada
+  corrida. En prod no muerde ahora, porque estos eventos se van a crear de cero.
+
+### Verificación
+
+`npm test` → **129 puros** en verde; `tsc --noEmit` y `lint` limpios. Ingesta real
+dos veces contra la BD dev. Revisado en la app (dev server + túnel) que los chips
+nuevos salen con su color: se confirmó en el CSS servido que Tailwind v4 **sí
+generó** `.text-tecnologia` y `.bg-bienestar/15` — era la trampa que marcaba el
+plan.
+
+⚠️ **Al levantar el dev server para revisar, va con `TZ=America/Monterrey`**, o las
+horas salen en UTC y parece un bug ("meetup a la 1:00 am"). El contenedor de prod
+ya tiene ese `TZ` puesto; verificado.
+
+### Lo que NO hizo falta (verificado, no supuesto)
+
+Migración de Prisma (`Event.category` es `String`), plantilla nueva de Meta (el
+cuerpo aprobado del digest no nombra categorías), ni tocar la validación del API
+(`z.enum(CATEGORIES)` se extiende sola).
+
+## Sesión 2026-08-05 — dos fuentes nuevas: CONARTE y Luma (commit local, SIN PUSHEAR)
+
+Los dos reportes de reconocimiento de CONARTE y Luma (hoy en `FUENTES.md`) pasaron a
+código. Aportan **9 eventos** que **ninguna boletera tiene**: 5 culturales de CONARTE
+(4 de entrada libre) y 4 de venue chico de Luma (Casa Dam, Victoria Records, Las Dunas
+Record Café, Maquiladora Pueblo Nuevo). Poco volumen, sí, pero es inventario
+diferenciado: Ticketmaster no puede traer lo que nadie vende.
+
+Archivos: `src/lib/ingest/sources/{conarte,luma}.ts`, registrados en `registry.ts`,
+con `tests/{conarte,luma}.test.ts` (puros, sin BD) y sus fixtures.
+
+### Lo que se verificó antes de escribir código
+
+Los dos docs se comprobaron contra el sitio real en vez de creerles: CONARTE sigue
+dando **5 eventos en 21 días** y Luma **19 en el área metropolitana, 5 en Arts &
+Culture**. Dos cosas del doc de Luma resultaron **desactualizadas**:
+
+> 🔴 **El "5" de CONARTE era falso, y esta "verificación" no lo detectó** (visto el
+> 2026-08-06: son **12**). Es el caso más útil de todo el proyecto sobre cómo se
+> verifica mal: comprobar el número **con el mismo parseo que lo produjo** no
+> comprueba nada — si el parser tiene un punto ciego, la verificación tiene el mismo
+> punto ciego y devuelve "confirmado". Lo que sí lo destapó fue mirar el HTML crudo
+> del sitio y contar los `<a href>` a mano, sin pasar por el conector. Regla:
+> **para verificar un conteo, cuenta por un camino distinto al del código que lo
+> generó.**
+
+- El listado **ya trae sede y precio** (`geo_address_info`, `ticket_info`). El doc decía
+  que sólo estaban en el detalle. El conector hace **una sola petición**, no ~20.
+- El filtro por categoría sirve: `discover_category_api_id=cat-AzVAf6VmE9JEre4` baja de
+  19 a 5. Así se ingiere sólo Arts & Culture (opción (a) del doc) sin tocar `CATEGORIES`.
+
+### Las trampas de los docs, y dónde quedó cada defensa
+
+| Trampa | Defensa en el código |
+|---|---|
+| CONARTE: fecha *timezone-naive* que se corre 6 h | `fechaZonaAUtc()` usa `Intl` con la zona del evento; el test corre el mismo caso bajo `TZ=UTC`, `America/Monterrey` y `Asia/Tokyo` |
+| CONARTE: `<li>` señuelo en días vacíos | `parseListado()` descarta `no-events` |
+| CONARTE: `/agenda?fecha=` es 301 con cuerpo vacío | la URL se escribe con diagonal, y hay test |
+| CONARTE: sede poco confiable en el listado | se lee del detalle (`p.subtitle`), cortada en el separador ` I ` |
+| Luma: geolocaliza por IP (el VPS aterriza en Boston) | `latitude`/`longitude` siempre + **revienta** si nada es de Nuevo León |
+| Luma: `pagination_cursor` (no `next_cursor`) | paginación con el nombre correcto, tope de 20 páginas y corte si el cursor no avanza |
+| Luma: sede oculta en ~22% (`mode: obfuscated`) | esos eventos se **descartan**: sin nombre real colapsarían en un `Venue` falso y el dedupe fusionaría eventos sin relación |
+
+### El umbral de alerta ya no es global — `Connector.minExpected`
+
+`dropAlert` exigía que la corrida previa hubiera traído **≥ 5** eventos. CONARTE y Luma
+rondan justo ese número, así que una caída a cero **no habría alertado nunca**. Ahora
+cada conector puede fijar su umbral (`minExpected: 2` en los dos nuevos) y el criterio
+vive en `hayCaida()` (`src/lib/ingest/connector.ts`), que usan tanto `runIngest()` como
+`/admin/salud` — antes la página repetía el `>= 5` por su cuenta.
+
+Además, cero eventos no siempre es lo mismo que "no sé leer la página": el conector de
+CONARTE **lanza error** si ningún día del barrido tuvo la forma esperada (ni resultados
+ni el aviso de día vacío). Eso es lo que convierte un cambio de tema del sitio en un
+fallo ruidoso en vez de una fuente que se apaga en silencio.
+
+### `priceMin: 0` ya se muestra como "Gratis"
+
+Las dos fuentes traen entrada libre como `0` (que es un dato real, distinto de
+`undefined` = "no sé"). `formatPrecio(0)` decía `"desde $0"`, y **los dos call sites de
+la web trataban el 0 como ausente** (`e.priceMin ? … : null`). Arreglado: la cartelera y
+el detalle dicen "Gratis", y el botón "Boletos" dice "Más info" cuando el evento es
+gratuito — no hay boletos que comprar.
+
+### Verificación
+
+`npm test` → **121 puros** pasando; `tsc --noEmit` y `lint` limpios. Ingesta real contra
+la **BD dev** (`npm run ingest`): `conarte: 5`, `luma: 4`, sin duplicados al correrla dos
+veces y sin colisiones de `Venue`. Revisado en la app (dev server + túnel) que los
+eventos salen con imagen, "Gratis" y descripción.
+
+Notas del entorno, no del código: en el `.env` local `TICKETMASTER_API_KEY` está
+**vacía**, así que esa fuente sale `✗` en local (en prod está configurada en Coolify);
+y la BD dev tiene una fila basura en `Source` con slug `s`, de antes de esta sesión.
+
+### Pendientes que deja
+
+- ~~Categorías nuevas (plan aparte)~~ **HECHO el mismo día**, ver "Sesión
+  2026-08-05 (tarde)" arriba. (Aquí decía además que Ticketmaster podía estar
+  escondiendo mucho inventario por segmento: **se midió y era falso**, 2 de 89.)
+- **Términos de uso de Luma: SIN REVISAR** (el doc ya lo marcaba). Es una API interna,
+  no documentada; conviene leerlos antes de que esto corra a diario en prod.
+- Una sede de CONARTE (~1 de cada 5) no publica recinto y cae en el `Venue`
+  "CONARTE (sede por confirmar)". Se prefirió eso a tirar el 20% del inventario.
+- Fuentes con más volumen sin explorar: Auditorio Pabellón M, Showcenter Complex,
+  Teatro de la Ciudad, Superboletos. *(Al 2026-08-06 quedan sólo Pabellón M y Teatro de
+  la Ciudad: el conector de Superboletos cubrió también Showcenter.)*
 
 ## Sesión 2026-08-03 — las plantillas SÍ se probaron (antes no), y la baja tolerante
 
@@ -268,11 +762,11 @@ que remandar `join though-excellent` al +1 415 523 8886.
 
 ## Sesión 2026-07-29 — salida del Sandbox y plantillas
 
-**⛔ LO PRIMERO: hay 15 commits locales SIN PUSHEAR, y NO se deben pushear todavía.**
+**⛔ LO PRIMERO: hay 34 commits locales SIN PUSHEAR, y NO se deben pushear todavía.**
 El código ya exige plantillas para todo mensaje que inicia el negocio, incluido el
 OTP — y la plantilla de OTP **no existe**. Si esto se deploya, `plantillaOtp()` lanza
 `Falta TWILIO_CONTENT_SID_OTP` y **el login se cae en producción**. La lista de lo
-que tiene que pasar antes está en `META-WHATSAPP.md` § "NO DEPLOYAR".
+que tiene que pasar antes está al inicio de este documento (§ "LO PRIMERO").
 
 **No confíes en esta lista: cuéntalos.** `git log origin/main..HEAD --oneline`. Esta
 nota ya estuvo mal dos veces (decía 4 cuando eran 10, y 6 cuando eran 12) porque se
@@ -306,7 +800,7 @@ Los que traen cambios de código (el resto son docs): `424641e` (plantillas + `+
 - 🔴 **Plantilla de OTP BLOQUEADA** hasta que se verifique el negocio. **Esto es lo
   único que sigue deteniendo el deploy** — las otras dos ya no.
 - ✅ **Recordatorio rehecho como UTILITY con la fecha en variable**
-  (`HXdfa8086a05d711d7feaf5d52ce6d9e4b`). Ver `META-WHATSAPP.md` para el
+  (`HXdfa8086a05d711d7feaf5d52ce6d9e4b`). Ver más abajo para el
   cuerpo y el porqué de la categoría. Lo que toca al código: nuevo `formatCuando`
   (`src/lib/format.ts`) que devuelve "hoy a las 9:00 pm" / "mañana a las 9:00 pm" /
   "el jue 30 jul a las 9:00 pm", **comparando días de calendario, no horas**. Así el
@@ -337,6 +831,16 @@ digest— pasan por el review normal de Meta y no dependen de ella. Antes esto e
 mezclado en las notas como si un solo bloqueo detuviera todo.
 
 ### 🔴 El bloqueo real: verificación del negocio
+
+> 📌 **Datos con los que se dio de alta el sender** (rescatados de
+> `META-WHATSAPP.md` al borrarlo el 2026-08-06; el formulario ya se envió, así que
+> esto es para no volver a decidirlo si hay que rehacerlo): nombre de la empresa =
+> el nombre legal del usuario · display name = `Vibra MX` · categoría =
+> **Entretenimiento** · sitio = `https://vibramx.fun/` · país = México · número =
+> `+1 734 767 0241` (~$1.15/mes, con SMS y voz). Es de EE.UU. y no mexicano porque
+> los mexicanos exigían documentación adicional. El SMS de verificación de Meta no
+> llega (filtrado A2P): **pedir el código por llamada** y capturarlo con el twimlet.
+> El checklist de "qué falta antes de pushear" está al inicio de este documento.
 
 Meta **no deja crear plantillas de categoría AUTHENTICATION** sin el negocio
 verificado (error `2388185`). O sea: **sin verificación no hay login por WhatsApp
@@ -480,7 +984,7 @@ puede abrir la ventana a mano.
 El sitio se presentaba como **"Eventos MTY"** en el `<title>`, el logo del header y
 el footer (`src/app/layout.tsx`), pero el dominio declarado ante Meta es
 `vibramx.fun` y el display name del sender es **`Vibra MX`**. Como el respaldo del
-display name ante Meta **ES el dominio** (ver `META-WHATSAPP.md`), un revisor que
+display name ante Meta **ES el dominio**, un revisor que
 abriera `vibramx.fun` buscando "Vibra MX" no encontraba la marca por ningún lado —
 exactamente el rechazo de display name que ya estaba anticipado, con su castigo de
 250 mensajes iniciados por el negocio cada 24 h.
@@ -572,8 +1076,8 @@ cd ~/eventos-mty
 npm install                 # si node_modules no está
 npx prisma migrate deploy   # aplicar migraciones a la BD
 npx prisma db seed          # 6 eventos de ejemplo
-npm test                    # 49 tests puros, SIN BD — seguro con el dev server arriba
-npm run test:borra-bd       # 21 tests de integración; RESETEA la BD eventos_mty_test
+npm test                    # tests puros, SIN BD — seguro con el dev server arriba
+npm run test:borra-bd       # los *.db.test.ts; RESETEA la BD eventos_mty_test
 npm run test:todo           # los dos (correr antes de pushear)
 npm run dev                 # http://localhost:3000
 npm run build               # build de producción
@@ -586,6 +1090,13 @@ host está en UTC y el contenedor de prod no; `runDigest` compara `digestDay` co
 `TZ=America/Monterrey npx tsx scripts/digest.ts`. También necesitan las credenciales
 de Twilio, que **no** están en el `.env` (salen de las env vars del contenedor de
 prod: `docker exec … printenv`). Ver "Sesión 2026-08-01/02" para el flujo completo.
+
+⚠️ **El `next dev` de los previews también quiere `TZ=America/Monterrey`**, por lo
+mismo: sin ella la cartelera pinta las horas en UTC y parece un bug del conector
+(un meetup "a la 1:00 am"). El contenedor de prod ya tiene ese `TZ` — verificado el
+2026-08-06, no hace falta tocarlo. Y **`npm run ingest` en local necesita
+`TICKETMASTER_API_KEY=…`** delante, porque en el `.env` está vacía; la llave sale
+del contenedor de prod igual que las de Twilio.
 
 ### Tests: dos comandos, dos bases (desde 2026-07-27)
 Antes había un solo `npm test` que **borraba la BD de desarrollo** en cada corrida
@@ -699,6 +1210,24 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
 - **Expansión nacional (futuro):** el conector de Ticketmaster está fijo a
   `city=Monterrey`. Para abrir otras ciudades habrá que parametrizarlo por ciudad y
   añadir `ciudad`/región a la navegación.
+- **CONARTE y Luma: investigadas el 2026-08-03/05 e IMPLEMENTADAS el 2026-08-05.
+  Superboletos: investigada e IMPLEMENTADA el 2026-08-06. AREMA: investigada e
+  IMPLEMENTADA el 2026-08-07.** Todo lo vigente de las seis fuentes —cómo están
+  implementadas, sus trampas y las defensas de cada una— vive ahora en **`FUENTES.md`**,
+  que sustituyó a los dos reportes por fuente el 2026-08-06 (siguen en el historial de
+  git).
+  - ⚠️ **Ninguna de las cuatro está en producción**: `origin/main` sigue con
+    `ticketmaster` y `arena-monterrey`. Falta pushear.
+  - **Sin explorar: ninguna.** Los dos que quedaban se cerraron el 2026-08-07 sin
+    necesitar conector: Auditorio Pabellón M ya entraba por Ticketmaster como
+    "Escenario GNP Seguros" y el Teatro de la Ciudad ya entraba por CONARTE. La Arena,
+    Superboletos y AREMA demostraron que conviene buscarles la API interna antes de
+    asumir scraping — las tres la tenían.
+  - **Facebook, Instagram y Eventbrite: descartados** el 2026-08-06 por acceso
+    cerrado, no por dificultad. **Boletia:** descartado el 2026-08-07 por lo mismo
+    (403 a todo, incluso a `robots.txt`). **Fever:** reconocida a fondo y viable,
+    sin implementar por decisión del usuario — la ficha de `FUENTES.md` alcanza
+    para escribir el conector sin repetir el reconocimiento. Razones en `FUENTES.md`.
 - **Dominio real: COMPRADO `vibramx.fun`** (2026-07-28, en Hostinger; expira
   2027-07-28). DNS ya propagado y verificado en Google/Cloudflare/Quad9:
   `vibramx.fun` y `www.vibramx.fun` → `187.127.254.144` (IP pública del VPS,
@@ -731,21 +1260,27 @@ Un test nuevo que toque la BD debe nombrarse `*.db.test.ts`.
   producción (sólo aplicaría a deploys de preview, que no se usan), pero conviene
   limpiarlo para que nadie lo lea como el valor bueno.
 
-**📄 `META-WHATSAPP.md` (nuevo, 2026-07-28):** el plan completo para salir del Sandbox
-— trámite ante Meta en orden, categorías y precios de plantillas para México, qué hay
-que cambiar en el código (mandar `contentSid` en vez de `body`), los pendientes que se
-destraban con eso, y las fechas que cambian este trimestre. **Es el camino crítico del
-proyecto:** sin sender aprobado no puede haber usuarios reales.
+**📄 Se escribió `META-WHATSAPP.md` (2026-07-28)** con el plan completo para salir
+del Sandbox. **Borrado el 2026-08-06 al consolidar los docs**, porque casi todo ya
+estaba implementado o superado; lo que seguía vivo se subió al § "LO PRIMERO" del
+inicio de este documento. El original se recupera con
+`git show 88f6b70:META-WHATSAPP.md` — ahí quedan los precios de plantillas para
+México, el trámite en orden y las trampas del Embedded Signup. **Era el camino
+crítico del proyecto:** sin sender aprobado no puede haber usuarios reales.
 
 **⏳ TRÁMITE DE META ARRANCADO EL 2026-07-28 — quedó a medias.** Se compró el número
 `+1 734 767 0241` en Twilio y el Embedded Signup llegó hasta el paso de verificar el
-número; falta meter el código y terminar. **Leer la sección "ESTADO DEL TRÁMITE" de
-`META-WHATSAPP.md` ANTES de retomar**: tiene lo ya decidido (display name `Vibra MX`,
-categoría, por qué el número es de EE.UU. y no mexicano), cinco trampas ya pisadas
-—entre ellas que **la verificación por SMS es imposible con un número de Twilio** por
-filtrado A2P de operadora— y, sobre todo, **estado efímero que ya no existe**: el
-`voice_url` del número apunta a un túnel de Cloudflare muerto y hay que rehacerlo o
-limpiarlo.
+número; falta meter el código y terminar. **(Resuelto al día siguiente: el sender
+quedó registrado y online el 2026-07-29 — ver esa sesión.)**
+
+Lo que se decidió aquí y sigue vigente —display name `Vibra MX`, categoría
+Entretenimiento, por qué el número es de EE.UU. y no mexicano— está recogido en la
+nota del § "El bloqueo real: verificación del negocio". De las trampas pisadas, la
+que más cuesta olvidar: **la verificación por SMS es imposible con un número de
+Twilio** por filtrado A2P de operadora — hay que pedir el código **por llamada**.
+
+⚠️ Estado efímero que quedó de esa sesión: el `voice_url` del número apunta a un
+túnel de Cloudflare muerto. Hay que rehacerlo o limpiarlo.
 
 **Pendiente (código — siguiente sesión):**
 - Refinamiento visual fino del rediseño (el usuario quiere funcionalidad primero,
@@ -1068,9 +1603,15 @@ Ver `.env.example`. En local, `.env` ya tiene `SESSION_SECRET` y `ADMIN_KEY`
 aleatorios generados, `WHATSAPP_TEST_MODE=true`, y las claves de terceros vacías.
 
 ## Mapa de archivos clave
-- Contrato: `src/lib/events/types.ts` (`NormalizedEvent`)
-- Ingesta: `src/lib/ingest/` (jsonld, llm, sources/ticketmaster, page-connector,
-  registry, run) + `scripts/ingest.ts`
+- Contrato: `src/lib/events/types.ts` (`NormalizedEvent` y `CATEGORIES`, que es la
+  fuente de verdad de las 5 categorías: agregar una es editar ese array)
+- Cómo se ve cada categoría (nombre, emoji, clases de color):
+  `src/lib/events/categorias.ts`. Lo usan cartelera, detalle y perfil — antes
+  estaba copiado en los tres. Va tipado `Record<Category, …>` para que olvidar
+  una sea error de compilación y no un chip gris en producción.
+- Ingesta: `src/lib/ingest/` (jsonld, llm, page-connector, registry, run, y
+  `sources/{ticketmaster,arena-monterrey,conarte,luma}`) + `scripts/ingest.ts`.
+  El criterio de "fuente caída" vive en `connector.ts` (`hayCaida`, `minExpected`).
 - Dedupe/upsert: `src/lib/events/{normalize,upsert}.ts`
 - Web: `src/app/` (page = Explorar, eventos/[id], entrar, perfil, mis-eventos,
   admin/salud) + `src/app/api/`

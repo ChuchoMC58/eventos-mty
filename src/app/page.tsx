@@ -1,19 +1,10 @@
 import { prisma } from "@/lib/db";
 import { formatDia, formatHora, formatPrecio } from "@/lib/format";
+import { CATEGORIAS_EN_ORDEN, infoCategoria } from "@/lib/events/categorias";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-const NOMBRE_CATEGORIA: Record<string, string> = {
-  musica: "Música",
-  deportes: "Deportes",
-  cultura: "Cultura",
-};
-const ESTILO_CATEGORIA: Record<string, string> = {
-  musica: "text-musica bg-musica/15",
-  deportes: "text-deportes bg-deportes/15",
-  cultura: "text-cultura bg-cultura/15",
-};
 const FECHAS = [
   { valor: "hoy", nombre: "Hoy" },
   { valor: "finde", nombre: "Este fin" },
@@ -73,9 +64,11 @@ function chip(activo: boolean): string {
 export default async function Explorar({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string; fecha?: string; venue?: string }>;
+  searchParams: Promise<{ categoria?: string; fecha?: string; venue?: string; fuente?: string }>;
 }) {
-  const { categoria, fecha, venue } = await searchParams;
+  // `fuente` (slug del conector) no tiene chip: es para revisar qué trae cada
+  // fuente después de una ingesta, no un filtro que le sirva al público.
+  const { categoria, fecha, venue, fuente } = await searchParams;
   const [events, venues] = await Promise.all([
     prisma.event.findMany({
       where: {
@@ -84,6 +77,7 @@ export default async function Explorar({
         startsAt: rangoFechas(fecha),
         ...(categoria ? { category: categoria } : {}),
         ...(venue ? { venueId: venue } : {}),
+        ...(fuente ? { sources: { some: { source: { slug: fuente } } } } : {}),
       },
       include: { venue: true },
       orderBy: { startsAt: "asc" },
@@ -123,13 +117,13 @@ export default async function Explorar({
         <Link href={urlCon({ fecha, venue })} className={chip(!categoria)}>
           Todo
         </Link>
-        {Object.entries(NOMBRE_CATEGORIA).map(([valor, nombre]) => (
+        {CATEGORIAS_EN_ORDEN.map((c) => (
           <Link
-            key={valor}
-            href={urlCon({ categoria: valor, fecha, venue })}
-            className={chip(categoria === valor)}
+            key={c.slug}
+            href={urlCon({ categoria: c.slug, fecha, venue })}
+            className={chip(categoria === c.slug)}
           >
-            {nombre}
+            {c.nombre}
           </Link>
         ))}
         <span className="mx-1.5 h-4.5 w-px bg-linea" />
@@ -177,7 +171,13 @@ export default async function Explorar({
               </span>
             </h2>
             <ul>
-              {grupo.map((e, i) => (
+              {grupo.map((e, i) => {
+                // Ojo con `e.priceMin ? …`: 0 es un precio real (entrada libre).
+                const precio = formatPrecio(
+                  e.priceMin != null ? Number(e.priceMin) : null,
+                  e.priceMax != null ? Number(e.priceMax) : null,
+                );
+                return (
                 <li key={e.id} className={i > 0 ? "border-t border-linea" : ""}>
                   <Link
                     href={`/eventos/${e.id}`}
@@ -201,17 +201,15 @@ export default async function Explorar({
                         </span>
                         <span className="block text-sm text-humo">
                           {e.venue.name}
-                          {formatPrecio(e.priceMin ? Number(e.priceMin) : null, e.priceMax ? Number(e.priceMax) : null)
-                            ? ` · ${formatPrecio(Number(e.priceMin), e.priceMax ? Number(e.priceMax) : null)}`
-                            : ""}
+                          {precio ? ` · ${precio}` : ""}
                         </span>
                       </span>
                     </span>
                     <span className="col-start-2 flex items-center gap-3.5 sm:col-start-3">
                       <span
-                        className={`rounded-sm px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] ${ESTILO_CATEGORIA[e.category] ?? "bg-hueso/10 text-humo"}`}
+                        className={`rounded-sm px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] ${infoCategoria(e.category)?.clases ?? "bg-hueso/10 text-humo"}`}
                       >
-                        {NOMBRE_CATEGORIA[e.category] ?? e.category}
+                        {infoCategoria(e.category)?.nombre ?? e.category}
                       </span>
                       <span className="hidden text-humo transition-transform group-hover:translate-x-1 group-hover:text-hueso sm:inline">
                         →
@@ -219,7 +217,8 @@ export default async function Explorar({
                     </span>
                   </Link>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
         );

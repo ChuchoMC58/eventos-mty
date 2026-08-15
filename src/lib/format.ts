@@ -68,5 +68,8 @@ export function formatCuando(d: Date, now: Date = new Date()): string {
 export function formatPrecio(min?: number | null, max?: number | null): string | null {
   if (min == null) return null;
   const f = (n: number) => `$${n.toLocaleString("es-MX")}`;
+  // 0 es un precio real, no un dato faltante: CONARTE y Luma traen eventos de
+  // entrada libre y "$0" se lee como un error de la app.
+  if (min === 0 && (max == null || max === 0)) return "Gratis";
   return max != null && max !== min ? `${f(min)}–${f(max)}` : `desde ${f(min)}`;
 }
