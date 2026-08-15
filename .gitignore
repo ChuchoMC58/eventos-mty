@@ -43,3 +43,9 @@ next-env.d.ts
 # logs de previews locales (dev server, cloudflared)
 /preview.log
 /cf.log
+
+# skills que instala el agente (LobeHub, Tavily…): herramienta local, no código
+# de la app, y este repo es público
+/.claude/
+/.agents/
+/skills-lock.json

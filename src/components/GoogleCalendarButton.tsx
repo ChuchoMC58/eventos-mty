@@ -1,5 +1,6 @@
 "use client";
 import { useSyncExternalStore } from "react";
+import { BOTON_SECUNDARIO } from "@/lib/ui";
 
 // Detecta Android sin provocar mismatch de hidratación: en el server (y en el
 // primer render del cliente) devuelve `false`, y tras hidratar lee el userAgent.
@@ -34,7 +35,7 @@ export default function GoogleCalendarButton({
     <a
       href={isAndroid ? androidIntentUrl : webUrl}
       {...(isAndroid ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-      className="rounded-md border border-linea px-5 py-2.5 text-sm text-hueso transition-colors hover:border-humo"
+      className={BOTON_SECUNDARIO}
     >
       Google Calendar
     </a>

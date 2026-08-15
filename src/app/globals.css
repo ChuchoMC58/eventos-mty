@@ -1,20 +1,62 @@
 @import "tailwindcss";
 
-/* Diseño "Marquesina": cartelera nocturna. Mundo oscuro comprometido (sin tema claro). */
+/*
+ * Diseño "Tablero": la cartelera de Monterrey como un tablero de salidas de
+ * acero — Fundidora, espectaculares, pintura de seguridad. Mundo oscuro único
+ * y comprometido (sin tema claro): una sola dirección, ejecutada limpia.
+ *
+ * Lo memorable es LA HORA: cifras monoespaciadas tabulares mandando la
+ * composición, y cada día abriendo con un numeral gigante que solapa el flujo.
+ */
+
+:root {
+  /* Campo dominante */
+  --fierro: #141210; /* negro cálido de fundición */
+  --fierro-2: #1d1a17; /* superficie elevada: inputs, diálogos */
+  --cal: #f4f1ea; /* texto principal */
+  --ceniza: #9a938a; /* texto secundario — 6.4:1 sobre fierro */
+  --linea: rgba(244, 241, 234, 0.14);
+
+  /* Acento ÚNICO. Todo lo que grita, grita en este naranja y en ningún otro. */
+  --senal: #ff5b23;
+
+  /*
+   * Rojo de alerta: cancelaciones y errores de formulario. No es "otro acento"
+   * suelto — es el único rol que --senal no puede cubrir, porque --senal ya
+   * significa "esta es la acción principal" y un evento cancelado no lo es.
+   */
+  --alerta: oklch(0.68 0.2 15);
+
+  /*
+   * Las categorías son una FAMILIA, no un arcoíris: misma lightness y mismo
+   * croma en oklch, variando sólo el matiz. Así el color informa (qué categoría)
+   * sin competir entre sí ni con --senal, que es mucho más saturado.
+   */
+  --musica: oklch(0.78 0.12 75); /* oro */
+  --deportes: oklch(0.78 0.12 145); /* verde */
+  --tecnologia: oklch(0.78 0.12 230); /* acero */
+  --cultura: oklch(0.78 0.12 300); /* violeta */
+  --bienestar: oklch(0.78 0.12 350); /* rosa */
+}
+
 @theme inline {
-  --color-ink: #101318;
-  --color-ink-2: #171b22;
-  --color-hueso: #f2efe8;
-  --color-humo: #98a0ad;
-  --color-linea: rgba(242, 239, 232, 0.12);
-  --color-musica: #f2a33c;
-  --color-deportes: #43c989;
-  --color-cultura: #b48cf2;
-  --color-tecnologia: #5cc8f5;
-  --color-bienestar: #f27a92;
+  --color-fierro: var(--fierro);
+  --color-fierro-2: var(--fierro-2);
+  --color-cal: var(--cal);
+  --color-ceniza: var(--ceniza);
+  --color-linea: var(--linea);
+  --color-senal: var(--senal);
+  --color-alerta: var(--alerta);
+
+  --color-musica: var(--musica);
+  --color-deportes: var(--deportes);
+  --color-cultura: var(--cultura);
+  --color-tecnologia: var(--tecnologia);
+  --color-bienestar: var(--bienestar);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-archivo-black), var(--font-geist-sans), sans-serif;
+  --font-display: var(--font-anton), var(--font-geist-sans), sans-serif;
 }
 
 html {
@@ -22,7 +64,116 @@ html {
 }
 
 body {
-  background: var(--color-ink);
-  color: var(--color-hueso);
+  color: var(--cal);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  /* Atmósfera, no fondo plano: un reflector cálido cayendo sobre el tablero. */
+  background-color: var(--fierro);
+  background-image: radial-gradient(
+    115% 55% at 50% -8%,
+    rgba(255, 91, 35, 0.11),
+    transparent 62%
+  );
+  background-attachment: fixed;
+}
+
+/*
+ * Grano de película sobre todo el lienzo. Va en un pseudo-elemento fijo con
+ * `pointer-events: none` para que no intercepte clics. El SVG es un data: URI
+ * (feTurbulence) — sin archivo ni petición de red.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* El contenido vive por encima del grano. */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * Foco visible. Antes cada input hacía `outline-none` y sólo cambiaba el borde:
+ * navegar con teclado era navegar a ciegas.
+ */
+:focus-visible {
+  outline: 2px solid var(--senal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--senal);
+  color: var(--fierro);
+}
+
+/*
+ * Pestañas de filtro: la activa va entre corchetes de --senal.
+ *
+ * Va en CSS y no en clases de Tailwind porque el valor arbitrario tendría que
+ * llevar los corchetes escapados dentro de otros corchetes, que se lee fatal.
+ *
+ * Los corchetes se reservan en TODAS, transparentes mientras la pestaña está
+ * apagada. Si sólo existieran en la activa, cada clic correría a las pestañas
+ * de su derecha y en móvil cambiaría el corte de línea de la fila entera.
+ */
+.pestana::before,
+.pestana::after {
+  color: transparent;
+  transition: color 150ms;
+}
+
+.pestana::before {
+  content: "[";
+  margin-right: 0.15em;
+}
+
+.pestana::after {
+  content: "]";
+  margin-left: 0.15em;
+}
+
+.pestana-activa::before,
+.pestana-activa::after {
+  color: var(--senal);
+}
+
+/* Los apagados sólo insinúan el corchete al pasar por encima. */
+.pestana:not(.pestana-activa):hover::before,
+.pestana:not(.pestana-activa):hover::after {
+  color: var(--linea);
+}
+
+/*
+ * LA secuencia de entrada — una sola, dirigida, y sin JavaScript. Las filas del
+ * tablero suben escalonadas al cargar. El retardo se topa a 420 ms para que la
+ * fila 90 no entre segundo y medio después de la primera.
+ */
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.entra {
+  animation: entra 0.38s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  animation-delay: min(calc(var(--i, 0) * 18ms), 420ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entra {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

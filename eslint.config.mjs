@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Skills instalados por el agente (LobeHub, Tavily…): traen sus propios
+    // scripts .cjs, que no son código de la app y no tienen por qué cumplir sus
+    // reglas. Sin esto, `npm run lint` sale en rojo por 15 errores ajenos.
+    ".claude/**",
+    ".agents/**",
   ]),
 ]);
 

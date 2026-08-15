@@ -7,9 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 (Vigente desde 2026-07-27.)
 
-- **`npm test`** → los 16 archivos que no terminan en `.db.test.ts`, sin Postgres.
+- **`npm test`** → los 19 archivos que no terminan en `.db.test.ts`, sin Postgres.
   Seguro de correr en cualquier momento, incluso con un preview o el dev server
-  arriba. (Son 158 al 2026-08-06; el número envejece, la regla no: **lo que separa
+  arriba. (Son 231 al 2026-08-11; el número envejece, la regla no: **lo que separa
   los dos comandos es el sufijo del archivo, no el conteo**.)
 - **`npm run test:borra-bd`** → los 6 archivos `*.db.test.ts`. **RESETEAN la BD**,
   pero contra `eventos_mty_test` (el setup `tests/setup-bd.ts` le pega el sufijo
@@ -72,6 +72,110 @@ Dos trampas ya pisadas (2026-07-23) al levantar el dev server para revisión:
 2. **Si Turbopack da FATAL "Permission denied" en `.next`**: hay residuos owned
    por root de corridas dockerizadas. Borrar `.next` completo (vía contenedor si
    hace falta) y dejar que recompile.
+3. **La INTERACTIVIDAD no se verifica contra `next dev`** (2026-08-10). Un clic
+   automatizado sobre un componente cliente puede no hacer nada simplemente
+   porque el dev server sigue compilando y React **aún no ha hidratado**: se ve
+   idéntico a un botón roto. Para probar interacción, levantar el build de
+   producción:
+
+   ```bash
+   npm run build
+   cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/
+   set -a; . ./.env; set +a
+   PORT=3107 HOSTNAME=127.0.0.1 node .next/standalone/server.js
+   ```
+
+   (El standalone NO copia solo `static/` ni `public/`; sin eso sale sin CSS.)
+   Si aun así hay que usar el dev server, confirmar que hidrató antes de concluir
+   nada: `Object.keys($0).some(k => k.startsWith('__react'))`.
+
+## Screenshots y pruebas de UI: Chrome por CDP
+
+Para cualquier cosa más allá de una foto (hacer clic, escribir, leer estado) se
+levanta Chrome con `--remote-debugging-port=9222` y se le habla por CDP desde
+Node — **sin dependencias**: Node 22 ya trae `WebSocket` global.
+
+```bash
+docker run -d --rm --name cdp --network host --entrypoint chromium-browser \
+  zenika/alpine-chrome --no-sandbox --headless=old --disable-gpu \
+  --remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 about:blank
+# tab nuevo: PUT http://127.0.0.1:9222/json/new?about:blank → webSocketDebuggerUrl
+```
+
+### Probar flujos con efectos externos SIN dispararlos (2026-08-11)
+
+Para llegar al paso 2 del login (el campo del código) hay que pasar por el paso 1,
+que **manda un WhatsApp real**. En vez de gastarlo, se intercepta la petición con
+el dominio `Fetch` y se responde un 200 falso:
+
+```js
+await send('Fetch.enable', { patterns: [{ urlPattern: '*request-code*', requestStage: 'Request' }] });
+// … clic en el botón; llega Fetch.requestPaused con requestId …
+await send('Fetch.fulfillRequest', { requestId, responseCode: 200,
+  body: Buffer.from('{"ok":true}').toString('base64') });
+```
+
+Dos apoyos del mismo flujo:
+
+- **Escribir en un input controlado por React** no funciona con `input.value = x`:
+  hay que usar el setter nativo del prototipo y despachar `new Event('input',
+  {bubbles:true})`.
+- **Páginas con sesión**: firmar la cookie a mano (`userId.hmac` con
+  `SESSION_SECRET`, ver `src/lib/auth/session.ts`) e inyectarla con
+  `Network.setCookie` antes de `Page.navigate`. Si se crea un usuario de prueba en
+  la BD para esto, **borrarlo al terminar** y verificar el conteo.
+
+### Comparar variantes de estilo SIN compilar cada una (2026-08-11)
+
+Para enseñarle al usuario opciones de diseño no hace falta un build por variante:
+se inyecta un `<style>` vacío en la página ya cargada, se le cambia el
+`textContent` por cada variante y se captura sólo la región de interés con
+`Page.captureScreenshot` + `clip` (la caja sale de `getBoundingClientRect`). Siete
+variantes en una sola carga, y el repo no se toca hasta que el usuario elige.
+
+Al medir si algo cabe, **medir de verdad** en vez de estimar: sumar los anchos de
+los hijos más `columnGap × (n−1)` y compararlo con el ancho del contenedor da los
+píxeles exactos que sobran o faltan. Así se supo que los corchetes de las
+pestañas se pasaban por 50 px.
+
+⚠️ `deviceScaleFactor: 3` en un viewport de 1280 cuelga la siguiente llamada a
+`Runtime.evaluate`. Con 2 no pasa.
+
+Trampas ya pisadas (2026-08-10):
+
+- ⚠️ **Cerrar las pestañas entre corridas.** Cada `json/new` abre una y no se
+  cierra sola; con varias abiertas cargando imágenes, `Page.captureScreenshot`
+  empieza a colgarse.
+- **Si el contenedor deja de responder, RECREARLO, no reiniciarlo.** `docker
+  restart cdp` a veces lo deja muerto (es `--rm`) y `docker ps` sale vacío; el
+  síntoma es que el script falla al instante sin explicación.
+- **Una página con ~70 imágenes externas cuelga a Chrome.** Filtrar la vista
+  (`?fecha=finde&categoria=deportes`) para bajar a ~10.
+- **Apilar `backdrop-blur` también cuelga la captura de página completa**, y ese
+  sí no tiene nada que ver con las imágenes: la cartelera tenía una barra
+  pegajosa con desenfoque **por cada día**, y componer esas capas en un viewport
+  de 3000 px con `--disable-gpu` deja colgado `Page.getLayoutMetrics` **antes**
+  de capturar. Si una página se cuelga y tiene pocas imágenes, buscar
+  `backdrop-blur` repetido antes de culpar a la red.
+- **`getComputedStyle` MIENTE sobre `outline-color`.** Al verificar el anillo de
+  foco devuelve el color del texto aunque la regla lleve un literal con
+  `!important`. Se perdió un rato creyendo que `var(--senal)` no resolvía — y sí
+  resolvía. **El foco se verifica a ojo**, con un Tab de verdad
+  (`Input.dispatchKeyEvent` con `windowsVirtualKeyCode: 9`).
+- Poner un **tope por llamada** (`Promise.race` con un `setTimeout`) en el
+  cliente CDP: un método colgado sin tope se lleva la corrida entera sin decir
+  cuál fue.
+
+## ⚠️ `pkill -f` / `pgrep -f` se matan a sí mismos
+
+`pkill -f 'next dev'` mata el propio `bash -c` que lo ejecuta, porque su línea de
+comando **contiene el patrón**. El síntoma es un exit code 143/144 sin más
+explicación. Usar `pkill -x <nombre>` (coincidencia exacta del ejecutable) o
+buscar el PID por el puerto, que es lo más fiable:
+
+```bash
+PID=$(ss -ltnp | grep ':3107' | grep -o 'pid=[0-9]*' | cut -d= -f2); kill "$PID"
+```
 
 ## Exponer un preview: usar Cloudflare Tunnel (lo más simple)
 
@@ -93,7 +197,9 @@ hidrata sobre el túnel). (b) El host NO resuelve `trycloudflare.com` por DNS, a
 que para auto-verificar la URL hay que curl-earla desde un contenedor con salida a
 internet (`docker run --rm node:22-bookworm-slim node -e "fetch(URL)..."`), no
 desde el host. (c) Lánzalo con `setsid ... & disown` (no como background task del
-harness, que lo reapea).
+harness, que lo reapea). (d) El túnel sirve igual apuntando al **build de
+producción** en vez del dev server (`--url http://localhost:3107`), y es lo que
+conviene cuando lo que se enseña tiene interactividad — ver la trampa 3 de arriba.
 
 # Docs de progreso — mantener al día y commitear en `main` local
 

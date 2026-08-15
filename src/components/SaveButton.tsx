@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { BOTON_PRIMARIO, BOTON_SECUNDARIO } from "@/lib/ui";
 
 export default function SaveButton({
   eventId,
@@ -84,11 +85,15 @@ export default function SaveButton({
       <button
         onClick={alClic}
         disabled={busy}
-        className={`rounded-md border px-5 py-2.5 text-sm transition-colors disabled:opacity-60 ${isSaved ? "border-musica/50 font-bold text-musica" : "border-linea text-hueso hover:border-humo"}`}
+        className={
+          isSaved
+            ? "border border-senal px-5 py-3 font-mono text-[0.72rem] font-bold uppercase tracking-[0.14em] text-senal transition-colors disabled:opacity-60"
+            : BOTON_SECUNDARIO
+        }
       >
         {isSaved ? "★ Guardado" : "☆ Me interesa"}
       </button>
-      {error && <span className="self-center text-sm text-red-400">{error}</span>}
+      {error && <span className="self-center text-sm text-alerta">{error}</span>}
 
       {/* Diálogo propio en vez de window.confirm: el nativo rotula los botones
           "OK/Cancel" en el idioma del navegador y no se pueden cambiar. */}
@@ -97,30 +102,23 @@ export default function SaveButton({
           role="dialog"
           aria-modal="true"
           aria-labelledby="titulo-recordatorio"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-fierro/85 p-4 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) guardar(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-lg border border-linea bg-ink-2 p-5 shadow-xl">
-            <p id="titulo-recordatorio" className="font-semibold text-hueso">
+          <div className="w-full max-w-sm border border-linea bg-fierro-2 p-6">
+            <p id="titulo-recordatorio" className="text-lg font-bold leading-snug tracking-[0.01em]">
               ¿Te recordamos por WhatsApp un día antes del evento?
             </p>
-            <p className="mt-1.5 text-sm text-humo">
+            <p className="mt-2 text-sm text-ceniza">
               El evento se guarda en “Mis eventos” de cualquier forma.
             </p>
-            <div className="mt-5 flex gap-2.5">
-              <button
-                ref={siRef}
-                onClick={() => guardar(true)}
-                className="flex-1 rounded-md bg-musica px-4 py-2.5 text-sm font-extrabold text-ink transition-[filter] hover:brightness-110"
-              >
+            <div className="mt-6 flex gap-2.5">
+              <button ref={siRef} onClick={() => guardar(true)} className={`flex-1 ${BOTON_PRIMARIO}`}>
                 Sí
               </button>
-              <button
-                onClick={() => guardar(false)}
-                className="flex-1 rounded-md border border-linea px-4 py-2.5 text-sm text-hueso transition-colors hover:border-humo"
-              >
+              <button onClick={() => guardar(false)} className={`flex-1 ${BOTON_SECUNDARIO}`}>
                 No
               </button>
             </div>

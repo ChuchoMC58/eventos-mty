@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { hayCaida } from "@/lib/ingest/connector";
 import { connectors } from "@/lib/ingest/registry";
+import { ROTULO } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -19,15 +20,20 @@ export default async function Salud({
   });
 
   return (
-    <main className="mx-auto max-w-3xl p-4">
-      <h1 className="mb-4 text-2xl font-bold">Salud de fuentes</h1>
-      <table className="w-full text-sm">
+    <main className="mx-auto max-w-[960px] px-4 pt-12 sm:px-6 sm:pt-16">
+      <p className={ROTULO}>Interno</p>
+      <h1 className="mt-3 mb-8 font-display text-[clamp(2rem,6.5vw,3rem)] uppercase leading-[1.04] tracking-[0.11em]">
+        Salud de fuentes
+      </h1>
+      {/* La tabla es ancha: que se desplace ella sola en vez de romper la página. */}
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[36rem] text-sm">
         <thead>
-          <tr className="border-b text-left">
-            <th className="p-2">Fuente</th>
-            <th className="p-2">Última corrida</th>
-            <th className="p-2">Eventos</th>
-            <th className="p-2">Estado</th>
+          <tr className="border-y border-linea text-left">
+            <th className={`${ROTULO} p-3 font-normal`}>Fuente</th>
+            <th className={`${ROTULO} p-3 font-normal`}>Última corrida</th>
+            <th className={`${ROTULO} p-3 font-normal`}>Eventos</th>
+            <th className={`${ROTULO} p-3 font-normal`}>Estado</th>
           </tr>
         </thead>
         <tbody>
@@ -44,11 +50,13 @@ export default async function Salud({
                 minExpected: connectors.find((c) => c.slug === s.slug)?.minExpected,
               });
             return (
-              <tr key={s.id} className="border-b">
-                <td className="p-2">{s.name}</td>
-                <td className="p-2">{last ? last.ranAt.toLocaleString("es-MX") : "nunca"}</td>
-                <td className="p-2">{last?.eventCount ?? "—"}</td>
-                <td className="p-2">
+              <tr key={s.id} className="border-b border-linea">
+                <td className="p-3 font-bold">{s.name}</td>
+                <td className="p-3 font-mono text-[0.8rem] tabular-nums text-ceniza">
+                  {last ? last.ranAt.toLocaleString("es-MX") : "nunca"}
+                </td>
+                <td className="p-3 font-mono tabular-nums">{last?.eventCount ?? "—"}</td>
+                <td className={`p-3 font-mono text-[0.8rem] ${caida ? "text-alerta" : "text-ceniza"}`}>
                   {!last ? "—" : caida ? `⚠ Revisar${last.error ? `: ${last.error}` : ""}` : "✓ OK"}
                 </td>
               </tr>
@@ -56,6 +64,7 @@ export default async function Salud({
           })}
         </tbody>
       </table>
+      </div>
     </main>
   );
 }

@@ -1,7 +1,39 @@
 # Eventos MTY — Handoff / Estado del proyecto
 
 > Documento de continuidad para retomar el trabajo en una sesión nueva.
-> Última actualización: 2026-08-08 (**el cron del digest de vuelta a las 18:00** —estaba
+> Última actualización: 2026-08-12 (**`/perfil` reordenado, y un agujero de
+> verdad tapado: un perfil nuevo nacía en silencio permanente**. La lista de
+> categorías vacía no significaba "todo" sino "nada" —el match sólo dice que sí
+> cuando la categoría del evento está en la lista, y el digest trata "cero
+> eventos" como skip mudo—, así que `user.create` ahora pone **las cinco**.
+> Además: **fuera el campo "Gustos específicos"**, que prometía equipos y
+> artistas cuando el match nunca mira el título y los tags son puro género
+> (`rock`, `latin`, `comedy`) y sólo los trae el 31 % de los eventos; el
+> formulario pasa a **dos grupos** con encabezado propio; el día del resumen
+> deja de ser desplegable y es una **fila de siete**; y se agrega la casilla
+> **"Todo"**. Ver "Sesión 2026-08-12". Cuatro commits locales, **sin pushear**).
+> Antes, 2026-08-11 (**la cartelera se pagina por meses** —el mes
+> en curso y los tres siguientes— y con ello caen **tres bugs de rango de
+> fechas**: "Este mes" era una ventana rodante de 30 días y traía septiembre,
+> "Este fin" abarcaba nueve días si lo abrías en sábado o domingo, y el `take:
+> 100` truncaba la vista sin filtros en silencio. Ver "La cartelera se pagina por
+> meses". Además, **la pestaña activa pasa de subrayada a `[ entre corchetes ]`**.
+> Antes, el mismo día: **cuarta vuelta de revisión del rediseño**:
+> los titulares de display pasan a `leading-[1.04]` —iban a 0.86–0.92 y las líneas
+> se montaban—, fuera la franja naranja del encabezado, **el código OTP se topa en
+> 6 dígitos** en cliente y servidor —malformado quemaba intentos del código bueno—
+> y **`/mis-eventos` deja de listar lo que ya pasó**. Además se descubrió que el
+> `.env` local nunca tuvo credenciales de Twilio: se copiaron del contenedor de
+> prod. Ver "Sesión 2026-08-11").
+> Antes, 2026-08-10 (**rediseño completo "Tablero"**, en la rama
+> `diseno/rediseno-completo` y **sin pushear**: dirección industrial regiomontana, un
+> solo acento naranja, categorías como familia oklch, Anton de display, y dos bugs
+> reales corregidos —el foco de teclado era invisible en toda la app y las capas
+> apiladas de `backdrop-blur` colgaban hasta a Chrome. Ver "Sesión 2026-08-10").
+> Antes, 2026-08-08 (**buscador y desplegable de lugares en la cartelera**,
+> que sustituyen al muro de ~90 enlaces de venues; con conteo por lugar que se adapta a
+> los filtros. Ver "Sesión 2026-08-08 (tarde)". Antes, el mismo día: **el cron del digest
+> de vuelta a las 18:00** —estaba
 > en una hora de prueba desde el 2-ago— y **arreglado un bug de recordatorios: el
 > reintento de un mensaje rebotado era imposible** y su test pasaba por llamar dos veces
 > con el mismo reloj. Además, **los 7 eventos huérfanos, borrados** — y de paso se
@@ -112,6 +144,418 @@ completos si están presentes.
   mismo lenguaje visual. Se eligió entre 2 prototipos, que vivían sin trackear en
   `design/` y **se borraron el 2026-08-06** (ya no aportaban: el diseño elegido
   lleva semanas en producción). `formatPrecio` ahora usa separador de miles.
+
+## Sesión 2026-08-12 — `/perfil`: un agujero real y cuatro cambios de forma
+
+Cuatro commits locales **sin pushear**: `c180f82`, `0d15fa7`, `6a9eebb`,
+`e18d6e6`. Todo en `main` local.
+
+Empezó como "hay mucho espacio entre los campos" y acabó destapando que el
+formulario no decía lo que el código hace.
+
+### El hallazgo: `categories` y `tags` son SÓLO del digest
+
+Nada fuera del resumen semanal los lee. El único consumidor es
+`lib/digest/run.ts:32`, vía `eventMatchesInterests` (`lib/digest/match.ts:5`).
+**La cartelera no se personaliza con ellos**: filtra por parámetros de URL. Pero
+el formulario los presentaba como cuatro ajustes sueltos de la app, así que
+parecían filtros de la cartelera.
+
+De ahí sale el reordenado: dos `<section>` con encabezado propio —**"Tu resumen
+semanal"** (día + categorías) y **"Recordatorios"**— separadas por un filete en
+vez de por un hueco.
+
+### ⚠️ Un perfil nuevo nacía en silencio permanente (arreglado)
+
+Salió de una pregunta del usuario: *"si no marcas ninguna casilla, ¿te llega
+todo?"*. **No: no te llega nada.** El match sólo dice que sí cuando la categoría
+del evento está en la lista del usuario; con la lista vacía nunca es cierto, y
+`run.ts:34` trata "cero eventos" como `skipped` **mudo** — ni siquiera avisa.
+Medido contra la BD dev: con perfil vacío, **0 de 58** eventos en la ventana de
+10 días; con las cinco marcadas, **58**.
+
+Y `user.create` (`api/auth/verify/route.ts`) creaba el perfil **sin categorías**,
+o sea exactamente ahí. Ahora nace con **las cinco**. Verificado ejercitando la
+ruta de verdad (OTP insertado a mano en la BD → `POST /api/auth/verify` → perfil
+con los cinco slugs; usuario de prueba borrado, conteo 7 → 7).
+
+**`digestDay` sigue en `null` al crear**, a propósito: darle día automáticamente
+es inscribir a alguien a recibir WhatsApps sin que lo pida. En la práctica lo
+elige al guardar el onboarding, que trae jueves preseleccionado.
+
+### ⚠️ "Gustos específicos" prometía lo que no podía cumplir (campo retirado)
+
+El rótulo decía *"Equipos, géneros, artistas"* y el placeholder *"rayados, rock,
+stand-up"*. La realidad, medida en la BD:
+
+- El match compara **sólo contra `event.tags`**, **nunca contra el título**. Un
+  concierto de Molotov no matchea con `molotov`.
+- Los tags vienen del género de Ticketmaster y de las categorías de Luma: `latin`
+  (20), `rock` (17), `pop` (12), `hip-hop/rap` (10), `comedy` (6). **Ni un nombre
+  de banda ni de equipo.** `rayados` y `stand-up` devolvían **cero** siempre.
+- Sólo **126 de 400** eventos traen algún tag (31 %). En la ventana de 10 días,
+  14 de 58 — y `rock` justo entonces tenía **0**.
+
+Además los gustos **suman, no filtran**: el match es un OR, así que marcar
+*Deportes* y escribir una banda da *todo* deportes, no "rock dentro de deportes".
+
+Se retiró **de la interfaz, no de la BD**: la columna sigue y el digest la sigue
+leyendo, así que a quien ya guardó gustos le funcionan. Por eso `guardar()`
+**dejó de mandar `tags`** en vez de mandarlo vacío — el esquema del PATCH lo
+tiene opcional y omitirlo no toca lo guardado; un `[]` lo habría borrado.
+
+**Si algún día vuelve el campo, primero hay que arreglar el match** (que mire el
+título, no sólo los tags). Queda anotado en el código, donde vivía.
+
+### Lo demás del formulario
+
+- **El día del resumen ya no es un desplegable**: siete opciones fijas y cortas
+  escondidas tras dos clics no compraban nada. Ahora es una fila `Do Lu Ma Mi Ju
+  Vi Sá` — dos letras, porque con inicial sola hay dos M y una S/D que se
+  confunden; el nombre completo va en el `aria-label`. Son **radios reales
+  ocultos** (`has-[:checked]` pinta la etiqueta), no `<button>`: así el grupo se
+  recorre con flechas sin reimplementar nada.
+- **"No enviarme el resumen" salió de la lista** y es una casilla aparte: nunca
+  fue un octavo día, es apagar el envío. Al apagarlo la fila se atenúa; **al
+  reencenderlo vuelve el día que estaba elegido** (por eso existe `ultimoDia`), y
+  elegir un día reenciende solo.
+- **Casilla "Todo"**, a pedido del usuario: marca las cinco. **No** es un valor
+  guardado aparte ni una lista vacía — eso metería en la BD un dato invisible,
+  indistinguible de "no elegí nada", que significa lo contrario. Con algunas
+  marcadas queda en `indeterminate` (guion naranja), puesto **por propiedad**
+  porque por atributo no se puede.
+- **El día va ARRIBA de las categorías** (pedido del usuario): se elige una vez,
+  las categorías son la lista larga con la que se juega.
+- Altura del formulario: 804 px → **788 px**, pasando por 873 (los encabezados de
+  grupo cuestan ~120 px; apretar el ritmo ahorró ~90; quitar los gustos, ~100).
+
+### ⚠️ Ojo a futuro: una sexta categoría rompería "Todo"
+
+"Todo" son cinco slugs concretos, no un comodín. Si se agrega una sexta
+categoría, **quien tenga "Todo" no la recibirá** hasta volver al perfil. Ese día
+hay que decidir si se migra a los que tenían las cinco.
+
+### Verificación
+
+Todo contra el **build de producción** (no el dev server), con clics reales por
+CDP: `Ju → Sá → apagar (fila atenuada, ningún día) → encender → vuelve a Sá`;
+`1/5 intermedio → Todo deja 5/5 → otra vez 0/5 → marcar una vuelve a intermedio`.
+`npm test` 231/231. Los errores de `tsc` en `tests/fever.test.ts` son
+**preexistentes** y ajenos a esta sesión.
+
+Detalle de método que se pagó caro: un test de interacción "falló" tras mover los
+días arriba y **no era la app** — el script buscaba "la última casilla de la
+página" y ésa pasó a ser una categoría. Los localizadores por posición mienten en
+cuanto se reordena el DOM; ir por el texto de la etiqueta.
+
+---
+
+## Sesión 2026-08-11 — cuarta vuelta de revisión, y dos bugs de verdad
+
+Sigue todo **en la rama `diseno/rediseno-completo`, sin pushear**. Ojo al pushear:
+esta rama NO es `main`, así que subirla implica decidir si el rediseño "Tablero"
+entero se va a producción, no sólo estos retoques.
+
+### Tipografía y encabezado
+
+Cuarta vuelta de revisión de "Tablero", con el usuario mirando la portada:
+
+1. **"Las letras están amontonadas".** No era el espaciado horizontal (0.11em ya
+   estaba medido y bien): era la **interlínea**. Los titulares de display iban
+   entre `leading-[0.86]` (portada) y `0.92`, y con Anton —que ya trae la caja de
+   línea apretada— "QUÉ HAY / EN MONTERREY." se leía como un bloque sólido. Todos
+   los `h1` de display pasan a **`leading-[1.04]`**: portada, detalle, entrar,
+   perfil, mis-eventos, salud y 404.
+2. De paso, los **títulos de eventos** llevaban `tracking-[-0.01em]`, que funciona
+   en minúsculas pero apelmaza los muchos títulos que llegan en MAYÚSCULAS desde
+   los conectores. Pasan a `tracking-[0.01em]` (cartelera, mis-eventos y el
+   diálogo de recordatorio).
+3. **Fuera la franja naranja de 3 px** de arriba del encabezado. Era el "sello de
+   pintura de seguridad" del sistema, pero pegada al borde de la ventana se leía
+   como barra de carga. El usuario la pidió quitada; `DISENO.md` lo deja anotado
+   para que una sesión futura no la reponga.
+
+4. En `/entrar` y `/perfil` había **56 px muertos** entre el filete de la intro y
+   el rótulo del primer campo (`pb-6` + `pt-8`). Bajan a 40.
+
+### ⚠️ El `.env` local NUNCA tuvo credenciales de Twilio
+
+El usuario probó el login en el preview y salió "No pudimos enviar el código por
+WhatsApp ahora". **No era el rediseño**: el log del servidor decía
+`Error: username is required`, que es el cliente de Twilio quejándose de que
+`TWILIO_ACCOUNT_SID` y `TWILIO_AUTH_TOKEN` estaban **vacíos** en
+`/home/claude/eventos-mty/.env` — con fecha del 17 de julio y sin tocar desde
+entonces. No hay `.env.local` ni ningún otro archivo de env: las pruebas que
+"antes sí jalaban" fueron contra el contenedor de producción, que sí las tiene.
+
+Se copiaron del contenedor de prod (`docker inspect … --format '{{range
+.Config.Env}}'`) al `.env` local: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y
+`ADMIN_WHATSAPP` (el local tenía el formato viejo de 13 caracteres, `+52…`, y
+prod usa 14, `+521…`). `TWILIO_WHATSAPP_FROM` ya coincidía. Validadas sin mandar
+nada, con `accounts(SID).fetch()`.
+
+Recordatorio de lo que sigue siendo cierto al probar el login en local:
+`WHATSAPP_TEST_MODE=true` manda **todo a `ADMIN_WHATSAPP`**, no al número tecleado,
+y como `TWILIO_CONTENT_SID_OTP` no existe (tampoco en prod) sale como **texto
+libre**, que sólo se entrega dentro de la ventana de 24 h del sandbox.
+
+### El código OTP se topa en 6 dígitos (bug real)
+
+El campo del código aceptaba cualquier cosa: 7 dígitos, espacios o letras entraban
+tal cual. Lo importante no era lo feo, sino que el servidor lo trataba como
+**intento fallido** y `verifyCode` incrementa `attempts` — o sea, un pegado torpe
+**quemaba uno de los 5 intentos del código bueno**.
+
+- Cliente (`EntrarForm.tsx`): `onChange` filtra a dígitos y corta en 6, más
+  `maxLength={6}`, y el botón sólo se habilita con los 6. El filtro va en el
+  `onChange` **y no sólo en `maxLength`**, porque pegar esquiva `maxLength`.
+- Servidor (`/api/auth/verify`): exige `/^\d{6}$/` **antes** de tocar la BD, así lo
+  malformado responde 400 sin gastar intento.
+
+### `/mis-eventos`: fuera lo que ya pasó, y menos cromo
+
+- La lista mostraba eventos guardados ya ocurridos. Ahora filtra con **el mismo
+  corte que la cartelera**: `startsAt >= ahora` (no el inicio del día — un evento
+  que ya empezó deja de ser un plan). Los pasados **NO se borran de la BD**, sólo
+  salen de la vista.
+- A pedido del usuario: el rótulo "Guardados" pasa **debajo** del titular (es la
+  única página así; el resto lo lleva encima), **se quitó la franja de conteo**, y
+  el estado vacío dice siempre "No tienes ningún evento guardado". Hubo una versión
+  intermedia con conteo de pasados y un mensaje "Todo lo que guardaste ya pasó":
+  el usuario los descartó los dos, así que la página volvió a **una sola consulta**.
+- El filete superior lo aportaba la franja de conteo; se movió al `<ul>` y sólo se
+  pinta si hay filas, para no dejar una raya huérfana bajo el mensaje vacío.
+
+### Cómo se verificó
+
+Todo contra el **build de producción** (standalone en :3107), nunca `next dev`:
+`npm test` en verde (213), lint limpio, y capturas por CDP.
+
+⚠️ **Truco nuevo y reutilizable: interceptar el POST para no gastar un WhatsApp.**
+Para probar el paso 2 del login (el campo del código) hace falta pasar por el paso
+1, que manda un mensaje real. En vez de eso se interceptó la petición con el
+dominio `Fetch` de CDP y se respondió un 200 falso:
+
+```js
+await send('Fetch.enable', { patterns: [{ urlPattern: '*request-code*', requestStage: 'Request' }] });
+// … clic en "Mandarme el código" …
+await send('Fetch.fulfillRequest', { requestId, responseCode: 200,
+  body: Buffer.from('{"ok":true}').toString('base64') });
+```
+
+Para las páginas con sesión se firmó la cookie a mano (`userId.hmac` con
+`SESSION_SECRET`) y se inyectó con `Network.setCookie` antes de navegar. Para el
+estado vacío se creó un usuario temporal en la BD de desarrollo y **se borró al
+terminar** (se verificó el conteo después: 6 usuarios).
+
+### La cartelera se pagina por meses (y tres bugs de rango de fechas)
+
+El usuario vio eventos de **septiembre** dentro del filtro "Este mes". De ahí
+salió todo esto. La lógica de rangos se sacó de `app/page.tsx` a
+**`src/lib/events/rangos.ts`**, que ahora sí tiene pruebas con un `now` fijo
+(`tests/rangos.test.ts`, 18 casos) — era el código que se rompe solo con el paso
+del tiempo y no tenía ninguna.
+
+**Los tres bugs:**
+
+1. **"Este mes" era una ventana rodante de 30 días** (`now + 30d`), no el mes de
+   calendario. El 11 de agosto la cartelera traía el 1, 4 y 6 de septiembre.
+2. **"Este fin", en sábado o domingo, abarcaba NUEVE días.** Buscaba siempre el
+   viernes *siguiente* (`(5 - day + 7) % 7`), así que estando ya metido en el fin
+   el rango iba de "ahora" hasta el lunes de la semana de después: lo que quedaba
+   de ese fin + la semana entera + el fin siguiente completo. Sólo salía bien los
+   viernes. Ahora, si ya es fin de semana, el viernes es el que acaba de pasar.
+3. **`take: 100` truncaba la vista sin filtros en silencio** (~mediados de
+   octubre). Pasa a `TOPE = 250`, que una página de mes (~80) nunca toca; hace
+   falta sólo para la búsqueda, que barre todo el futuro.
+
+**El paginado.** Se decidió a partir de la densidad real del catálogo: al
+2026-08-11 había 82/75/81 eventos en ago-sep-oct, 55 en noviembre y luego el
+desplome a 27/9/7/3/1 — de diciembre en adelante deja de ser cartelera y pasa a
+ser una lista suelta de anuncios de Arena Monterrey. Así que la cartelera muestra
+**el mes en curso y los tres siguientes**, una página por mes
+(`MESES_ADELANTE = 3`).
+
+- Las pestañas quedan `HOY · ESTE FIN | AGO · SEP · OCT · NOV`, y abajo del
+  listado hay saltos `← septiembre` / `noviembre →` (el que llega hasta abajo no
+  va a subir a buscar la pestaña).
+- **"Este mes" se quitó como pestaña**: con el paginado sería la misma consulta
+  que la primera página, con dos controles para lo mismo. `?fecha=mes` sigue
+  funcionando para los enlaces ya compartidos (hay test).
+- **Buscar SALE de la ventana** y barre todo el futuro: los shows grandes se
+  anuncian con casi un año (CAMILO 2027 es de marzo de 2027) y son justo los que
+  se buscan por nombre. Cambiar de **lugar** no sale del mes — es un ajuste
+  dentro de lo que se está viendo, y por eso `mes` viaja como hidden en el form y
+  se desactiva en el submit sólo cuando hay texto de búsqueda.
+- El horizonte completo del catálogo, para referencia: **340 eventos futuros
+  activos, hasta el 21 de mayo de 2027** (Henge en Nodriza Estudio).
+
+Verificado contra el build de producción con la BD real: 82/75/81/55 por mes, sin
+fugas al mes vecino, y la parte de cliente probada por CDP (buscar suelta el mes;
+cambiar de lugar lo conserva).
+
+### La pestaña activa va entre corchetes
+
+El usuario pidió otra forma para el filete naranja de la pestaña activa. Se le
+enseñaron **siete variantes montadas por CSS inyectado sobre la app viva** (sin
+tocar el repo: `Runtime.evaluate` metiendo un `<style>` y capturando sólo la fila
+de filtros) y eligió los corchetes: `[ ESTE FIN ]` en `--senal`. El detalle de
+diseño y el porqué están en `DISENO.md`; lo que importa para una sesión futura:
+
+- **Los corchetes se reservan en las once pestañas**, transparentes cuando están
+  apagadas. Si sólo existieran en la activa, cada clic correría a las pestañas de
+  su derecha.
+- Eso costó ancho: la fila se pasaba **50 px** de los 1052 disponibles y se
+  partía en dos renglones. Se recuperó con márgenes de `0.15em` y `gap-x-4` en
+  vez de `gap-x-5`. **Quedan 39 px de sobra — una pestaña más rompe la cuenta.**
+- Van en `globals.css` (`.pestana` / `.pestana-activa`) y no en clases de
+  Tailwind, porque el valor arbitrario tendría que llevar los corchetes
+  escapados dentro de otros corchetes.
+
+Truco reutilizable: para decidir a ojo entre variantes de estilo **no hace falta
+compilar cada una**. Se inyecta el CSS por CDP sobre el build ya corriendo y se
+captura la región con `Page.captureScreenshot` + `clip`. Siete opciones en una
+sola carga de página.
+
+## Sesión 2026-08-10 — rediseño completo "Tablero" (rama `diseno/rediseno-completo`)
+
+**En rama, NO en `main`, y sin pushear.** El usuario pidió instalar el skill
+`frontend-design` del marketplace de LobeHub
+(`affaan-m-everything-claude-code-frontend-design`) y rediseñar la app entera con
+dirección visual nueva. La rama sale de `main` (no de `diseno/app-completa`, cuyos
+5 commits de tema claro "Papel" quedan fuera).
+
+**La dirección: "Tablero"** — industrial regiomontano, la cartelera como tablero de
+salidas de acero. Mundo oscuro único, sin interruptor claro/oscuro: el skill exige
+elegir una dirección y comprometerse.
+
+- **Lo memorable es la hora**: cifras mono tabulares mandando la composición, y cada
+  día abriendo con su numeral grande en la barra pegajosa.
+- **Color**: un campo dominante (`--fierro` #141210) + **un solo acento**
+  (`--senal` #ff5b23, naranja de seguridad) + `--alerta` para cancelaciones y errores.
+  Las 5 categorías dejan de ser un arcoíris y pasan a una **familia oklch** de misma
+  lightness y croma variando sólo el matiz, usadas como filete de 2 px + versalita
+  mono, nunca como píldora rellena.
+- **Tipografía**: entra `Anton` (display de rótulo), sale `Archivo Black`. Los títulos
+  de los eventos **siguen en Geist**: Anton a 100 filas no se lee.
+- **Atmósfera**: reflector radial cálido + grano de película por `feTurbulence` en un
+  `data:` URI (sin archivos ni peticiones). Nada de fondos planos.
+- **Movimiento**: UNA secuencia — las filas entran escalonadas por CSS puro
+  (`.entra` + `--i`), con el retardo topado a 420 ms y anulada bajo
+  `prefers-reduced-motion`.
+
+Archivos nuevos: `src/lib/ui.ts` (los controles del sistema en constantes, para que
+botones y campos no se desincronicen entre páginas), `src/app/not-found.tsx` (la 404
+caía en la página por defecto de Next, en inglés y fondo blanco) y **`DISENO.md`**,
+que es la referencia del sistema visual — tokens, reglas y qué NO hacer. Este
+documento cuenta cómo se llegó; `DISENO.md` cuenta qué quedó.
+
+### Las tres vueltas de revisión (lo que cambió después de enseñárselo)
+
+El primer commit no fue el final. Tres cosas salieron de que el usuario lo mirara:
+
+1. **El encabezado de día era `sticky` y no gustó**: se quedaba fijo bajo la
+   cabecera y viajaba hacia abajo montándose sobre los eventos — que además se
+   pintaban **por encima** de él y lo dejaban ilegible. Se ofrecieron tres salidas
+   (quitarle lo pegajoso / dejarlo pegajoso pero opaco / día en riel lateral) y se
+   eligió **quitarle lo pegajoso**. Ahora vive en el flujo, en una banda sobre
+   `--fierro-2`, y por eso ya no necesita `z-index`.
+2. **El espaciado de los titulares se puso dos veces.** La primera (0.035em) el
+   usuario preguntó "¿se ve igual?" — y tenía razón: a 4.6rem son ~2.6 px y no se
+   distinguía. En vez de adivinar otra vez se **midió en el navegador** el ancho
+   del titular a cuatro valores (455 / 488 / 526 / 574 px) y se eligió **0.11em**
+   viendo las cuatro capturas. Lección: para "ponle más espacio", medir y enseñar
+   opciones sale más barato que iterar a ciegas.
+3. **La franja de estado no se entendía.** Decía `100+ EVENTOS` y `PRÓXIMOS` como
+   dos datos sueltos y se leían como dos cifras distintas. Ahora es **una frase**
+   (`5 eventos este fin · Deportes`), con la categoría separada por punto medio. De
+   paso se arregló la concordancia: decía "1 eventos".
+
+También salió que `tracking` deja hueco **después de la última letra**, así que el
+punto naranja de "en Monterrey." quedaba flotando; se compensa con un `-ml`.
+
+**Dos bugs reales corregidos de paso:**
+
+1. **El foco de teclado era invisible** en toda la app: cada input hacía
+   `outline-none` y sólo cambiaba el color del borde. Ahora hay un anillo
+   `:focus-visible` global en `--senal`.
+2. **Capas apiladas de `backdrop-blur`**: había una barra pegajosa con desenfoque
+   por cada día de la cartelera. Con el fondo ya opaco al 95 % no aportaban nada y
+   costaban caro — tanto que **colgaban a Chrome** al capturar la página completa.
+   Quitarlas arregló la captura; el desenfoque queda sólo en la cabecera.
+
+⚠️ **`getComputedStyle` miente sobre `outline-color` en este Chrome headless**:
+devuelve el color del texto aunque la regla diga `!important` con un literal. El
+anillo de foco hay que verificarlo **a ojo**, con un Tab de verdad
+(`Input.dispatchKeyEvent`), no leyendo estilos computados.
+
+Verificado contra el **build de producción** (standalone en :3107, nunca `next dev`):
+lint limpio, 213 tests en verde, React hidrata, el input de teléfono filtra letras y
+se topa en 10 dígitos, y capturas de cartelera (escritorio y móvil), detalle, entrar,
+perfil, mis-eventos, 404 y estado vacío. Los 5 errores de `tsc` en
+`tests/fever.test.ts` son **previos** y no los toca este trabajo.
+
+Para ver `/perfil` y `/mis-eventos` hace falta sesión: se creó un usuario de prueba
+(`+5210000000001`) **en la BD de desarrollo**, se firmó la cookie a mano con
+`SESSION_SECRET` (el formato es `userId.hmac`) y **se borró al terminar**.
+
+**Pendiente / decisiones abiertas:** el detalle de evento muestra descripciones con
+markdown crudo (`**Fecha:**`) que viene del conector — es **previo** y de datos, no
+de diseño, pero se nota más ahora que el texto respira. Y la franja de estado sigue
+ahí por decisión del usuario; quitarla sería una línea si estorba.
+
+`.gitignore` y `eslint.config.mjs` ahora excluyen `.claude/`, `.agents/` y
+`skills-lock.json`: son skills que instala el agente, no código de la app, y sus
+scripts `.cjs` sacaban `npm run lint` en rojo con 15 errores ajenos.
+
+## Sesión 2026-08-08 (tarde) — buscador y desplegable de lugares en la cartelera
+
+La lista de venues era un muro de **~90 enlaces planos** que se comía la pantalla antes
+de llegar al primer evento. Ahora son un `<input type="search">` + un `<select>`.
+
+### Cómo está hecho
+
+`src/components/FiltrosBusqueda.tsx`, cliente, con **`next/form`** (`action="/"`): los
+campos se serializan a la query y la navegación es del lado del cliente, pero **sigue
+funcionando sin JS** por el submit nativo. Por eso el `<select>` se manda con
+`requestSubmit()` en vez de un `router.push`: sin JS el botón "Buscar" hace lo mismo.
+`categoria` y `fecha` viajan como hidden para no perder los chips.
+
+- **La búsqueda pega a título Y a nombre de lugar** (`OR`, `mode: "insensitive"`).
+  ⚠️ **No ignora acentos**: "musica" NO encuentra "música". Haría falta `unaccent` en
+  Postgres; quedó fuera a propósito.
+- **El desplegable trae el conteo por lugar y se adapta a los filtros**: con
+  `?categoria=deportes` baja de 70 opciones a 7, porque cuenta con el mismo `where` que
+  la lista menos el propio venue. El lugar seleccionado se queda aunque dé 0, si no el
+  desplegable diría "Todos los lugares" con el filtro puesto.
+
+### Dos trampas que costaron encontrarse
+
+1. **`key` para remontar un input deja los nodos viejos colgados.** Los campos se
+   pusieron primero como no controlados con `key={q}` para que un "Quitar búsqueda" los
+   limpiara. Tras una navegación **blanda** el form acababa con **3 inputs `q`** en el
+   DOM y la URL salía `?q=harlem&q=sin+bandera`. Se arregló haciéndolos controlados y
+   sincronizándolos con la URL durante el render (el patrón de React para "ajustar
+   estado cuando cambia una prop"), sin `key` y sin efecto.
+2. **Un repro que carga la página de cero NO reproduce esto.** El primer intento de
+   aislarlo usó `page.goto` y salió limpio, lo que casi hace pasar el bug por un fallo
+   del script de prueba. Sólo aparece llegando por navegación client-side.
+
+Aparte, un form serializa **todos** sus campos, así que buscar sin lugar dejaba
+`?q=algo&venue=` en cualquier URL compartida. Los campos vacíos se deshabilitan en el
+`onSubmit` (un campo deshabilitado no se serializa) y se reactivan en el tick siguiente.
+No se usa `preventDefault` a propósito: según los docs de `next/form` eso anularía la
+navegación del lado del cliente.
+
+### Verificado
+
+`npm test` (213) + `npm run test:borra-bd` (35) en verde, lint limpio, **`next build`
+limpio**, y el flujo completo probado en Chrome de verdad sobre el dev server: elegir
+lugar → buscar con el lugar puesto → segunda búsqueda seguida → volver a "Todos los
+lugares" → chip de categoría conservando la búsqueda. Todas las URLs salen limpias.
+`tsc` sigue con los 5 errores previos de `tests/fever.test.ts`, ninguno nuevo.
+
+---
 
 ## Sesión 2026-08-08 — los 7 huérfanos borrados, y no eran lo que el doc decía
 
@@ -1365,14 +1809,15 @@ túnel de Cloudflare muerto. Hay que rehacerlo o limpiarlo.
     `whatsapp:+14155238886` era `https://timberwolf-mastiff-9776.twil.io/demo-reply`,
     la función demo por defecto de Twilio. Ese mismo GET sirve para verificar que el
     cambio quedó.
-  - La palabra clave no se anuncia en ningún lado de la app. En `/perfil` la opción
-    dice `No enviarme el resumen (baja)` (`src/components/PerfilForm.tsx:99`) — ese
-    "(baja)" no explica nada y confunde. Cambiarla a `No enviarme el resumen` + un
-    texto de ayuda que enseñe la palabra clave.
-    **Menos urgente desde el 2026-08-03:** el cuerpo aprobado del digest ya la enseña
-    ("Responde BAJA para dejar de recibir este resumen") y `esBaja()` acepta variantes,
-    así que la app ya no es el único lugar donde podría aprenderse. El texto de
-    `/perfil` sigue igual de confuso.
+  - ~~La palabra clave no se anuncia en ningún lado de la app.~~ **HECHO.** La
+    opción ya dice `No enviarme el resumen` a secas y al pie de `/perfil` hay un
+    párrafo que enseña la palabra: *"Responde BAJA a cualquiera de nuestros
+    mensajes…"*. (El doc siguió pidiéndolo un tiempo después de estar hecho;
+    revisado el 2026-08-12.) Ojo con la distinción que ese texto sostiene:
+    **apagar el resumen es una preferencia; BAJA es un derecho** y apaga también
+    los recordatorios.
+    Desde el 2026-08-03 el cuerpo aprobado del digest la enseña igual ("Responde
+    BAJA para dejar de recibir este resumen") y `esBaja()` acepta variantes.
 - **Reintento real de recordatorios — DESPUÉS de las plantillas (decidido 2026-07-28).**
   Hoy el cron corre 1 vez al día y la consulta filtra eventos de *mañana*, así que un
   rebote no se reintenta nunca (a la siguiente pasada el evento ya es hoy y sale de la
