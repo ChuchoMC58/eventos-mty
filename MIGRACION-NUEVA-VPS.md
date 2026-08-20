@@ -81,25 +81,43 @@ lo rompía).
 - **API de Coolify** estaba **desactivada por defecto** → la habilité en
   `instance_settings` y creé un token (valor en `~/.coolify-…`, fuera del repo).
 
-## 5. Pendiente para terminar (espera tu OK)
+## 5. Pendiente para terminar (estado 2026-08-20, sesión de verificación)
 
-1. **Pushear a `main`** el commit del Dockerfile (`git push`). Sin OK explícito,
-   NO se pushea (regla `AGENTS.md`). Tras el OK, el webhook de GitHub →
-   Coolify despliega solo.
-2. **DNS** — mover el registro `A` de `vibramx.fun` (+ `www`) a `93.188.161.137`
-   (en el registrador, Hostinger). **Preferible antes del primer deploy** para
-   que Let's Encrypt valide.
-3. **Verificar `https://vibramx.fun`** sirviendo (146 eventos) tras el deploy.
-4. **Recrear los 3 jobs programados** (Scheduled Tasks de Coolify), mismos
-   horarios en UTC:
-   - `ingesta` → `npm run ingest` → `0 12 * * *`
-   - `recordatorios` → `npm run reminders` → `0 16 * * *`
-   - `digest` → `npm run digest` → `0 0 * * *`
-5. **Repuntar el webhook de GitHub** (el viejo apunta a la IP del VPS anterior).
-6. **Herramientas de dev** (si se sigue trabajando ahí): `cloudflared` en
+**Ya hecho en esta sesión (2026-08-20):**
+- `.coolify-agent.env` estaba malformado (token con prefijo basura `2|` →
+  `Unauthenticated` en toda llamada API). Corregido; ya sourcea bien.
+- Recreados los 3 jobs programados vía API (GET `/applications/{uuid}/scheduled-tasks`
+  antes devolvía `[]`):
+  - `ingesta` → `npm run ingest` → `0 12 * * *` (uuid `ek4z2do5q…`)
+  - `recordatorios` → `npm run reminders` → `0 16 * * *` (uuid `9lwk2cwx…`)
+  - `digest` → `npm run digest` → `0 0 * * *` (uuid `q5oczskre…`)
+- El fix del Dockerfile y estas docs quedaron squasheadas en **un** commit local
+  (`adb5ead`), listo para pushear: `git reset --soft origin/main` + commit +
+  `git push origin main` (regla de squash de `AGENTS.md`).
+
+**BLOQUEADOR — esta máquina NO tiene credenciales de push a GitHub.**
+No hay `.git-credentials`, `~/.netrc`, claves SSH, helper en config, token GH en
+el entorno ni `gh`. (El repo es público y `ls-remote` lee sin auth; escribir no.)
+Los pushes previos se hicieron desde otra máquina. Para pushear hay que o bien
+configurar aquí un PAT con permiso de escritura, o hacerlo desde el equipo del
+usuario. **No disparar deploy manual por API hasta que el fix esté en
+`origin/main`** (deploy ahora recompilaría el Dockerfile roto).
+
+Queda, en orden:
+1. **Pushear a `main`** el commit `adb5b` (requiere credenciales de push; fuera
+   del alcance del agente hoy).
+2. **Deploy** — con el fix ya en `origin/main`, un deploy de Coolify compila
+   (webhook de GitHub o botón/API). Se verifica `https://vibramx.fun`.
+3. **DNS** — mover el registro `A` de `vibramx.fun` (+ `www`) a `93.188.161.137`
+   (en el registrador, Hostinger). **Preferible antes del primer deploy con
+   dominio** para que Let's Encrypt valide.
+4. **Repuntar el webhook de GitHub** (el viejo apunta a la IP del VPS anterior).
+   Requiere token GitHub con permiso de webhooks, o hacerlo desde los ajustes del
+   repo en la web de GitHub.
+5. **Herramientas de dev** (si se sigue trabajando ahí): `cloudflared` en
    `~/.local/bin` (previews por túnel; Hostinger bloquea puertos directos),
    Tailscale, contenedor `cdp` (screenshots/CDP). Ver `AGENTS.md`.
-7. **Limpieza de secretos** al final: borrar `/home/idk2858/migracion-restaurada/`,
+6. **Limpieza de secretos** al final: borrar `/home/idk2858/migracion-restaurada/`,
    el `.tar` original y `~/.coolify-app-env.env` (si ya no hacen falta).
 
 ## 6. Trampas heredadas del otro VPS
