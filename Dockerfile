@@ -6,7 +6,10 @@ WORKDIR /app
 # Prisma necesita openssl para su motor de consultas.
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
-RUN npm ci
+# Forzar devDependencies aunque alguien inyecte NODE_ENV=production en el build
+# (lo hace Coolify al pasar las env de build-time como ARG). Sin esto, un
+# "npm ci" en producción salta @tailwindcss/postcss y el build revienta.
+RUN NODE_ENV=development npm ci
 
 # ---------- build: genera el cliente Prisma y compila Next.js ----------
 FROM node:22-slim AS build
