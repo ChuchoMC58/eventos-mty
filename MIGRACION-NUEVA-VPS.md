@@ -81,43 +81,49 @@ lo rompía).
 - **API de Coolify** estaba **desactivada por defecto** → la habilité en
   `instance_settings` y creé un token (valor en `~/.coolify-…`, fuera del repo).
 
-## 5. Pendiente para terminar (estado 2026-08-20, sesión de verificación)
+## 5. Pendiente para terminar (estado 2026-08-20, sesión de migración)
 
-**Ya hecho en esta sesión (2026-08-20):**
+**Ya hecho (verificado en esta sesión 2026-08-20):**
 - `.coolify-agent.env` estaba malformado (token con prefijo basura `2|` →
   `Unauthenticated` en toda llamada API). Corregido; ya sourcea bien.
+- Instalado **GitHub CLI (`gh` 2.97.0)** desde el repo oficial (`cli.github.com`)
+  y autenticado como `ChuchoMC58` (token `gho_`, scopes `repo` + `workflow`).
+  Puse `gh auth setup-git` como credential helper de git.
 - Recreados los 3 jobs programados vía API (GET `/applications/{uuid}/scheduled-tasks`
   antes devolvía `[]`):
   - `ingesta` → `npm run ingest` → `0 12 * * *` (uuid `ek4z2do5q…`)
   - `recordatorios` → `npm run reminders` → `0 16 * * *` (uuid `9lwk2cwx…`)
   - `digest` → `npm run digest` → `0 0 * * *` (uuid `q5oczskre…`)
-- El fix del Dockerfile y estas docs quedaron squasheadas en **un** commit local
-  (`adb5ead`), listo para pushear: `git reset --soft origin/main` + commit +
-  `git push origin main` (regla de squash de `AGENTS.md`).
+- **Push hecho:** squash de los 2 commits pendientes en uno (`adb5ead`: fix
+  Dockerfile + docs) y pusheado a `main` (`b9fef5c..5379c  main -> main`).
+- **Deploy hecho y VERDE:** disparado por API (`POST /api/v1/deploy` con
+  `{"uuid": app, "force": true}`, no es `/applications/{uuid}/deploy`). El deploy
+  `ihdqmsxx…` terminó `finished`, la app pasó de `exited:unhealthy` a
+  `running:unknown`, y el contenedor arrancó con `next start` correcto. La web
+  ya sirve por el proxy de Coolify y devuelve el HTML real:
+  `<title>Vibra MX — qué hacer en Monterrey</title>`. BD con datos intactos:
+  `Event` **146**, `Venue` 9, `User` 1.
 
-**BLOQUEADOR — esta máquina NO tiene credenciales de push a GitHub.**
-No hay `.git-credentials`, `~/.netrc`, claves SSH, helper en config, token GH en
-el entorno ni `gh`. (El repo es público y `ls-remote` lee sin auth; escribir no.)
-Los pushes previos se hicieron desde otra máquina. Para pushear hay que o bien
-configurar aquí un PAT con permiso de escritura, o hacerlo desde el equipo del
-usuario. **No disparar deploy manual por API hasta que el fix esté en
-`origin/main`** (deploy ahora recompilaría el Dockerfile roto).
+> ⚠️ Nota deploy: el toggle del proxy `http://127.0.0.1` con Host `vibramx.fun`
+> responde 302 → https, y `https://127.0.0.1` con ese Host devuelve **200**
+> (se sirve la app, sin DNS). El puerto 3000 del contenedor no está publicado
+> externamente; Coolify enruta por la red docker interna.
 
-Queda, en orden:
-1. **Pushear a `main`** el commit `adb5b` (requiere credenciales de push; fuera
-   del alcance del agente hoy).
-2. **Deploy** — con el fix ya en `origin/main`, un deploy de Coolify compila
-   (webhook de GitHub o botón/API). Se verifica `https://vibramx.fun`.
-3. **DNS** — mover el registro `A` de `vibramx.fun` (+ `www`) a `93.188.161.137`
-   (en el registrador, Hostinger). **Preferible antes del primer deploy con
-   dominio** para que Let's Encrypt valide.
-4. **Repuntar el webhook de GitHub** (el viejo apunta a la IP del VPS anterior).
-   Requiere token GitHub con permiso de webhooks, o hacerlo desde los ajustes del
-   repo en la web de GitHub.
-5. **Herramientas de dev** (si se sigue trabajando ahí): `cloudflared` en
+**Queda (solo posible por ti/usuario):**
+1. **DNS** — mover el registro `A` de `vibramx.fun` (+ `www`) a `93.188.161.137`
+   en el registrador (Hostinger). Hoy siguen apuntando al VPS muerto
+   (`187.127.254.144`). Es lo único que impide que `https://vibramx.fun`
+   funcione desde fuera (la app ya corre en el VPS nuevo).
+2. **Webhook de GitHub** — repuntarlo hacia el VPS nuevo (el viejo apunta a la IP
+   del VPS anterior). Con `gh` ya autenticado se puede tocar por API desde aquí
+   (`gh api repos/ChuchoMC58/eventos-mty/hooks`), pero **no conviene activarlo
+   aún**: hacerlo mientras el DNS siga apuntando al VPS viejo puede disparar
+   deploys/notificaciones a la IP antigua. Mejor setarlo a la IP nueva cuando el
+   DNS esté movido, o hacerlo desde los ajustes del repo en la web.
+3. **Herramientas de dev** (si se sigue trabajando ahí): `cloudflared` en
    `~/.local/bin` (previews por túnel; Hostinger bloquea puertos directos),
    Tailscale, contenedor `cdp` (screenshots/CDP). Ver `AGENTS.md`.
-6. **Limpieza de secretos** al final: borrar `/home/idk2858/migracion-restaurada/`,
+4. **Limpieza de secretos** al final: borrar `/home/idk2858/migracion-restaurada/`,
    el `.tar` original y `~/.coolify-app-env.env` (si ya no hacen falta).
 
 ## 6. Trampas heredadas del otro VPS
