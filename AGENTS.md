@@ -244,3 +244,4 @@ Five canonical triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `
 ### Domain docs
 
 Single-context: one `CONTEXT.md` at the root plus `docs/adr/`. See `docs/agents/domain.md`.
+prueba webhook: secret configurado, verificar deploy
