@@ -121,7 +121,7 @@ const cuentaEventos = (n: number) => `${n} ${n === 1 ? "evento" : "eventos"}`;
 
 // Las tres plantillas de la app. Los ContentSid viven en variables de entorno
 // porque cambian entre cuentas de Twilio; los valores de producción están en
-// AGENTS.md § "el push está bloqueado" y HANDOFF.md.
+// la UI de Coolify (app `eventos-mty` → Environment Variables).
 export const plantillaOtp = (codigo: string): Plantilla => ({
   envSid: "TWILIO_CONTENT_SID_OTP",
   variables: { "1": codigo },

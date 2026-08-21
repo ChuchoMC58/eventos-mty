@@ -8,7 +8,8 @@
 > (`88f6b70` es el último commit en que existían; verificado).
 >
 > Esto describe **lo que está implementado hoy** y por qué está escrito así. La
-> narrativa por sesiones vive en `HANDOFF.md`; aquí sólo lo que sigue siendo cierto.
+> narrativa de decisiones que siguen vigentes —y la historia resumida del
+> proyecto— está en `HANDOFF.md`; aquí sólo lo que sigue siendo cierto.
 >
 > Última revisión: 2026-08-13.
 

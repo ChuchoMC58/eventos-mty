@@ -3,12 +3,10 @@
 Reemplaza el plan original de Railway. Coolify (self-hosted en tu VPS) construye
 desde un repo Git usando el `Dockerfile` de este proyecto.
 
-> Éste es el **plan** con el que se montó. Para lo que quedó montado de verdad
-> (IPs, volúmenes, webhook, las dos bases de datos, qué variables existen
-> realmente en producción) y para mudarlo a otra instancia, ver
-> [`MIGRACION-VPS.md`](MIGRACION-VPS.md). Ahí también está la diferencia ya
-> detectada: producción **no** tiene `ANTHROPIC_API_KEY` ni `LLM_MODEL`, aunque
-> esta lista las incluya.
+> Éste fue el **plan** con el que se montó. La instalación real (IP, secretos,
+> jobs, las dos bases de datos, qué variables existen en producción) quedó
+> documentada en `HANDOFF.md` hasta que se completó la migración a otro VPS
+> (2026-08). Los detalles de montaje de cada máquina viven en `git` (historial).
 
 ## Requisitos previos
 - Coolify instalado en el VPS (ya está).
